@@ -150,52 +150,53 @@ public class DayFour {
 
     private List<Passport> readFile(String filename) throws FileNotFoundException {
         List<Passport> values = new ArrayList<>();
-        Scanner in = new Scanner(new FileReader(filename));
-        in.useDelimiter(System.getProperty("line.separator"));
-        while(in.hasNext()) {
-            Passport passport = new Passport();
-            while(in.hasNext()) {
-                String line = in.next();
-                if (line.isBlank())
-                    break;
-                for (String data : line.split(" ")) {
-                    String[] parts = data.split(":");
-                    if (parts.length != 2)
-                        continue;
-                    switch (parts[0]) {
-                        case "ecl":
-                            passport.ecl = parts[1];
-                            break;
-                        case "byr":
-                            passport.byr = parts[1];
-                            break;
-                        case "iyr":
-                            passport.iyr = parts[1];
-                            break;
-                        case "eyr":
-                            passport.eyr = parts[1];
-                            break;
-                        case "hgt":
-                            passport.hgt = parts[1];
-                            break;
-                        case "hcl":
-                            passport.hcl = parts[1];
-                            break;
-                        case "pid":
-                            passport.pid = parts[1];
-                            break;
-                        case "cid":
-                            passport.cid = parts[1];
-                            break;
-                        default:
-                            System.out.println("Not supported: " + parts[0]);
+        try(Scanner in = new Scanner(new FileReader(filename))) {
+            in.useDelimiter(System.getProperty("line.separator"));
+            while (in.hasNext()) {
+                Passport passport = new Passport();
+                while (in.hasNext()) {
+                    String line = in.next();
+                    if (line.isBlank())
+                        break;
+                    for (String data : line.split(" ")) {
+                        String[] parts = data.split(":");
+                        if (parts.length != 2)
+                            continue;
+                        switch (parts[0]) {
+                            case "ecl":
+                                passport.ecl = parts[1];
+                                break;
+                            case "byr":
+                                passport.byr = parts[1];
+                                break;
+                            case "iyr":
+                                passport.iyr = parts[1];
+                                break;
+                            case "eyr":
+                                passport.eyr = parts[1];
+                                break;
+                            case "hgt":
+                                passport.hgt = parts[1];
+                                break;
+                            case "hcl":
+                                passport.hcl = parts[1];
+                                break;
+                            case "pid":
+                                passport.pid = parts[1];
+                                break;
+                            case "cid":
+                                passport.cid = parts[1];
+                                break;
+                            default:
+                                System.out.println("Not supported: " + parts[0]);
+                        }
                     }
                 }
+                values.add(passport);
             }
-            values.add(passport);
+            in.close();
+            return values;
         }
-        in.close();
-        return values;
     }
 
     @Test

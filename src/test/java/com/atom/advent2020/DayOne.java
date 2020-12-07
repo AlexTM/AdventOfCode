@@ -70,12 +70,13 @@ public class DayOne {
 
     private Integer[] readFile(String filename) throws FileNotFoundException {
         List<Integer> values = new ArrayList<>();
-        Scanner in = new Scanner(new FileReader(filename));
-        while(in.hasNext()) {
-            values.add(Integer.parseInt(in.next()));
+        try(Scanner in = new Scanner(new FileReader(filename))) {
+            while (in.hasNext()) {
+                values.add(Integer.parseInt(in.next()));
+            }
+            in.close();
+            return values.toArray(new Integer[values.size()]);
         }
-        in.close();
-        return values.toArray(new Integer[values.size()]);
     }
 
     private int findTwoValuesIn(Integer[] values, int target) {

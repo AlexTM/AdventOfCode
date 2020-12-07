@@ -73,13 +73,14 @@ public class DayFive {
 
     private List<String> readFile(String filename) throws FileNotFoundException {
         List<String> values = new ArrayList<>();
-        Scanner in = new Scanner(new FileReader(filename));
-        while(in.hasNext()) {
-            String line = in.next();
-            values.add(line);
+        try(Scanner in = new Scanner(new FileReader(filename))) {
+            while (in.hasNext()) {
+                String line = in.next();
+                values.add(line);
+            }
+            in.close();
+            return values;
         }
-        in.close();
-        return values;
     }
 
 

@@ -88,13 +88,14 @@ public class DayThree {
 
     private List<char[]> readFile(String filename) throws FileNotFoundException {
         List<char[]> values = new ArrayList<>();
-        Scanner in = new Scanner(new FileReader(filename));
-        while(in.hasNext()) {
-            String line = in.nextLine();
-            values.add(line.toCharArray());
+        try(Scanner in = new Scanner(new FileReader(filename))) {
+            while (in.hasNext()) {
+                String line = in.nextLine();
+                values.add(line.toCharArray());
+            }
+            in.close();
+            return values;
         }
-        in.close();
-        return values;
     }
 
     @Test

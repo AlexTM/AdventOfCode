@@ -159,29 +159,30 @@ public class DaySix {
     }
 
     private Map<Integer, GroupInfo> readFile(String filename) throws FileNotFoundException {
-        Scanner in = new Scanner(new FileReader(filename));
-        in.useDelimiter(System.getProperty("line.separator"));
+        try(Scanner in = new Scanner(new FileReader(filename))) {
+            in.useDelimiter(System.getProperty("line.separator"));
 
-        Map<Integer, GroupInfo> values = new HashMap<>();
+            Map<Integer, GroupInfo> values = new HashMap<>();
 
-        int group = 0;
-        while(in.hasNext()) {
-            int people = 0;
-            Map<Character, Integer> v = new HashMap<>();
-            while(in.hasNext()) {
-                String line = in.next();
-                if (line.isBlank())
-                    break;
-                for(char c : line.toCharArray()) {
-                    v.put(c, v.getOrDefault(c, 0)+1);
+            int group = 0;
+            while (in.hasNext()) {
+                int people = 0;
+                Map<Character, Integer> v = new HashMap<>();
+                while (in.hasNext()) {
+                    String line = in.next();
+                    if (line.isBlank())
+                        break;
+                    for (char c : line.toCharArray()) {
+                        v.put(c, v.getOrDefault(c, 0) + 1);
+                    }
+                    people++;
                 }
-                people++;
+                values.put(group, new GroupInfo().setRes(v).setPeople(people));
+                group++;
             }
-            values.put(group, new GroupInfo().setRes(v).setPeople(people));
-            group++;
+            in.close();
+            return values;
         }
-        in.close();
-        return values;
     }
 
 }

@@ -131,21 +131,22 @@ public class DayTwo {
 
     private List<Password> readFile(String filename) throws FileNotFoundException {
         List<Password> values = new ArrayList<>();
-        Scanner in = new Scanner(new FileReader(filename));
-        in.useDelimiter("\n");
-        while(in.hasNext()) {
-            String line = in.next();
-            String[] parts = line.split(" ");
-            String[] minMax = parts[0].split("-");
-            values.add(new Password()
-                    .setMin(Integer.parseInt(minMax[0]))
-                    .setMax(Integer.parseInt(minMax[1]))
-                    .setPassword(parts[2])
-                    .setLetter(parts[1].charAt(0))
-            );
+        try(Scanner in = new Scanner(new FileReader(filename))) {
+            in.useDelimiter("\n");
+            while (in.hasNext()) {
+                String line = in.next();
+                String[] parts = line.split(" ");
+                String[] minMax = parts[0].split("-");
+                values.add(new Password()
+                        .setMin(Integer.parseInt(minMax[0]))
+                        .setMax(Integer.parseInt(minMax[1]))
+                        .setPassword(parts[2])
+                        .setLetter(parts[1].charAt(0))
+                );
+            }
+            in.close();
+            return values;
         }
-        in.close();
-        return values;
     }
 
     @Test
