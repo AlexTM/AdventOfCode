@@ -69,7 +69,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * What is the ID of your seat?
  *
  */
-public class DayFive {
+public class D5 {
 
     private List<String> readFile(String filename) throws FileNotFoundException {
         List<String> values = new ArrayList<>();

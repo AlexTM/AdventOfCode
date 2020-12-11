@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * In your expense report, what is the product of the three entries that sum to 2020?
  *
  */
-public class DayOne {
+public class D1 {
 
     private static Integer values[] = new Integer[] {
             1721,

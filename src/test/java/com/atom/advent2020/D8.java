@@ -111,7 +111,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Fix the program so that it terminates normally by changing exactly one jmp (to nop) or nop (to jmp). What is the
  * value of the accumulator after the program terminates?
  */
-public class DayEight {
+public class D8 {
 
     class Op {
         private String code;

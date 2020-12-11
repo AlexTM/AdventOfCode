@@ -62,7 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * How many passwords are valid according to the new interpretation of the policies?
  *
  */
-public class DayTwo {
+public class D2 {
 
     class Password {
         int min;

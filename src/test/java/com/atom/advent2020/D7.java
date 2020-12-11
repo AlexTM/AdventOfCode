@@ -78,7 +78,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * How many individual bags are required inside your single shiny gold bag?
  *
  */
-public class DaySeven {
+public class D7 {
 
     class Rule {
         private String name;

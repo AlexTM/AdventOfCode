@@ -67,7 +67,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * preamble) which is not the sum of two of the 25 numbers before it. What is the first number that does not have
  * this property?
  */
-public class DayNine {
+public class D9 {
 
     private List<Long> readFile(String filename) throws FileNotFoundException {
         List<Long> values = new ArrayList<>();

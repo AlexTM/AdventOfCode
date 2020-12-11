@@ -165,7 +165,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * What is the total number of distinct ways you can arrange the adapters to connect the charging outlet to your device?
  *
  */
-public class DayTen {
+public class D10 {
 
     private List<Long> readFile(String filename) throws FileNotFoundException {
         List<Long> values = new ArrayList<>();

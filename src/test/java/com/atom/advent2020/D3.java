@@ -84,7 +84,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * In the above example, these slopes would find 2, 7, 3, 4, and 2 tree(s) respectively; multiplied together, these produce the answer 336.
  *
  */
-public class DayThree {
+public class D3 {
 
     private List<char[]> readFile(String filename) throws FileNotFoundException {
         List<char[]> values = new ArrayList<>();
