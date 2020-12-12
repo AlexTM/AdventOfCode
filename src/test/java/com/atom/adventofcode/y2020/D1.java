@@ -2,8 +2,8 @@ package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -67,15 +67,14 @@ public class D1 {
                 findThreeValuesIn(readFile("src/test/resources/2020/D1.txt"), 2020));
     }
 
-
     private Integer[] readFile(String filename) throws FileNotFoundException {
         List<Integer> values = new ArrayList<>();
-        try(Scanner in = new Scanner(new FileReader(filename))) {
+        try(Scanner in = new Scanner(new File(filename))) {
             while (in.hasNext()) {
                 values.add(Integer.parseInt(in.next()));
             }
             in.close();
-            return values.toArray(new Integer[values.size()]);
+            return values.toArray(new Integer[0]);
         }
     }
 

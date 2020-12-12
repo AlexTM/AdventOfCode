@@ -2,8 +2,8 @@ package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -88,7 +88,7 @@ public class D3 {
 
     private List<char[]> readFile(String filename) throws FileNotFoundException {
         List<char[]> values = new ArrayList<>();
-        try(Scanner in = new Scanner(new FileReader(filename))) {
+        try(Scanner in = new Scanner(new File(filename))) {
             while (in.hasNext()) {
                 String line = in.nextLine();
                 values.add(line.toCharArray());

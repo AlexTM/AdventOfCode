@@ -2,6 +2,7 @@ package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.*;
@@ -73,7 +74,7 @@ public class D5 {
 
     private List<String> readFile(String filename) throws FileNotFoundException {
         List<String> values = new ArrayList<>();
-        try(Scanner in = new Scanner(new FileReader(filename))) {
+        try(Scanner in = new Scanner(new File(filename))) {
             while (in.hasNext()) {
                 String line = in.next();
                 values.add(line);

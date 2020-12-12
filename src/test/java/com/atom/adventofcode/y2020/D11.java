@@ -2,6 +2,7 @@ package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -233,8 +234,7 @@ public class D11 {
 
     private char[][] readFile(String filename) throws FileNotFoundException {
         List<char[]> values = new ArrayList<>();
-        try(Scanner in = new Scanner(new FileReader(filename))) {
-            in.useDelimiter(System.getProperty("line.separator"));
+        try(Scanner in = new Scanner(new File(filename))) {
             while (in.hasNext()) {
                 String line = in.next().trim();
                 values.add(line.toCharArray());

@@ -137,6 +137,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class D4 {
 
+    // Convert to record
     class Passport {
         String byr;
         String iyr;
@@ -148,6 +149,7 @@ public class D4 {
         String cid;
     }
 
+    // Too ugly, not going to re-write
     private List<Passport> readFile(String filename) throws FileNotFoundException {
         List<Passport> values = new ArrayList<>();
         try(Scanner in = new Scanner(new FileReader(filename))) {

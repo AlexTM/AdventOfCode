@@ -113,36 +113,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class D8 {
 
-    class Op {
-        private String code;
-        private int value;
-
-        public String getCode() {
-            return code;
-        }
-
-        public Op setCode(String code) {
-            this.code = code;
-            return this;
-        }
-
-        public int getValue() {
-            return value;
-        }
-
-        public Op setValue(int value) {
-            this.value = value;
-            return this;
-        }
-
-        @Override
-        public String toString() {
-            return "Op{" +
-                    "code='" + code + '\'' +
-                    ", value=" + value +
-                    '}';
-        }
-    }
+    record Op(String code, int value) {}
 
     private List<Op> readFile(String filename) throws FileNotFoundException {
         List<Op> values = new ArrayList<>();
@@ -151,7 +122,7 @@ public class D8 {
             while (in.hasNext()) {
                 String line = in.next();
                 String parts[] = line.split(" ");
-                values.add(new Op().setCode(parts[0]).setValue(Integer.parseInt(parts[1])));
+                values.add(new Op(parts[0],Integer.parseInt(parts[1])));
             }
             in.close();
             return values;
@@ -161,38 +132,29 @@ public class D8 {
     @Test
     public void testBootcode() throws FileNotFoundException {
         List<Op> codes = readFile("src/test/resources/2020/D8_t.txt");
-
         assertEquals(5, process(codes));
 
         codes = readFile("src/test/resources/2020/D8.txt");
         System.out.println("Result: "+process(codes));
-
     }
 
     private int process(List<Op> opList) {
-
         int pos = 0;
         int acc = 0;
 
-        Set<Integer> visted = new HashSet<>();
-
+        Set<Integer> visited = new HashSet<>();
         while(true) {
-            if(visted.contains(pos))
+            if(visited.contains(pos))
                 break;
             Op op = opList.get(pos);
-            visted.add(pos);
-            switch(op.code) {
-                case "nop":
-                    pos++;
-                    break;
-                case "acc":
+            visited.add(pos);
+            switch (op.code) {
+                case "nop" -> pos++;
+                case "acc" -> {
                     acc += op.value;
                     pos++;
-                    break;
-                case "jmp":
-                    pos += op.value;
-                    break;
-
+                }
+                case "jmp" -> pos += op.value;
             }
         }
         System.out.println("Pos "+pos+", acc "+acc);
@@ -201,52 +163,44 @@ public class D8 {
 
 
     private int process2(List<Op> opList) {
-
         int pos = 0;
         int acc = 0;
 
-        Set<Integer> visted = new HashSet<>();
-
+        Set<Integer> visited = new HashSet<>();
         while(pos < opList.size()) {
-            if(visted.contains(pos))
+            if(visited.contains(pos))
                 return -1;
             Op op = opList.get(pos);
-            visted.add(pos);
-            switch(op.code) {
-                case "nop":
-                    pos++;
-                    break;
-                case "acc":
+            visited.add(pos);
+            switch (op.code) {
+                case "nop" -> pos++;
+                case "acc" -> {
                     acc += op.value;
                     pos++;
-                    break;
-                case "jmp":
-                    pos += op.value;
-                    break;
-
+                }
+                case "jmp" -> pos += op.value;
             }
         }
         return acc;
     }
 
+    private Op flip(Op op) {
+        if(op.code.equals("nop")) {
+            return new Op("jmp", op.value);
+        } else if(op.code.equals("jmp")) {
+            return new Op("nop", op.value);
+        }
+        return op;
+    }
 
     private void changeOpCodes(List<Op> opList) {
-
-        for(Op op : opList) {
-            if(op.code.equals("nop")) {
-                op.code = "jmp";
-            } else if(op.code.equals("jmp")) {
-                op.code = "nop";
-            }
+        for(int i=0; i<opList.size(); i++) {
+            opList.set(i, flip(opList.get(i)));
             if(process2(opList) != -1) {
                 return;
             }
             // swap back
-            if(op.code.equals("nop")) {
-                op.code = "jmp";
-            } else if(op.code.equals("jmp")) {
-                op.code = "nop";
-            }
+            opList.set(i, flip(opList.get(i)));
         }
     }
 
@@ -259,6 +213,5 @@ public class D8 {
         codes = readFile("src/test/resources/2020/D8.txt");
         changeOpCodes(codes);
         System.out.println("Result: "+process2(codes));
-
     }
 }

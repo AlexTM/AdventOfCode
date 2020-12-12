@@ -64,54 +64,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class D2 {
 
-    class Password {
-        int min;
-        int max;
-        char letter;
-        String password;
-
-        public int getMin() {
-            return min;
-        }
-
-        public Password setMin(int min) {
-            this.min = min;
-            return this;
-        }
-
-        public int getMax() {
-            return max;
-        }
-
-        public Password setMax(int max) {
-            this.max = max;
-            return this;
-        }
-
-        public char getLetter() {
-            return letter;
-        }
-
-        public Password setLetter(char letter) {
-            this.letter = letter;
-            return this;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public Password setPassword(String password) {
-            this.password = password;
-            return this;
-        }
-    }
+    record Password(int min, int max, char letter, String password) {}
 
     @Test
     public void testPasswordPolicy() {
-        assertTrue(validatePasswordPolicy(new Password().setMin(1).setMax(3).setLetter('a').setPassword("abcde")));
-        assertTrue(validatePasswordPolicy(new Password().setMin(2).setMax(9).setLetter('c').setPassword("ccccccccc")));
-        assertFalse(validatePasswordPolicy(new Password().setMin(1).setMax(3).setLetter('b').setPassword("cdefg")));
+        assertTrue(validatePasswordPolicy(new Password(1,3,'a',"abcde")));
+        assertTrue(validatePasswordPolicy(new Password(2,9,'c',"ccccccccc")));
+        assertFalse(validatePasswordPolicy(new Password(1,3,'b',"cdefg")));
     }
 
     @Test
@@ -123,10 +82,10 @@ public class D2 {
 
     private boolean validatePasswordPolicy(Password p) {
         Map<Character, Long> freq =
-                p.getPassword().chars().mapToObj(c -> (char) c).collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-        if(!freq.containsKey(p.getLetter()))
+                p.password.chars().mapToObj(c -> (char) c).collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        if(!freq.containsKey(p.letter))
             return false;
-        return freq.get(p.getLetter()) >= p.getMin() && freq.get(p.getLetter()) <= p.getMax();
+        return freq.get(p.letter) >= p.min && freq.get(p.letter) <= p.max;
     }
 
     private List<Password> readFile(String filename) throws FileNotFoundException {
@@ -137,11 +96,11 @@ public class D2 {
                 String line = in.next();
                 String[] parts = line.split(" ");
                 String[] minMax = parts[0].split("-");
-                values.add(new Password()
-                        .setMin(Integer.parseInt(minMax[0]))
-                        .setMax(Integer.parseInt(minMax[1]))
-                        .setPassword(parts[2])
-                        .setLetter(parts[1].charAt(0))
+                values.add(new Password(
+                        Integer.parseInt(minMax[0]),
+                        Integer.parseInt(minMax[1]),
+                        parts[1].charAt(0),
+                        parts[2])
                 );
             }
             in.close();
@@ -151,9 +110,9 @@ public class D2 {
 
     @Test
     public void testPasswordPolicy2() {
-        assertTrue(validatePasswordPolicy2(new Password().setMin(1).setMax(3).setLetter('a').setPassword("abcde")));
-        assertFalse(validatePasswordPolicy2(new Password().setMin(2).setMax(9).setLetter('c').setPassword("ccccccccc")));
-        assertFalse(validatePasswordPolicy2(new Password().setMin(1).setMax(3).setLetter('b').setPassword("cdefg")));
+        assertTrue(validatePasswordPolicy2(new Password(1,3,'a',"abcde")));
+        assertFalse(validatePasswordPolicy2(new Password(2,9,'c',"ccccccccc")));
+        assertFalse(validatePasswordPolicy2(new Password(1,3,'b',"cdefg")));
     }
 
 
@@ -165,7 +124,7 @@ public class D2 {
     }
 
     private boolean validatePasswordPolicy2(Password p) {
-        char[] chars = p.getPassword().toCharArray();
-        return chars[p.getMin()-1] == p.getLetter() ^ chars[p.getMax()-1] == p.getLetter();
+        char[] chars = p.password.toCharArray();
+        return chars[p.min-1] == p.letter ^ chars[p.max-1] == p.letter;
     }
 }

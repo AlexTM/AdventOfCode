@@ -2,6 +2,7 @@ package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -155,30 +156,14 @@ public class D12 {
         }
     }
 
-    static class Instruction {
-        final int value;
-        final char inst;
-        public Instruction(String s) {
-            inst = s.charAt(0);
-            value = Integer.parseInt(s.substring(1));
-        }
-
-        public int getValue() {
-            return value;
-        }
-
-        public char getInst() {
-            return inst;
-        }
-    }
+    record Instruction(char instruction, int value) { }
 
     private List<Instruction> readFile(String filename) throws FileNotFoundException {
         List<Instruction> instructions = new ArrayList<>();
-        try(Scanner in = new Scanner(new FileReader(filename))) {
-            in.useDelimiter(System.getProperty("line.separator"));
+        try(Scanner in = new Scanner(new File(filename))) {
             while (in.hasNext()) {
                 String line = in.next().trim();
-                instructions.add(new Instruction(line));
+                instructions.add(new Instruction(line.charAt(0), Integer.parseInt(line.substring(1))));
             }
             in.close();
             return instructions;
@@ -222,17 +207,16 @@ public class D12 {
 
     @Test
     public void testShipControls1() throws FileNotFoundException {
-        Ship s = new Ship().setAngle(90).setX(0).setY(0);
-        for(Instruction i : readFile("src/test/resources/2020/D12_t.txt")) {
-            controlMapOne.get(i.inst).apply(i, s);
-        }
-        assertEquals(25, distance(s));
+        final Ship s1 = new Ship().setAngle(90).setX(0).setY(0);
+        readFile("src/test/resources/2020/D12_t.txt")
+                .forEach(i -> controlMapOne.get(i.instruction).apply(i, s1));
+        assertEquals(25, distance(s1));
 
-        s = new Ship().setAngle(90).setX(0).setY(0);
-        for(Instruction i : readFile("src/test/resources/2020/D12.txt")) {
-            controlMapOne.get(i.inst).apply(i, s);
-        }
-        System.out.println("Result :"+distance(s));
+        final Ship s2 = new Ship().setAngle(90).setX(0).setY(0);
+        readFile("src/test/resources/2020/D12.txt")
+                .forEach(i -> controlMapOne.get(i.instruction).apply(i, s2));
+        System.out.println("Result :"+distance(s2));
+        assertEquals(441, distance(s2));
     }
 
     static final Map<Character, ShipControls> controlMapTwo = Map.of(
@@ -263,18 +247,16 @@ public class D12 {
 
     @Test
     public void testShipControls2() throws FileNotFoundException {
-        Ship s = new Ship().setAngle(0).setX(0).setY(0).setWx(10).setWy(-1);
-        for(Instruction i : readFile("src/test/resources/2020/D12_t.txt")) {
-            controlMapTwo.get(i.inst).apply(i, s);
-        }
-        assertEquals(286, distance(s));
+        final Ship s1 = new Ship().setX(0).setY(0).setWx(10).setWy(-1);
+        readFile("src/test/resources/2020/D12_t.txt")
+                .forEach(i -> controlMapTwo.get(i.instruction).apply(i, s1));
+        assertEquals(286, distance(s1));
 
-        s = new Ship().setAngle(90).setX(0).setY(0).setWx(10).setWy(-1);
-        for(Instruction i : readFile("src/test/resources/2020/D12.txt")) {
-            controlMapTwo.get(i.inst).apply(i, s);
-        }
-        System.out.println("Result :"+distance(s));
-        assertEquals(40014, distance(s));
+        final Ship s2 = new Ship().setX(0).setY(0).setWx(10).setWy(-1);
+        readFile("src/test/resources/2020/D12.txt")
+                .forEach(i -> controlMapTwo.get(i.instruction).apply(i, s2));
+        System.out.println("Result :"+distance(s2));
+        assertEquals(40014, distance(s2));
     }
 
 }

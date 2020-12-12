@@ -97,7 +97,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class D6 {
 
-    class GroupInfo {
+    static class GroupInfo {
         private Map<Character, Integer> res;
         private int people;
 

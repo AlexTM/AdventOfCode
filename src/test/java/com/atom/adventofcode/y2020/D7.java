@@ -2,6 +2,7 @@ package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.*;
@@ -82,7 +83,7 @@ public class D7 {
 
     class Rule {
         private String name;
-        private Map<String, Integer> children = new HashMap<>();
+        private final Map<String, Integer> children = new HashMap<>();
 
         @Override
         public String toString() {
@@ -99,7 +100,7 @@ public class D7 {
 
     private List<Rule> readFile(String filename) throws FileNotFoundException {
         List<Rule> values = new ArrayList<>();
-        try(Scanner in = new Scanner(new FileReader(filename))) {
+        try(Scanner in = new Scanner(new File(filename))) {
             in.useDelimiter(System.getProperty("line.separator"));
             while (in.hasNext()) {
                 String line = stripString(in.next());
