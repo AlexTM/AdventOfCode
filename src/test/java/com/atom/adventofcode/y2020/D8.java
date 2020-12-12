@@ -1,4 +1,4 @@
-package com.atom.advent2020;
+package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 
@@ -160,11 +160,11 @@ public class D8 {
 
     @Test
     public void testBootcode() throws FileNotFoundException {
-        List<Op> codes = readFile("src/test/resources/dayeight_test.txt");
+        List<Op> codes = readFile("src/test/resources/2020/D8_t.txt");
 
         assertEquals(5, process(codes));
 
-        codes = readFile("src/test/resources/dayeight.txt");
+        codes = readFile("src/test/resources/2020/D8.txt");
         System.out.println("Result: "+process(codes));
 
     }
@@ -252,11 +252,11 @@ public class D8 {
 
     @Test
     public void testBootcode2() throws FileNotFoundException {
-        List<Op> codes = readFile("src/test/resources/dayeight_test.txt");
+        List<Op> codes = readFile("src/test/resources/2020/D8_t.txt");
         changeOpCodes(codes);
         assertEquals(8, process2(codes));
 
-        codes = readFile("src/test/resources/dayeight.txt");
+        codes = readFile("src/test/resources/2020/D8.txt");
         changeOpCodes(codes);
         System.out.println("Result: "+process2(codes));
 

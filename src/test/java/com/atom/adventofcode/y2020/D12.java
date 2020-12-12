@@ -1,4 +1,4 @@
-package com.atom.advent2020;
+package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 
@@ -194,7 +194,7 @@ public class D12 {
         void apply(Instruction i, Ship s);
     }
 
-    static Map<Character, ShipControls> controlMapOne = Map.of(
+    static final Map<Character, ShipControls> controlMapOne = Map.of(
             'N', (i, s) -> s.setY(s.getY()-i.value),
             'S', (i, s) -> s.setY(s.getY()+i.value),
             'E', (i, s) -> s.setX(s.getX()+i.value),
@@ -223,19 +223,19 @@ public class D12 {
     @Test
     public void testShipControls1() throws FileNotFoundException {
         Ship s = new Ship().setAngle(90).setX(0).setY(0);
-        for(Instruction i : readFile("src/test/resources/D12_t.txt")) {
+        for(Instruction i : readFile("src/test/resources/2020/D12_t.txt")) {
             controlMapOne.get(i.inst).apply(i, s);
         }
         assertEquals(25, distance(s));
 
         s = new Ship().setAngle(90).setX(0).setY(0);
-        for(Instruction i : readFile("src/test/resources/D12.txt")) {
+        for(Instruction i : readFile("src/test/resources/2020/D12.txt")) {
             controlMapOne.get(i.inst).apply(i, s);
         }
         System.out.println("Result :"+distance(s));
     }
 
-    static Map<Character, ShipControls> controlMapTwo = Map.of(
+    static final Map<Character, ShipControls> controlMapTwo = Map.of(
             'N', (i, s) -> s.setWy(s.getWy()-i.value),
             'S', (i, s) -> s.setWy(s.getWy()+i.value),
             'E', (i, s) -> s.setWx(s.getWx()+i.value),
@@ -264,13 +264,13 @@ public class D12 {
     @Test
     public void testShipControls2() throws FileNotFoundException {
         Ship s = new Ship().setAngle(0).setX(0).setY(0).setWx(10).setWy(-1);
-        for(Instruction i : readFile("src/test/resources/D12_t.txt")) {
+        for(Instruction i : readFile("src/test/resources/2020/D12_t.txt")) {
             controlMapTwo.get(i.inst).apply(i, s);
         }
         assertEquals(286, distance(s));
 
         s = new Ship().setAngle(90).setX(0).setY(0).setWx(10).setWy(-1);
-        for(Instruction i : readFile("src/test/resources/D12.txt")) {
+        for(Instruction i : readFile("src/test/resources/2020/D12.txt")) {
             controlMapTwo.get(i.inst).apply(i, s);
         }
         System.out.println("Result :"+distance(s));

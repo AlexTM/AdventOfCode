@@ -1,4 +1,4 @@
-package com.atom.advent2020;
+package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 
@@ -122,19 +122,19 @@ public class D6 {
 
     @Test
     public void testDaySix() throws FileNotFoundException {
-        int res = count(readFile("src/test/resources/daysix_test.txt"));
+        int res = count(readFile("src/test/resources/2020/D6_t.txt"));
         assertEquals(11, res);
 
-        int res2 = count(readFile("src/test/resources/daysix.txt"));
+        int res2 = count(readFile("src/test/resources/2020/D6.txt"));
         System.out.println("Result: "+res2);
     }
 
     @Test
     public void testDaySix2() throws FileNotFoundException {
-        int res = count2(readFile("src/test/resources/daysix_test.txt"));
+        int res = count2(readFile("src/test/resources/2020/D6_t.txt"));
         assertEquals(6, res);
 
-        int res2 = count2(readFile("src/test/resources/daysix.txt"));
+        int res2 = count2(readFile("src/test/resources/2020/D6.txt"));
         System.out.println("Result: "+res2);
     }
 

@@ -1,4 +1,4 @@
-package com.atom.advent2020;
+package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 
@@ -84,24 +84,24 @@ public class D9 {
 
     @Test
     public void testDayNine() throws FileNotFoundException {
-        List<Long> ints = readFile("src/test/resources/daynine_test.txt");
+        List<Long> ints = readFile("src/test/resources/2020/D9_t.txt");
         System.out.println(ints);
         long res = findFirst(ints, 5);
         assertEquals(127, res);
 
-        ints = readFile("src/test/resources/daynine.txt");
+        ints = readFile("src/test/resources/2020/D9.txt");
         res = findFirst(ints, 25);
         System.out.println("Found "+res);
     }
 
     @Test
     public void testDayNine2() throws FileNotFoundException {
-        List<Long> ints = readFile("src/test/resources/daynine_test.txt");
+        List<Long> ints = readFile("src/test/resources/2020/D9_t.txt");
         System.out.println(ints);
         long res = findContinuous(ints, 5);
         assertEquals(62, res);
 
-        ints = readFile("src/test/resources/daynine.txt");
+        ints = readFile("src/test/resources/2020/D9.txt");
         res = findContinuous(ints, 25);
         System.out.println("Found "+res);
     }

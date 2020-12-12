@@ -1,4 +1,4 @@
-package com.atom.advent2020;
+package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
@@ -201,26 +201,26 @@ public class D4 {
 
     @Test
     public void testPassports() throws FileNotFoundException {
-        List<Passport> passports = readFile("src/test/resources/dayfour_test.txt");
+        List<Passport> passports = readFile("src/test/resources/2020/D4_t.txt");
         System.out.println(passports);
         long count = passports.stream().filter(this::validatePassports).count();
         assertEquals(2, count);
 
-        passports = readFile("src/test/resources/dayfour.txt");
+        passports = readFile("src/test/resources/2020/D4.txt");
         count = passports.stream().filter(this::validatePassports).count();
         System.out.println("Result :"+count);
     }
 
     @Test
     public void testPassports2Invalid() throws FileNotFoundException {
-        List<Passport> passports = readFile("src/test/resources/dayfour_test_invalid.txt");
+        List<Passport> passports = readFile("src/test/resources/2020/D4_t_invalid.txt");
         System.out.println(passports);
         long count = passports.stream().filter(this::validatePassports).filter(this::validatePassports2).count();
         assertEquals(0, count);
     }
     @Test
     public void testPassports2Valid() throws FileNotFoundException {
-        List<Passport> passports = readFile("src/test/resources/dayfour_test_valid.txt");
+        List<Passport> passports = readFile("src/test/resources/2020/D4_t_valid.txt");
         System.out.println(passports);
         long count = passports.stream().filter(this::validatePassports).filter(this::validatePassports2).count();
         assertEquals(4, count);
@@ -228,7 +228,7 @@ public class D4 {
 
     @Test
     public void testPassports2() throws FileNotFoundException {
-        List<Passport> passports = readFile("src/test/resources/dayfour.txt");
+        List<Passport> passports = readFile("src/test/resources/2020/D4.txt");
         long count = passports.stream().filter(this::validatePassports).filter(this::validatePassports2).count();
         System.out.println("Result :"+count);
     }

@@ -1,4 +1,4 @@
-package com.atom.advent2020;
+package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 
@@ -117,7 +117,7 @@ public class D2 {
     @Test
     public void testPasswordList() throws FileNotFoundException {
         System.out.println("Valid passwords: "+
-                readFile("src/test/resources/daytwo.txt").stream().filter(this::validatePasswordPolicy).count()
+                readFile("src/test/resources/2020/D2.txt").stream().filter(this::validatePasswordPolicy).count()
         );
     }
 
@@ -160,7 +160,7 @@ public class D2 {
     @Test
     public void testPasswordList2() throws FileNotFoundException {
         System.out.println("Valid passwords: "+
-                readFile("src/test/resources/daytwo.txt").stream().filter(this::validatePasswordPolicy2).count()
+                readFile("src/test/resources/2020/D2.txt").stream().filter(this::validatePasswordPolicy2).count()
         );
     }
 

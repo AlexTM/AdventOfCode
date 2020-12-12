@@ -1,4 +1,4 @@
-package com.atom.advent2020;
+package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 
@@ -262,11 +262,11 @@ public class D11 {
 
     @Test
     public void test() throws FileNotFoundException {
-        char[][]  inp = readFile("src/test/resources/day11_test.txt");
+        char[][]  inp = readFile("src/test/resources/2020/D11_t.txt");
         inp = engine(inp, 4, NeighboursNextTo::countNeighbours);
         assertEquals(37, countSeats(inp));
 
-        inp = readFile("src/test/resources/day11.txt");
+        inp = readFile("src/test/resources/2020/D11.txt");
         inp = engine(inp, 4, NeighboursNextTo::countNeighbours);
         System.out.println("Result "+countSeats(inp));
 
@@ -303,11 +303,11 @@ public class D11 {
 
     @Test
     public void test2() throws FileNotFoundException {
-        char[][]  inp = readFile("src/test/resources/day11_test.txt");
+        char[][]  inp = readFile("src/test/resources/2020/D11_t.txt");
         inp = engine(inp, 5, NeighboursViewable::countNeighbours);
         assertEquals(26, countSeats(inp));
 
-        inp = readFile("src/test/resources/day11.txt");
+        inp = readFile("src/test/resources/2020/D11.txt");
         inp = engine(inp, 5, NeighboursViewable::countNeighbours);
         System.out.println("Result "+countSeats(inp));
         assertEquals(2002, countSeats(inp));

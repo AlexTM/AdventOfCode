@@ -1,4 +1,4 @@
-package com.atom.advent2020;
+package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 
@@ -185,9 +185,9 @@ public class D10 {
         Long res = joltageCal(Arrays.asList(joltage));
         assertEquals(35, res);
 
-        assertEquals(220, joltageCal(readFile("src/test/resources/dayten_test.txt")));
+        assertEquals(220, joltageCal(readFile("src/test/resources/2020/D10_t.txt")));
 
-        assertEquals(2048, joltageCal(readFile("src/test/resources/dayten.txt")));
+        assertEquals(2048, joltageCal(readFile("src/test/resources/2020/D10.txt")));
 
     }
 
@@ -239,14 +239,14 @@ public class D10 {
         long res = combinations(joltage, 0L, 22L, new HashMap<>());
         assertEquals(8, res);
 
-        joltage = readFile("src/test/resources/dayten_test.txt");
+        joltage = readFile("src/test/resources/2020/D10_t.txt");
         Collections.sort(joltage);
         assertEquals(19208, combinations(joltage, 0L, 3+joltage.get(joltage.size()-1), new HashMap<>()));
     }
 
     @Test
     public void testSimple3() throws FileNotFoundException {
-        List<Long> joltage = readFile("src/test/resources/dayten.txt");
+        List<Long> joltage = readFile("src/test/resources/2020/D10.txt");
         Collections.sort(joltage);
         System.out.println("Output "+combinations(joltage, 0L, 3+joltage.get(joltage.size()-1), new HashMap<>()));
     }

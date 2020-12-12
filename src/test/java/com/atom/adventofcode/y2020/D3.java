@@ -1,4 +1,4 @@
-package com.atom.advent2020;
+package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 
@@ -100,16 +100,16 @@ public class D3 {
 
     @Test
     public void testTrees() throws FileNotFoundException {
-        List<char[]> inp = readFile("src/test/resources/daythree_test.txt");
+        List<char[]> inp = readFile("src/test/resources/2020/D3_t.txt");
         assertEquals(7, countTrees(inp, 3, 1));
 
-        System.out.println("Trees: "+countTrees(readFile("src/test/resources/daythree.txt"), 3, 1));
+        System.out.println("Trees: "+countTrees(readFile("src/test/resources/2020/D3.txt"), 3, 1));
 
     }
 
     @Test
     public void testTrees2() throws FileNotFoundException {
-        List<char[]> inp = readFile("src/test/resources/daythree_test.txt");
+        List<char[]> inp = readFile("src/test/resources/2020/D3_t.txt");
         assertEquals(2, countTrees(inp, 1, 1));
         assertEquals(7, countTrees(inp, 3, 1));
         assertEquals(3, countTrees(inp, 5, 1));
@@ -123,7 +123,7 @@ public class D3 {
         }
         assertEquals(336, res);
 
-        inp = readFile("src/test/resources/daythree.txt");
+        inp = readFile("src/test/resources/2020/D3.txt");
         res = 1;
         for(int [] steps : inputs) {
             res *= countTrees(inp, steps[0], steps[1]);

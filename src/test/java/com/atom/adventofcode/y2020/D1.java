@@ -1,4 +1,4 @@
-package com.atom.advent2020;
+package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 
@@ -56,7 +56,7 @@ public class D1 {
         assertEquals(514579, findTwoValuesIn(values, 2020));
 
         System.out.println("Result: "+
-                findTwoValuesIn(readFile("src/test/resources/dayone.txt"), 2020));
+                findTwoValuesIn(readFile("src/test/resources/2020/D1.txt"), 2020));
     }
 
     @Test
@@ -64,7 +64,7 @@ public class D1 {
         assertEquals(241861950, findThreeValuesIn(values, 2020));
 
         System.out.println("Result: "+
-                findThreeValuesIn(readFile("src/test/resources/dayone.txt"), 2020));
+                findThreeValuesIn(readFile("src/test/resources/2020/D1.txt"), 2020));
     }
 
 

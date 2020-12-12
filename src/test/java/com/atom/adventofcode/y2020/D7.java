@@ -1,4 +1,4 @@
-package com.atom.advent2020;
+package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 
@@ -154,7 +154,7 @@ public class D7 {
 
     @Test
     public void testLoadingBags() throws FileNotFoundException {
-        List<Rule> rules = readFile("src/test/resources/dayseven_test.txt");
+        List<Rule> rules = readFile("src/test/resources/2020/D7_t.txt");
         rules.stream().forEach(System.out::println);
         assertEquals(9, rules.size());
         assertEquals(9, rules.get(3).children.get("faded blue"));
@@ -176,7 +176,7 @@ public class D7 {
 
     @Test
     public void testIterateOverTreeBags() throws FileNotFoundException {
-        List<Rule> rules = readFile("src/test/resources/dayseven_test.txt");
+        List<Rule> rules = readFile("src/test/resources/2020/D7_t.txt");
         int[][] m = buildGraph(rules);
         Map<String, Integer> l = getLookupMap(rules);
         Map<Integer, String> rev = getReverseLookupMap(rules);
@@ -188,7 +188,7 @@ public class D7 {
         assertEquals(4, results.size());
 
 
-        rules = readFile("src/test/resources/dayseven.txt");
+        rules = readFile("src/test/resources/2020/D7.txt");
         m = buildGraph(rules);
         l = getLookupMap(rules);
         rev = getReverseLookupMap(rules);
@@ -213,7 +213,7 @@ public class D7 {
 
     @Test
     public void testIterateOverTreeBags2() throws FileNotFoundException {
-        List<Rule> rules = readFile("src/test/resources/dayseven_test.txt");
+        List<Rule> rules = readFile("src/test/resources/2020/D7_t.txt");
         int[][] m = buildGraph(rules);
         Map<String, Integer> l = getLookupMap(rules);
         Map<Integer, String> rev = getReverseLookupMap(rules);
@@ -224,7 +224,7 @@ public class D7 {
         assertEquals(32, bags);
 
 
-        rules = readFile("src/test/resources/dayseven.txt");
+        rules = readFile("src/test/resources/2020/D7.txt");
         m = buildGraph(rules);
         l = getLookupMap(rules);
 

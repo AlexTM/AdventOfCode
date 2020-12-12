@@ -1,4 +1,4 @@
-package com.atom.advent2020;
+package com.atom.adventofcode.y2020;
 
 import org.junit.jupiter.api.Test;
 
@@ -99,7 +99,7 @@ public class D5 {
         assertEquals(820, seatNumber("BBFFBBFRLL"));
 
         int max = 0;
-        for(String line : readFile("src/test/resources/dayfive.txt")) {
+        for(String line : readFile("src/test/resources/2020/D5.txt")) {
             max = Math.max(max, seatNumber(line));
         }
 
@@ -110,7 +110,7 @@ public class D5 {
     public void testSeatCheck2() throws FileNotFoundException {
 
         List<Integer> seatNumbers = new ArrayList<>();
-        for(String line : readFile("src/test/resources/dayfive.txt")) {
+        for(String line : readFile("src/test/resources/2020/D5.txt")) {
             seatNumbers.add(seatNumber(line));
         }
 
@@ -123,9 +123,6 @@ public class D5 {
             }
             start++;
         }
-
-
-        System.out.println(seatNumbers);
     }
 
     private int seatNumber(String input) {
