@@ -204,7 +204,7 @@ public class D13 {
                 .collect(Collectors.toList());
 
         // Compare two columns at a time, once match point is located,
-        // merge columns into 1 with new offset and period
+        // merge columns into 1 with new offset and period and repeat
         Column res = new Column(1L, 0L);
         for(Long value : filteredList) {
             res = calculateRepetitionPeriod(res, new Column(value, (long)position.get(value)));
