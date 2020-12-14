@@ -1,13 +1,9 @@
 package com.atom.adventofcode.y2020;
 
+import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -232,23 +228,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class D11 {
 
-    private char[][] readFile(String filename) throws FileNotFoundException {
-        List<char[]> values = new ArrayList<>();
-        try(Scanner in = new Scanner(new File(filename))) {
-            while (in.hasNext()) {
-                String line = in.next().trim();
-                values.add(line.toCharArray());
-            }
-            in.close();
-            return values.toArray(new char[values.size()][]);
-        }
+    private char[][] readFile(String filename) {
+        List<char[]> values = FileReader.readFileObjectList(filename, line -> line.trim().toCharArray());
+        return values.toArray(new char[values.size()][]);
     }
 
     private int countSeats(char[][] inp) {
         int c = 0;
-        for(int i=0; i<inp.length; i++) {
-            for(int j=0; j<inp[0].length; j++) {
-                if(inp[i][j] == '#')
+        for (char[] chars : inp) {
+            for (int j = 0; j < inp[0].length; j++) {
+                if (chars[j] == '#')
                     c++;
             }
         }
@@ -261,7 +250,7 @@ public class D11 {
     }
 
     @Test
-    public void test() throws FileNotFoundException {
+    public void test() {
         char[][]  inp = readFile("src/test/resources/2020/D11_t.txt");
         inp = engine(inp, 4, NeighboursNextTo::countNeighbours);
         assertEquals(37, countSeats(inp));
@@ -302,7 +291,7 @@ public class D11 {
 
 
     @Test
-    public void test2() throws FileNotFoundException {
+    public void test2() {
         char[][]  inp = readFile("src/test/resources/2020/D11_t.txt");
         inp = engine(inp, 5, NeighboursViewable::countNeighbours);
         assertEquals(26, countSeats(inp));

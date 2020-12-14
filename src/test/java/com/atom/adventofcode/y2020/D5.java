@@ -1,12 +1,9 @@
 package com.atom.adventofcode.y2020;
 
+import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -72,19 +69,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class D5 {
 
-    private List<String> readFile(String filename) throws FileNotFoundException {
-        List<String> values = new ArrayList<>();
-        try(Scanner in = new Scanner(new File(filename))) {
-            while (in.hasNext()) {
-                String line = in.next();
-                values.add(line);
-            }
-            in.close();
-            return values;
-        }
-    }
-
-
     @Test
     public void testBinCheck() {
         assertEquals(44, binSearch("FBFBBFFRLR".toCharArray(), 0, 0, 128, 'F'));
@@ -94,13 +78,13 @@ public class D5 {
     }
 
     @Test
-    public void testSeatCheck() throws FileNotFoundException {
+    public void testSeatCheck() {
         assertEquals(567, seatNumber("BFFFBBFRRR"));
         assertEquals(119, seatNumber("FFFBBBFRRR"));
         assertEquals(820, seatNumber("BBFFBBFRLL"));
 
         int max = 0;
-        for(String line : readFile("src/test/resources/2020/D5.txt")) {
+        for(String line : FileReader.readFileObjectList("src/test/resources/2020/D5.txt", s -> s)) {
             max = Math.max(max, seatNumber(line));
         }
 
@@ -108,10 +92,10 @@ public class D5 {
     }
 
     @Test
-    public void testSeatCheck2() throws FileNotFoundException {
+    public void testSeatCheck2() {
 
         List<Integer> seatNumbers = new ArrayList<>();
-        for(String line : readFile("src/test/resources/2020/D5.txt")) {
+        for(String line : FileReader.readFileObjectList("src/test/resources/2020/D5.txt", s -> s)) {
             seatNumbers.add(seatNumber(line));
         }
 

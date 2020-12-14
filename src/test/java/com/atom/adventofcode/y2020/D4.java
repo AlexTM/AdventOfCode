@@ -1,10 +1,9 @@
 package com.atom.adventofcode.y2020;
 
+import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -150,11 +149,8 @@ public class D4 {
     }
 
     // Too ugly, not going to re-write
-    private List<Passport> readFile(String filename) throws FileNotFoundException {
-        List<Passport> values = new ArrayList<>();
-        try(Scanner in = new Scanner(new FileReader(filename))) {
-            in.useDelimiter(System.getProperty("line.separator"));
-            while (in.hasNext()) {
+    private List<Passport> readFile(String filename) {
+        return FileReader.scanFileObjectList(filename, in -> {
                 Passport passport = new Passport();
                 while (in.hasNext()) {
                     String line = in.next();
@@ -165,46 +161,25 @@ public class D4 {
                         if (parts.length != 2)
                             continue;
                         switch (parts[0]) {
-                            case "ecl":
-                                passport.ecl = parts[1];
-                                break;
-                            case "byr":
-                                passport.byr = parts[1];
-                                break;
-                            case "iyr":
-                                passport.iyr = parts[1];
-                                break;
-                            case "eyr":
-                                passport.eyr = parts[1];
-                                break;
-                            case "hgt":
-                                passport.hgt = parts[1];
-                                break;
-                            case "hcl":
-                                passport.hcl = parts[1];
-                                break;
-                            case "pid":
-                                passport.pid = parts[1];
-                                break;
-                            case "cid":
-                                passport.cid = parts[1];
-                                break;
-                            default:
-                                System.out.println("Not supported: " + parts[0]);
+                            case "ecl" -> passport.ecl = parts[1];
+                            case "byr" -> passport.byr = parts[1];
+                            case "iyr" -> passport.iyr = parts[1];
+                            case "eyr" -> passport.eyr = parts[1];
+                            case "hgt" -> passport.hgt = parts[1];
+                            case "hcl" -> passport.hcl = parts[1];
+                            case "pid" -> passport.pid = parts[1];
+                            case "cid" -> passport.cid = parts[1];
+                            default -> System.out.println("Not supported: " + parts[0]);
                         }
                     }
                 }
-                values.add(passport);
-            }
-            in.close();
-            return values;
-        }
+                return passport;
+            });
     }
 
     @Test
-    public void testPassports() throws FileNotFoundException {
+    public void testPassports() {
         List<Passport> passports = readFile("src/test/resources/2020/D4_t.txt");
-        System.out.println(passports);
         long count = passports.stream().filter(this::validatePassports).count();
         assertEquals(2, count);
 
@@ -214,22 +189,20 @@ public class D4 {
     }
 
     @Test
-    public void testPassports2Invalid() throws FileNotFoundException {
+    public void testPassports2Invalid() {
         List<Passport> passports = readFile("src/test/resources/2020/D4_t_invalid.txt");
-        System.out.println(passports);
         long count = passports.stream().filter(this::validatePassports).filter(this::validatePassports2).count();
         assertEquals(0, count);
     }
     @Test
-    public void testPassports2Valid() throws FileNotFoundException {
+    public void testPassports2Valid() {
         List<Passport> passports = readFile("src/test/resources/2020/D4_t_valid.txt");
-        System.out.println(passports);
         long count = passports.stream().filter(this::validatePassports).filter(this::validatePassports2).count();
         assertEquals(4, count);
     }
 
     @Test
-    public void testPassports2() throws FileNotFoundException {
+    public void testPassports2() {
         List<Passport> passports = readFile("src/test/resources/2020/D4.txt");
         long count = passports.stream().filter(this::validatePassports).filter(this::validatePassports2).count();
         System.out.println("Result :"+count);

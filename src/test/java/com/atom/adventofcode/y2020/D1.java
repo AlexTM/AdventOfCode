@@ -1,13 +1,9 @@
 package com.atom.adventofcode.y2020;
 
+import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -52,30 +48,19 @@ public class D1 {
     };
 
     @Test
-    public void testDayOnePart1() throws FileNotFoundException {
+    public void testDayOnePart1() {
         assertEquals(514579, findTwoValuesIn(values, 2020));
 
         System.out.println("Result: "+
-                findTwoValuesIn(readFile("src/test/resources/2020/D1.txt"), 2020));
+                findTwoValuesIn(FileReader.readFileIntegerArray("src/test/resources/2020/D1.txt"), 2020));
     }
 
     @Test
-    public void testDayOnePart2() throws FileNotFoundException {
+    public void testDayOnePart2() {
         assertEquals(241861950, findThreeValuesIn(values, 2020));
 
         System.out.println("Result: "+
-                findThreeValuesIn(readFile("src/test/resources/2020/D1.txt"), 2020));
-    }
-
-    private Integer[] readFile(String filename) throws FileNotFoundException {
-        List<Integer> values = new ArrayList<>();
-        try(Scanner in = new Scanner(new File(filename))) {
-            while (in.hasNext()) {
-                values.add(Integer.parseInt(in.next()));
-            }
-            in.close();
-            return values.toArray(new Integer[0]);
-        }
+                findThreeValuesIn(FileReader.readFileIntegerArray("src/test/resources/2020/D1.txt"), 2020));
     }
 
     private int findTwoValuesIn(Integer[] values, int target) {

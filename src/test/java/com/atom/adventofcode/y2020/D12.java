@@ -1,14 +1,10 @@
 package com.atom.adventofcode.y2020;
 
+import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
-import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -94,7 +90,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class D12 {
 
-    class Ship {
+    static class Ship {
         private int x, y;
         private int angle;
         private int wx, wy;
@@ -143,31 +139,13 @@ public class D12 {
             this.angle = angle;
             return this;
         }
-
-        @Override
-        public String toString() {
-            return "Ship{" +
-                    "x=" + x +
-                    ", y=" + y +
-                    ", angle=" + angle +
-                    ", wx=" + wx +
-                    ", wy=" + wy +
-                    '}';
-        }
     }
 
     record Instruction(char instruction, int value) { }
 
-    private List<Instruction> readFile(String filename) throws FileNotFoundException {
-        List<Instruction> instructions = new ArrayList<>();
-        try(Scanner in = new Scanner(new File(filename))) {
-            while (in.hasNext()) {
-                String line = in.next().trim();
-                instructions.add(new Instruction(line.charAt(0), Integer.parseInt(line.substring(1))));
-            }
-            in.close();
-            return instructions;
-        }
+    private List<Instruction> readFile(String filename) {
+        return FileReader.readFileObjectList(filename,
+                line -> new Instruction(line.charAt(0), Integer.parseInt(line.substring(1))));
     }
 
     private int distance(Ship s) {
@@ -206,7 +184,7 @@ public class D12 {
             });
 
     @Test
-    public void testShipControls1() throws FileNotFoundException {
+    public void testShipControls1() {
         final Ship s1 = new Ship().setAngle(90).setX(0).setY(0);
         readFile("src/test/resources/2020/D12_t.txt")
                 .forEach(i -> controlMapOne.get(i.instruction).apply(i, s1));
@@ -246,7 +224,7 @@ public class D12 {
             });
 
     @Test
-    public void testShipControls2() throws FileNotFoundException {
+    public void testShipControls2() {
         final Ship s1 = new Ship().setX(0).setY(0).setWx(10).setWy(-1);
         readFile("src/test/resources/2020/D12_t.txt")
                 .forEach(i -> controlMapTwo.get(i.instruction).apply(i, s1));

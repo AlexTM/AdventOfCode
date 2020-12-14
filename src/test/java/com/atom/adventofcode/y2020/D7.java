@@ -1,10 +1,9 @@
 package com.atom.adventofcode.y2020;
 
+import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -94,35 +93,27 @@ public class D7 {
         }
     }
 
-    private String stripString(String inp) {
-        return inp.replace("bags", "").replace("bag", "").replace(".", "").trim();
+    private List<Rule> readFile(String filename) {
+        return FileReader.readFileObjectList(filename, line -> {
+            String parts[] = stripString(line).split("contain");
+
+            Rule n = new Rule();
+            n.name = parts[0].trim();
+
+            if(!parts[1].trim().startsWith("no other")) {
+                String parts2[] = parts[1].split(",");
+                for(int i=0; i< parts2.length; i++) {
+                    String trimString = parts2[i].trim();
+                    int amount = Integer.parseInt(trimString.substring(0,1));
+                    n.children.put(trimString.substring(1).trim(), amount);
+                }
+            }
+            return n;
+        });
     }
 
-    private List<Rule> readFile(String filename) throws FileNotFoundException {
-        List<Rule> values = new ArrayList<>();
-        try(Scanner in = new Scanner(new File(filename))) {
-            in.useDelimiter(System.getProperty("line.separator"));
-            while (in.hasNext()) {
-                String line = stripString(in.next());
-                String parts[] = line.split("contain");
-
-                Rule n = new Rule();
-                n.name = parts[0].trim();
-
-                if(!parts[1].trim().startsWith("no other")) {
-                    String parts2[] = parts[1].split(",");
-                    for(int i=0; i< parts2.length; i++) {
-                        String trimString = parts2[i].trim();
-                        int amount = Integer.parseInt(trimString.substring(0,1));
-                        n.children.put(trimString.substring(1).trim(), amount);
-                    }
-                }
-
-                values.add(n);
-            }
-            in.close();
-            return values;
-        }
+    private String stripString(String inp) {
+        return inp.replace("bags", "").replace("bag", "").replace(".", "").trim();
     }
 
     private Map<String, Integer> getLookupMap(List<Rule> rules) {
@@ -154,7 +145,7 @@ public class D7 {
     }
 
     @Test
-    public void testLoadingBags() throws FileNotFoundException {
+    public void testLoadingBags() {
         List<Rule> rules = readFile("src/test/resources/2020/D7_t.txt");
         rules.stream().forEach(System.out::println);
         assertEquals(9, rules.size());
@@ -176,7 +167,7 @@ public class D7 {
     }
 
     @Test
-    public void testIterateOverTreeBags() throws FileNotFoundException {
+    public void testIterateOverTreeBags() {
         List<Rule> rules = readFile("src/test/resources/2020/D7_t.txt");
         int[][] m = buildGraph(rules);
         Map<String, Integer> l = getLookupMap(rules);
@@ -213,7 +204,7 @@ public class D7 {
 
 
     @Test
-    public void testIterateOverTreeBags2() throws FileNotFoundException {
+    public void testIterateOverTreeBags2() {
         List<Rule> rules = readFile("src/test/resources/2020/D7_t.txt");
         int[][] m = buildGraph(rules);
         Map<String, Integer> l = getLookupMap(rules);

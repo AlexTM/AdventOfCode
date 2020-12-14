@@ -1,10 +1,8 @@
 package com.atom.adventofcode.y2020;
 
+import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -167,28 +165,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class D10 {
 
-    private List<Long> readFile(String filename) throws FileNotFoundException {
-        List<Long> values = new ArrayList<>();
-        try(Scanner in = new Scanner(new File(filename))) {
-            while (in.hasNext()) {
-                String line = in.next();
-                values.add(Long.parseLong(line));
-            }
-            in.close();
-            return values;
-        }
+    private List<Long> readFile(String filename) {
+        return FileReader.readFileObjectList(filename, Long::parseLong);
     }
 
     @Test
-    public void testSimple() throws FileNotFoundException {
+    public void testSimple() {
         Long[] joltage = new Long[] {16L, 10L, 15L, 5L, 1L, 11L, 7L, 19L, 6L, 12L, 4L};
         Long res = joltageCal(Arrays.asList(joltage));
         assertEquals(35, res);
 
         assertEquals(220, joltageCal(readFile("src/test/resources/2020/D10_t.txt")));
-
         assertEquals(2048, joltageCal(readFile("src/test/resources/2020/D10.txt")));
-
     }
 
     private Long joltageCal(List<Long> joltage) {
@@ -197,13 +185,13 @@ public class D10 {
         long stepOne = 0;
         long stepThree = 1;
         long lastValue = 0;
-        for(int i=0; i<joltage.size(); i++) {
-            long dif = joltage.get(i) - lastValue;
-            if(dif == 1)
+        for (Long aLong : joltage) {
+            long dif = aLong - lastValue;
+            if (dif == 1)
                 stepOne++;
-            if(dif == 3)
+            if (dif == 3)
                 stepThree++;
-            lastValue = joltage.get(i);
+            lastValue = aLong;
         }
         return stepOne * stepThree;
     }
@@ -233,7 +221,7 @@ public class D10 {
     }
 
     @Test
-    public void testSimple2() throws FileNotFoundException {
+    public void testSimple2() {
         List<Long> joltage = Arrays.asList(16L, 10L, 15L, 5L, 1L, 11L, 7L, 19L, 6L, 12L, 4L);
         Collections.sort(joltage);
         long res = combinations(joltage, 0L, 22L, new HashMap<>());
@@ -245,7 +233,7 @@ public class D10 {
     }
 
     @Test
-    public void testSimple3() throws FileNotFoundException {
+    public void testSimple3() {
         List<Long> joltage = readFile("src/test/resources/2020/D10.txt");
         Collections.sort(joltage);
         System.out.println("Output "+combinations(joltage, 0L, 3+joltage.get(joltage.size()-1), new HashMap<>()));

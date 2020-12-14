@@ -1,12 +1,9 @@
 package com.atom.adventofcode.y2020;
 
+import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -86,20 +83,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class D3 {
 
-    private List<char[]> readFile(String filename) throws FileNotFoundException {
-        List<char[]> values = new ArrayList<>();
-        try(Scanner in = new Scanner(new File(filename))) {
-            while (in.hasNext()) {
-                String line = in.nextLine();
-                values.add(line.toCharArray());
-            }
-            in.close();
-            return values;
-        }
+    private List<char[]> readFile(String filename) {
+        return FileReader.readFileObjectList(filename, String::toCharArray);
     }
 
     @Test
-    public void testTrees() throws FileNotFoundException {
+    public void testTrees() {
         List<char[]> inp = readFile("src/test/resources/2020/D3_t.txt");
         assertEquals(7, countTrees(inp, 3, 1));
 
@@ -108,7 +97,7 @@ public class D3 {
     }
 
     @Test
-    public void testTrees2() throws FileNotFoundException {
+    public void testTrees2() {
         List<char[]> inp = readFile("src/test/resources/2020/D3_t.txt");
         assertEquals(2, countTrees(inp, 1, 1));
         assertEquals(7, countTrees(inp, 3, 1));
@@ -129,7 +118,6 @@ public class D3 {
             res *= countTrees(inp, steps[0], steps[1]);
         }
         System.out.println("Trees: "+res);
-
     }
 
 

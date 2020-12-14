@@ -1,10 +1,10 @@
 package com.atom.adventofcode.y2020;
 
+import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,21 +69,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * this property?
  */
 public class D9 {
-
-    private List<Long> readFile(String filename) throws FileNotFoundException {
-        List<Long> values = new ArrayList<>();
-        try(Scanner in = new Scanner(new File(filename))) {
-            while (in.hasNext()) {
-                String line = in.next();
-                values.add(Long.parseLong(line));
-            }
-            in.close();
-            return values;
-        }
+    private List<Long> readFile(String filename) {
+        return FileReader.readFileObjectList(filename, Long::parseLong);
     }
 
     @Test
-    public void testDayNine() throws FileNotFoundException {
+    public void testDayNine() {
         List<Long> ints = readFile("src/test/resources/2020/D9_t.txt");
         System.out.println(ints);
         long res = findFirst(ints, 5);
@@ -95,7 +86,7 @@ public class D9 {
     }
 
     @Test
-    public void testDayNine2() throws FileNotFoundException {
+    public void testDayNine2() {
         List<Long> ints = readFile("src/test/resources/2020/D9_t.txt");
         System.out.println(ints);
         long res = findContinuous(ints, 5);

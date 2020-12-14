@@ -1,13 +1,10 @@
 package com.atom.adventofcode.y2020;
 
+import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -73,39 +70,33 @@ public class D2 {
         assertFalse(validatePasswordPolicy(new Password(1,3,'b',"cdefg")));
     }
 
-    @Test
-    public void testPasswordList() throws FileNotFoundException {
-        System.out.println("Valid passwords: "+
-                readFile("src/test/resources/2020/D2.txt").stream().filter(this::validatePasswordPolicy).count()
-        );
+    private List<Password> readFile(String filename) {
+        return FileReader.readFileObjectList(filename, line -> {
+            String[] parts = line.split(" ");
+            String[] minMax = parts[0].split("-");
+            return new Password(
+                    Integer.parseInt(minMax[0]),
+                    Integer.parseInt(minMax[1]),
+                    parts[1].charAt(0),
+                    parts[2]);
+        });
     }
 
     private boolean validatePasswordPolicy(Password p) {
         Map<Character, Long> freq =
-                p.password.chars().mapToObj(c -> (char) c).collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+                p.password.chars().mapToObj(c -> (char) c)
+                        .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         if(!freq.containsKey(p.letter))
             return false;
         return freq.get(p.letter) >= p.min && freq.get(p.letter) <= p.max;
     }
 
-    private List<Password> readFile(String filename) throws FileNotFoundException {
-        List<Password> values = new ArrayList<>();
-        try(Scanner in = new Scanner(new FileReader(filename))) {
-            in.useDelimiter("\n");
-            while (in.hasNext()) {
-                String line = in.next();
-                String[] parts = line.split(" ");
-                String[] minMax = parts[0].split("-");
-                values.add(new Password(
-                        Integer.parseInt(minMax[0]),
-                        Integer.parseInt(minMax[1]),
-                        parts[1].charAt(0),
-                        parts[2])
-                );
-            }
-            in.close();
-            return values;
-        }
+    @Test
+    public void testPasswordList() {
+        System.out.println("Valid passwords: "+
+                readFile("src/test/resources/2020/D2.txt").stream()
+                        .filter(this::validatePasswordPolicy).count()
+        );
     }
 
     @Test
@@ -115,11 +106,11 @@ public class D2 {
         assertFalse(validatePasswordPolicy2(new Password(1,3,'b',"cdefg")));
     }
 
-
     @Test
-    public void testPasswordList2() throws FileNotFoundException {
+    public void testPasswordList2() {
         System.out.println("Valid passwords: "+
-                readFile("src/test/resources/2020/D2.txt").stream().filter(this::validatePasswordPolicy2).count()
+                readFile("src/test/resources/2020/D2.txt").stream()
+                        .filter(this::validatePasswordPolicy2).count()
         );
     }
 

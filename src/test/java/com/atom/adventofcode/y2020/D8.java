@@ -1,9 +1,9 @@
 package com.atom.adventofcode.y2020;
 
+import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -115,22 +115,15 @@ public class D8 {
 
     record Op(String code, int value) {}
 
-    private List<Op> readFile(String filename) throws FileNotFoundException {
-        List<Op> values = new ArrayList<>();
-        try(Scanner in = new Scanner(new FileReader(filename))) {
-            in.useDelimiter(System.getProperty("line.separator"));
-            while (in.hasNext()) {
-                String line = in.next();
-                String parts[] = line.split(" ");
-                values.add(new Op(parts[0],Integer.parseInt(parts[1])));
-            }
-            in.close();
-            return values;
-        }
+    private List<Op> readFile(String filename) {
+        return FileReader.readFileObjectList(filename, line -> {
+            String[] parts = line.split(" ");
+            return new Op(parts[0],Integer.parseInt(parts[1]));
+        });
     }
 
     @Test
-    public void testBootcode() throws FileNotFoundException {
+    public void testBootcode() {
         List<Op> codes = readFile("src/test/resources/2020/D8_t.txt");
         assertEquals(5, process(codes));
 
@@ -205,7 +198,7 @@ public class D8 {
     }
 
     @Test
-    public void testBootcode2() throws FileNotFoundException {
+    public void testBootcode2() {
         List<Op> codes = readFile("src/test/resources/2020/D8_t.txt");
         changeOpCodes(codes);
         assertEquals(8, process2(codes));
