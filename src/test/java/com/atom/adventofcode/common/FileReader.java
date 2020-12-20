@@ -34,7 +34,9 @@ public abstract class FileReader {
         try(Scanner in = new Scanner(new File(filename))) {
             in.useDelimiter("\n");
             while (in.hasNext()) {
-                values.add(function.apply(in));
+                T obj = function.apply(in);
+                if(obj != null)
+                    values.add(obj);
             }
             in.close();
             return values;
@@ -49,7 +51,9 @@ public abstract class FileReader {
             in.useDelimiter("\n");
             while (in.hasNext()) {
                 String line = in.next();
-                values.add(function.apply(line));
+                T obj = function.apply(line);
+                if(obj != null)
+                    values.add(obj);
             }
             in.close();
             return values;
