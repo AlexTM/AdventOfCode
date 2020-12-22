@@ -3,10 +3,7 @@ package com.atom.adventofcode.y2020;
 import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
