@@ -3,7 +3,6 @@ package com.atom.adventofcode.y2020;
 import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
-import java.io.FileNotFoundException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
