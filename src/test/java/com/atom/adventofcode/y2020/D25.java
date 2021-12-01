@@ -95,14 +95,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class D25 {
 
     private long getLoopSize(long subjectNumber, long key) {
-        long value = 1;
-        long loops = 0;
-        while(true) {
-            value *= subjectNumber;
-            value %= 20201227;
+        long value = 1, loops = 0;
+        while(key != value) {
+            value = (value * subjectNumber) % 20201227;
             loops++;
-            if(key == value)
-                break;
         }
         return loops;
     }
@@ -118,8 +114,7 @@ public class D25 {
 
     private long getEncKey(long subjectNumber, long publicKey1, long publicKey2) {
         long loop1 = getLoopSize(subjectNumber, publicKey1);
-        long encKey = getPublicKey(publicKey2, loop1);
-        return encKey;
+        return getPublicKey(publicKey2, loop1);
     }
 
     @Test

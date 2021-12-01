@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -162,7 +163,6 @@ public class D24 {
         assertEquals(new Coord(0,0), run(cmds.get(0)));
     }
 
-
     @Test
     public void testTiles() {
         List<List<CMD>> cmds = readFile("src/test/resources/2020/D24_t.txt");
@@ -243,7 +243,6 @@ public class D24 {
             c.retainAll(blackTiles);
             count.put(h, c.size());
         });
-
 
         // Apply rules for next generation
         Set<Coord> res = new HashSet<>();
