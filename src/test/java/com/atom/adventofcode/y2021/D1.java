@@ -104,7 +104,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class D1 {
 
-    List<Integer> depth = List.of(199,
+    List<Integer> depth = List.of(
+            199,
             200,
             208,
             210,
@@ -115,11 +116,12 @@ public class D1 {
             260,
             263);
 
-    class State {
-        private Integer lastDepth = Integer.MAX_VALUE;
-    }
-
     private long countDepthIncreases(List<Integer> depths) {
+
+        class State {
+            private Integer lastDepth = Integer.MAX_VALUE;
+        }
+
         final State state = new State();
         return depths.stream().filter(d -> {
             boolean res = state.lastDepth < d;
@@ -128,12 +130,14 @@ public class D1 {
             }).count();
     }
 
-    class State2 {
-        private final Queue<Integer> queue = new ArrayBlockingQueue<>(4);
-        private Integer sum = 0;
-    }
 
     private long countDepthIncreasesWithSlidingWindow(List<Integer> depths) {
+
+        class State2 {
+            private final Queue<Integer> queue = new ArrayBlockingQueue<>(4);
+            private Integer sum = 0;
+        }
+
         final State2 state = new State2();
         return depths.stream().filter(d -> {
             int currentDepth = state.sum;
