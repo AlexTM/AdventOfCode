@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -62,4 +63,15 @@ public abstract class FileReader {
         }
     }
 
+    public static <R> R readFileForObject(String filename, R state, BiFunction<String, R, R> function) {
+        try(Scanner in = new Scanner(new File(filename))) {
+            in.useDelimiter("\n");
+            while (in.hasNext()) {
+                state = function.apply(in.next(), state);
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return state;
+    }
 }
