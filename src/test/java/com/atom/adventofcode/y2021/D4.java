@@ -101,23 +101,6 @@ public class D4 {
         ArrayList<HashSet<Integer>> combinations = new ArrayList<>();
         int boardTotal;
 
-        public int draw(Integer i) {
-            // Does this board have this number?
-            boolean containsNumber = false;
-            for(HashSet<Integer> hs : combinations) {
-                containsNumber |= hs.remove(i);
-            }
-            if(containsNumber)
-                boardTotal -= i;
-
-            for(HashSet<Integer> hs : combinations) {
-                if(hs.isEmpty()) {
-                    return boardTotal * i;
-                }
-            }
-            return -1;
-        }
-
         public void generateCombinations() {
             boardTotal = 0;
             for(int i=0; i<5; i++) {
@@ -171,10 +154,27 @@ public class D4 {
         });
     }
 
+    public int doDraw(Board b, Integer i) {
+        // Does this board have this number?
+        boolean containsNumber = false;
+        for(HashSet<Integer> hs : b.combinations) {
+            containsNumber |= hs.remove(i);
+        }
+        if(containsNumber)
+            b.boardTotal -= i;
+
+        for(HashSet<Integer> hs : b.combinations) {
+            if(hs.isEmpty()) {
+                return b.boardTotal * i;
+            }
+        }
+        return -1;
+    }
+
     public int playGame(Game game) {
         for(Integer d : game.draws) {
             for (Board b : game.boards) {
-                int res = b.draw(d);
+                int res = doDraw(b, d);
                 if (res > 0) {
                     game.boards.remove(b);
                     return res;
@@ -185,12 +185,10 @@ public class D4 {
     }
 
     public int loseGame(Game game) {
-
         int res = 0;
         while(game.boards.size() > 0) {
             res = playGame(game);
         }
-
         return res;
     }
 
