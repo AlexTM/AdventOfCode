@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -126,15 +127,9 @@ public class D5 {
     }
 
     private long countCoords(List<Cloud> clouds) {
-        final Map<Coord, Integer> count = new HashMap<>();
-
-        for(Cloud cloud : clouds) {
-            for(Coord coord: generateCoordsFromCloud(cloud)) {
-                count.put(coord, count.getOrDefault(coord, 0)+1);
-            }
-        }
-
-        return count.entrySet().stream().filter(e -> e.getValue() >= 2).count();
+        return clouds.stream().flatMap(c -> generateCoordsFromCloud(c).stream())
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .entrySet().stream().filter(e -> e.getValue() >= 2).count();
     }
 
     @Test
