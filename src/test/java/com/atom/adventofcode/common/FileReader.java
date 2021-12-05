@@ -30,6 +30,15 @@ public abstract class FileReader {
         }
     }
 
+    public static <T> T scanFileObject(String filename, Function<Scanner, T> function) {
+        try(Scanner in = new Scanner(new File(filename))) {
+            in.useDelimiter("\n");
+            return function.apply(in);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static <T>List<T> scanFileObjectList(String filename, Function<Scanner, T> function) {
         List<T> values = new ArrayList<>();
         try(Scanner in = new Scanner(new File(filename))) {
