@@ -118,16 +118,12 @@ public class D6 {
     public long thirdSolution(int[] fishAges, int days) {
         Queue<Long> lifeCycle = new ArrayBlockingQueue<>(7);
         Queue<Long> babyCycle = new ArrayBlockingQueue<>(2);
-        babyCycle.add(0L);
-        babyCycle.add(0L);
-        Long[] hist = convertFishAges(fishAges);
-
-        Collections.addAll(lifeCycle, hist);
+        Collections.addAll(babyCycle, 0L, 0L);
+        Collections.addAll(lifeCycle, convertFishAges(fishAges));
 
         for(int day=0; day<days; day++) {
             Long nextFish = lifeCycle.poll();
-            Long fromBabies = babyCycle.poll();
-            lifeCycle.add(nextFish+fromBabies);
+            lifeCycle.add(nextFish + babyCycle.poll());
             babyCycle.add(nextFish);
         }
 
