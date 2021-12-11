@@ -146,7 +146,7 @@ public class D8 {
      * Come back to this some other time!
      *
      */
-    private void mapToSegment(Row row) {
+    private Map<String, String> mapToSegment(Row row) {
 
         Map<String, Map<String, Integer>> count = new HashMap<>();
 
@@ -215,6 +215,7 @@ public class D8 {
             }
         }
         System.out.println(finalMapping);
+        return finalMapping;
     }
 
 
@@ -233,13 +234,83 @@ public class D8 {
         numberMap.put(9, Set.of("abcdfg".split("")));
     }
 
+    private String remainder(String s1, String s2) {
+        Set<String> one = new HashSet<>(Arrays.asList(s1.split("")));
+        Set<String> two = new HashSet<>(Arrays.asList(s2.split("")));
+        one.removeAll(two);
+        return one.stream().reduce("", (res, s) -> res+s);
+    }
+
+    private Map<String, String> mapToSegmentTakeTwo(Row row) {
+        Map<String, String> finalMapping = new HashMap<>();
+
+        Map<Integer, List<String>> lengthMapping = new HashMap<>();
+        for (String input : row.inputs) {
+            int l = input.length();
+            List<String> s = lengthMapping.getOrDefault(l, new ArrayList<>());
+            s.add(input);
+            lengthMapping.put(l, s);
+        }
+        System.out.println(lengthMapping);
+
+        // get the 1 and 7 to work out segment a
+        String ais = remainder(lengthMapping.get(3).get(0), lengthMapping.get(2).get(0));
+        finalMapping.put("a", ais);
+
+        // workout segment c
+        for(String s : lengthMapping.get(6)) {
+            String remainder = remainder(lengthMapping.get(2).get(0), s);
+            if(remainder.length() == 1) {
+                finalMapping.put("c", remainder);
+                break;
+            }
+        }
+
+        // segment f
+        finalMapping.put("f", remainder(lengthMapping.get(2).get(0), finalMapping.get("c")));
+
+        //
+
+        System.out.println(finalMapping);
+
+/*        while(finalMapping.size()!=7) {
+            for (String input : row.inputs) {
+                System.out.print(input + " : ");
+                switch (input.length()) {
+                    case 2 -> System.out.println("1");
+                    case 3 -> System.out.println("7");
+                    case 4 -> System.out.println("4");
+                    case 5 -> System.out.println("2,3,5");
+                    case 6 -> System.out.println("0,6,9");
+                    case 7 -> System.out.println("8");
+                }
+            }
+        }
+
+ */
+        return null;
+    }
+
+
     @Test
     public void testPart2() {
-        mapToSegment(
+        Map<String, String> mapping = mapToSegmentTakeTwo(
                 new Row(
                         List.of("acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab"),
                         List.of("cdfeb", "fcadb", "cdfeb", "cdbaf")));
 
+
+
+
+        Map.of(
+                "a", "d",
+                "b", "e",
+                "c", "a",
+                "d", "f",
+                "e", "g",
+                "f", "b",
+                "g", "c"
+        );
 
 //        mapToSegment(
 //            new Row(
