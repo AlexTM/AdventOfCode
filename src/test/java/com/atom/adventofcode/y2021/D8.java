@@ -4,7 +4,6 @@ import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -130,108 +129,20 @@ public class D8 {
         assertEquals(530, countUnique(loadData("src/test/resources/2021/D8.txt")));
     }
 
-    private int sumOutputs(List<Row> loadData) {
-        return 0;
-    }
 
-
-    private Set<String> stringToSet(String inp) {
-        return Arrays.stream(inp.split("")).collect(Collectors.toSet());
-    }
-
-
-    /**
-     * Not getting it
-     *
-     * Come back to this some other time!
-     *
-     */
-    private Map<String, String> mapToSegment(Row row) {
-
-        Map<String, Map<String, Integer>> count = new HashMap<>();
-
-        Map<Integer, Set<String>> lengthToSegment = new HashMap<>();
-
-        for(Map.Entry<Integer, Set<String>> e : numberMap.entrySet()) {
-            Set<String> s = lengthToSegment.getOrDefault(e.getValue().size(), new HashSet<>());
-            s.addAll(e.getValue());
-            lengthToSegment.put(e.getValue().size(), s);
-        }
-
-        System.out.println(lengthToSegment);
-
-        for(String data : row.inputs) {
-            int len = data.length();
-            Set<String> segments = lengthToSegment.get(len);
-
-            for(String seg : segments) {
-                Map<String, Integer> i = count.getOrDefault(seg, new HashMap<>());
-                Set<String> ch = stringToSet(data);
-                for(String c : ch) {
-                    i.put(c, i.getOrDefault(c, 0)+1);
-                }
-                count.put(seg, i);
-            }
-        }
-
-        System.out.println(count);
-
-        Map<String, List<String>> candidates = new HashMap<>();
-        for(Map.Entry<String, Map<String, Integer>> e : count.entrySet()) {
-            Optional<Map.Entry<String, Integer>> maxEntry  = e.getValue().entrySet()
-                    .stream().max(Map.Entry.comparingByValue()
-            );
-
-            candidates.put(e.getKey(),
-                    e.getValue().entrySet().stream().filter(ee->ee.getValue() == maxEntry.get().getValue())
-                            .map(Map.Entry::getKey).collect(Collectors.toList())
-            );
-        }
-
-        System.out.println(candidates);
-
-        Map<String, String> finalMapping = new HashMap<>();
-
-        while(finalMapping.size() != 7) {
-            boolean finished = true;
-            Iterator<String> it = candidates.keySet().iterator();
-            while(it.hasNext()) {
-                String s = it.next();
-                if(candidates.get(s).size() == 1) {
-
-
-                    String m = candidates.get(s).get(0);
-                    finalMapping.put(s, m);
-
-                    System.out.println(candidates);
-                    System.out.println("Removing "+s+" -> "+m);
-
-
-                    // remove from rest of candidates
-                    candidates.remove(s);
-                    candidates.forEach((k, v) -> v.remove(m));
-                    break;
-                }
-            }
-        }
-        System.out.println(finalMapping);
-        return finalMapping;
-    }
-
-
-    static final Map<Integer, Set<String>> numberMap;
+    static final Map<String, Set<String>> numberMap;
     static {
         numberMap = new HashMap<>();
-        numberMap.put(0, Set.of("abcefg".split("")));
-        numberMap.put(1, Set.of("cf".split("")));
-        numberMap.put(2, Set.of("acdeg".split("")));
-        numberMap.put(3, Set.of("acdfg".split("")));
-        numberMap.put(4, Set.of("bcdf".split("")));
-        numberMap.put(5, Set.of("abdfg".split("")));
-        numberMap.put(6, Set.of("abdefg".split("")));
-        numberMap.put(7, Set.of("acf".split("")));
-        numberMap.put(8, Set.of("abcdefg".split("")));
-        numberMap.put(9, Set.of("abcdfg".split("")));
+        numberMap.put("0", Set.of("abcefg".split("")));
+        numberMap.put("1", Set.of("cf".split("")));
+        numberMap.put("2", Set.of("acdeg".split("")));
+        numberMap.put("3", Set.of("acdfg".split("")));
+        numberMap.put("4", Set.of("bcdf".split("")));
+        numberMap.put("5", Set.of("abdfg".split("")));
+        numberMap.put("6", Set.of("abdefg".split("")));
+        numberMap.put("7", Set.of("acf".split("")));
+        numberMap.put("8", Set.of("abcdefg".split("")));
+        numberMap.put("9", Set.of("abcdfg".split("")));
     }
 
     private String remainder(String s1, String s2) {
@@ -239,6 +150,25 @@ public class D8 {
         Set<String> two = new HashSet<>(Arrays.asList(s2.split("")));
         one.removeAll(two);
         return one.stream().reduce("", (res, s) -> res+s);
+    }
+
+    private Map<String, Integer> countOccurances(List<String> input) {
+        Map<String, Integer> res = new HashMap<>();
+        for(String inp : input) {
+            for(String s : inp.split("")) {
+                int v = res.getOrDefault(s, 0)+1;
+                res.put(s, v);
+            }
+        }
+        return res;
+    }
+
+    public String getKey(Map<String, Integer> m, Integer value) {
+        for(Map.Entry<String, Integer> e : m.entrySet()){
+            if(e.getValue() == value)
+                return e.getKey();
+        }
+        return null;
     }
 
     private Map<String, String> mapToSegmentTakeTwo(Row row) {
@@ -251,73 +181,90 @@ public class D8 {
             s.add(input);
             lengthMapping.put(l, s);
         }
-        System.out.println(lengthMapping);
 
         // get the 1 and 7 to work out segment a
         String ais = remainder(lengthMapping.get(3).get(0), lengthMapping.get(2).get(0));
-        finalMapping.put("a", ais);
+        finalMapping.put(ais, "a");
 
         // workout segment c
+        String cIs = null;
         for(String s : lengthMapping.get(6)) {
             String remainder = remainder(lengthMapping.get(2).get(0), s);
             if(remainder.length() == 1) {
-                finalMapping.put("c", remainder);
+                cIs = remainder;
+                finalMapping.put(cIs, "c");
                 break;
             }
         }
 
         // segment f
-        finalMapping.put("f", remainder(lengthMapping.get(2).get(0), finalMapping.get("c")));
+        finalMapping.put(remainder(lengthMapping.get(2).get(0), cIs), "f");
 
-        //
+        // Other segments appear a unique number of times in reminding characters
+        List<String> all = new ArrayList<>();
+        all.addAll(lengthMapping.get(5));
+        all.addAll(lengthMapping.get(6));
 
-        System.out.println(finalMapping);
+        Map<String, Integer> count3 = countOccurances(all);
+        count3.keySet().removeAll(finalMapping.keySet());
+        finalMapping.put(getKey(count3, 3), "e");
+        finalMapping.put(getKey(count3, 5), "d");
+        finalMapping.put(getKey(count3, 4), "b");
+        finalMapping.put(getKey(count3, 6), "g");
 
-/*        while(finalMapping.size()!=7) {
-            for (String input : row.inputs) {
-                System.out.print(input + " : ");
-                switch (input.length()) {
-                    case 2 -> System.out.println("1");
-                    case 3 -> System.out.println("7");
-                    case 4 -> System.out.println("4");
-                    case 5 -> System.out.println("2,3,5");
-                    case 6 -> System.out.println("0,6,9");
-                    case 7 -> System.out.println("8");
-                }
+        return finalMapping;
+    }
+
+    public Integer computeCorrectOutput(Map<String, String> mapping, List<String> inputs) {
+        String result = "";
+
+        for(String inp : inputs) {
+            String number = "";
+            for(String seg : inp.split("")) {
+                number += mapping.get(seg);
             }
+            result += segsToNumber(number);
         }
 
- */
+        return Integer.parseInt(result);
+    }
+
+    private String segsToNumber(String number) {
+
+        Set<String> segs = Set.of(number.split(""));
+
+        for(Map.Entry<String, Set<String>> e : numberMap.entrySet()) {
+            if(e.getValue().size() == segs.size()) {
+                if(segs.containsAll(e.getValue()))
+                    return e.getKey();
+            }
+        }
         return null;
     }
 
+    private Integer addAll(List<Row> rows) {
+        Integer sum = 0;
+        for(Row row : rows) {
+            Map<String, String> mapping = mapToSegmentTakeTwo(row);
+            sum +=  computeCorrectOutput(mapping, row.outputs);
+        }
+        return sum;
+    }
 
+    /**
+     * Finally got it working, not going to re-do the code, already spent too much time on it!
+     */
     @Test
     public void testPart2() {
-        Map<String, String> mapping = mapToSegmentTakeTwo(
-                new Row(
-                        List.of("acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab"),
-                        List.of("cdfeb", "fcadb", "cdfeb", "cdbaf")));
+        Row row = new Row(
+                List.of("acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab"),
+                List.of("cdfeb", "fcadb", "cdfeb", "cdbaf"));
 
+        Map<String, String> mapping = mapToSegmentTakeTwo(row);
+        assertEquals(5353, computeCorrectOutput(mapping, row.outputs));
 
-
-
-        Map.of(
-                "a", "d",
-                "b", "e",
-                "c", "a",
-                "d", "f",
-                "e", "g",
-                "f", "b",
-                "g", "c"
-        );
-
-//        mapToSegment(
-//            new Row(
-//                    List.of("acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab"),
-//                    List.of("cdfeb", "fcadb", "cdfeb", "cdbaf")));
-        //assertEquals(61229, sumOutputs(loadData("src/test/resources/2021/D8_t.txt")));
-        //assertEquals(530, countUnique(loadData("src/test/resources/2021/D8.txt")));
+        assertEquals(61229, addAll(loadData("src/test/resources/2021/D8_t.txt")));
+        assertEquals(1051087, addAll(loadData("src/test/resources/2021/D8.txt")));
     }
 
 }
