@@ -171,11 +171,11 @@ public class D8 {
         return null;
     }
 
-    private Map<String, String> mapToSegmentTakeTwo(Row row) {
+    private Map<String, String> mapToSegmentTakeTwo(List<String> inputs) {
         Map<String, String> finalMapping = new HashMap<>();
 
         Map<Integer, List<String>> lengthMapping = new HashMap<>();
-        for (String input : row.inputs) {
+        for (String input : inputs) {
             int l = input.length();
             List<String> s = lengthMapping.getOrDefault(l, new ArrayList<>());
             s.add(input);
@@ -215,7 +215,7 @@ public class D8 {
         return finalMapping;
     }
 
-    public Integer computeCorrectOutput(Map<String, String> mapping, List<String> inputs) {
+    public int computeCorrectOutput(Map<String, String> mapping, List<String> inputs) {
         String result = "";
 
         for(String inp : inputs) {
@@ -243,12 +243,9 @@ public class D8 {
     }
 
     private Integer addAll(List<Row> rows) {
-        Integer sum = 0;
-        for(Row row : rows) {
-            Map<String, String> mapping = mapToSegmentTakeTwo(row);
-            sum +=  computeCorrectOutput(mapping, row.outputs);
-        }
-        return sum;
+        return rows.stream()
+                .map(row -> computeCorrectOutput(mapToSegmentTakeTwo(row.inputs), row.outputs))
+                .reduce(0, Integer::sum);
     }
 
     /**
@@ -260,8 +257,7 @@ public class D8 {
                 List.of("acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab"),
                 List.of("cdfeb", "fcadb", "cdfeb", "cdbaf"));
 
-        Map<String, String> mapping = mapToSegmentTakeTwo(row);
-        assertEquals(5353, computeCorrectOutput(mapping, row.outputs));
+        assertEquals(5353, computeCorrectOutput(mapToSegmentTakeTwo(row.inputs), row.outputs));
 
         assertEquals(61229, addAll(loadData("src/test/resources/2021/D8_t.txt")));
         assertEquals(1051087, addAll(loadData("src/test/resources/2021/D8.txt")));
