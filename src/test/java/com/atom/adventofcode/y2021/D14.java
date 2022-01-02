@@ -174,6 +174,12 @@ public class D14 {
         return max - min;
     }
 
+    // ab - 10
+    // ba - 9
+    // cd
+
+    // ab [ab]
+
     @Test
     public void testPart2() {
 
@@ -202,7 +208,6 @@ public class D14 {
         assertEquals(1588, getAnswer(testData.polymerTemplate, testData.rules, 10));
         assertEquals(1588, getAnswer2(testData.polymerTemplate, testData.rules, 10));
         assertEquals(2188189693529L, getAnswer2(testData.polymerTemplate, testData.rules, 40));
-
 
         Data puzzleData = loadData("src/test/resources/2021/D14.txt");
         // not 4441317262451

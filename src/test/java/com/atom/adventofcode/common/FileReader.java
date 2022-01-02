@@ -83,4 +83,22 @@ public abstract class FileReader {
         }
         return state;
     }
+
+    public interface TriFunction<T, U, I, R> {
+        R apply(T a, U b, I c);
+    }
+
+    public static <R> R readFileForObject(String filename, R state, TriFunction<R, String, Integer, R> function) {
+        try(Scanner in = new Scanner(new File(filename))) {
+            in.useDelimiter("\n");
+            int count = 0;
+            while (in.hasNext()) {
+                state = function.apply(state, in.next(), count++);
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return state;
+    }
+
 }
