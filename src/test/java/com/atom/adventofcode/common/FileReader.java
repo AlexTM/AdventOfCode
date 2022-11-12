@@ -17,6 +17,19 @@ public abstract class FileReader {
         return readFileIntegerList(filename).toArray(new Integer[0]);
     }
 
+    public static List<String> readFileStringList(String filename) {
+        List<String> values = new ArrayList<>();
+        try(Scanner in = new Scanner(new File(filename))) {
+            while (in.hasNext()) {
+                values.add(in.next());
+            }
+            in.close();
+            return values;
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static List<Integer> readFileIntegerList(String filename) {
         List<Integer> values = new ArrayList<>();
         try(Scanner in = new Scanner(new File(filename))) {
