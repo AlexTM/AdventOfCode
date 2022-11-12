@@ -85,6 +85,21 @@ public abstract class FileReader {
         }
     }
 
+    public static <T>List<T> readObjectList(String contents, Function<String, T> function) {
+        List<T> values = new ArrayList<>();
+        try(Scanner in = new Scanner(contents)) {
+            in.useDelimiter("\n");
+            while (in.hasNext()) {
+                String line = in.next();
+                T obj = function.apply(line);
+                if(obj != null)
+                    values.add(obj);
+            }
+            in.close();
+            return values;
+        }
+    }
+
     public static <R> R readFileForObject(String filename, R state, BiFunction<String, R, R> function) {
         try(Scanner in = new Scanner(new File(filename))) {
             in.useDelimiter("\n");
