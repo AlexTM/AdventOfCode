@@ -45,6 +45,11 @@ public class D3 {
         };
     }
 
+    private Pos apply(Set<Pos> s, Pos p, char c) {
+        p = newPos(p, c);
+        s.add(p);
+        return p;
+    }
 
     private int uniqueHousesWithRoboSanta(String inp) {
         Set<Pos> santaHouses = new HashSet<>();
@@ -58,11 +63,12 @@ public class D3 {
 
         boolean santaTurn = true;
         for(char c : inp.toCharArray()) {
-            Pos p = santaTurn ? santa : robo;
-            Set<Pos> s = santaTurn ? santaHouses : roboHouses;
 
-            p = newPos(p, c);
-            s.add(p);
+            if(santaTurn) {
+                santa = apply(santaHouses, santa, c);
+            } else {
+                robo = apply(roboHouses, robo, c);
+            }
 
             santaTurn = !santaTurn;
         }
@@ -70,13 +76,12 @@ public class D3 {
         return santaHouses.size();
     }
 
-
     @Test
     public void testHouseVisitsWithRoboSanta() {
         assertEquals(3, uniqueHousesWithRoboSanta("^>"));
         assertEquals(3, uniqueHousesWithRoboSanta("^>v<"));
         assertEquals(11, uniqueHousesWithRoboSanta("^v^v^v^v^v"));
 
-        assertEquals(2, uniqueHousesWithRoboSanta(inp));
+        assertEquals(2631, uniqueHousesWithRoboSanta(inp));
     }
 }
