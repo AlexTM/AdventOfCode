@@ -4,6 +4,8 @@ import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -51,6 +53,7 @@ public class D9 {
             // get all edges
             List<Edge> eList = edges.get(currentNode);
             if(eList != null) {
+
                 for (Edge e : eList) {
                     int newDistance = e.distance + distanceFromStart.get(currentNode);
                     if (newDistance < distanceFromStart.get(e.to)) {
@@ -76,9 +79,10 @@ public class D9 {
             nodes.add(d.start);
             nodes.add(d.end);
         }
+
         HashMap<String, List<Edge>> edges = new HashMap<>();
         for(Distance d : distances) {
-            var edgesList = edges.getOrDefault(d.start, new ArrayList<>());
+            List<Edge> edgesList = edges.getOrDefault(d.start, new ArrayList<>());
             edgesList.add(new Edge(d.end, d.distance));
             edges.put(d.start, edgesList);
 
