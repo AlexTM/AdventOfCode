@@ -4,8 +4,6 @@ import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -24,56 +22,10 @@ public class D9 {
     }
 
     record Edge(String to, int distance){};
+    record Graph(List<String> nodes, HashMap<String, List<Edge>> edges){};
 
-    public Integer doDijkstra(String start, List<String> nodes, HashMap<String, List<Edge>> edges) {
-
-        Set<String> visited = new HashSet<>();
-
-        // Set all distance to MAX with exception of start
-        HashMap<String, Integer> distanceFromStart = new HashMap<>();
-        for(String i : nodes) distanceFromStart.put(i, Integer.MAX_VALUE);
-        distanceFromStart.put(start, 0);
-
-        // Visit start location
-        Queue<String> toVisit = new PriorityQueue<>(
-                Comparator.comparing(distanceFromStart::get));
-
-        toVisit.add(start);
-
-        while(!toVisit.isEmpty()) {
-
-            String currentNode = toVisit.poll();
-
-            // check if we have already visited
-            if(visited.contains(currentNode))
-                continue;
-
-            visited.add(currentNode);
-
-            // get all edges
-            List<Edge> eList = edges.get(currentNode);
-            if(eList != null) {
-
-                for (Edge e : eList) {
-                    int newDistance = e.distance + distanceFromStart.get(currentNode);
-                    if (newDistance < distanceFromStart.get(e.to)) {
-                        distanceFromStart.put(e.to, newDistance);
-                        toVisit.add(e.to);
-                    }
-                }
-            }
-        }
-
-        distanceFromStart.forEach((key, value) -> System.out.println(key + ": " + value));
-
-        return Collections.max(distanceFromStart.entrySet(),
-                Map.Entry.comparingByValue()).getValue();
-    }
-
-    @Test
-    public void testGetShortestDistance() {
-        List<Distance> distances = FileReader.readObjectList(testInp, D9::parseString);
-
+    // TODO redo
+    private Graph generateGraph(List<Distance> distances) {
         Set<String> nodes = new HashSet<>();
         for(Distance d : distances) {
             nodes.add(d.start);
@@ -91,6 +43,56 @@ public class D9 {
             edges.put(d.end, edgesList);
         }
 
-        assertEquals(605, doDijkstra("London", new ArrayList<>(nodes), edges));
+        // Create an extra start node with 1 directional links and zero distance
+        // This means we can use the same function to check all the possible
+        // start points
+        List<Edge> edgesList = new ArrayList<>();
+        for(String s : nodes) {
+            edgesList.add(new Edge(s, 0));
+        }
+        edges.put("start", edgesList);
+        nodes.add("start");
+
+        return new Graph(new ArrayList<>(nodes), edges);
+    }
+
+    // brute force
+    private int depthFirst(String start, int cost, int size,
+                            HashMap<String, List<Edge>> edges,
+                            Set<String> visited, boolean isMin) {
+
+        if(visited.size() == size-1) return cost;
+
+        Set<String> v = new HashSet<>(visited);
+        v.add(start);
+
+        int c = isMin ? Integer.MAX_VALUE : 0;
+        for(Edge e : edges.getOrDefault(start, new ArrayList<>())) {
+            if(!visited.contains(e.to)) {
+                if(isMin)
+                    c = Math.min(c, depthFirst(e.to, cost + e.distance, size, edges, v, true));
+                else
+                    c = Math.max(c, depthFirst(e.to, cost + e.distance, size, edges, v, false));
+            }
+        }
+        return c;
+    }
+
+    @Test
+    public void testGetShortestDistanceFullSearch() {
+//        List<Distance> distances = FileReader.readObjectList(testInp, D9::parseString);
+        List<Distance> distances = FileReader.readFileObjectList("src/test/resources/2015/D9.txt",
+                D9::parseString);
+
+        Graph graph = generateGraph(distances);
+
+        int minCost = depthFirst("start",
+                0, graph.nodes.size(), graph.edges, new HashSet<>(), true);
+        assertEquals(117, minCost);
+
+
+        int maxCost = depthFirst("start",
+                0, graph.nodes.size(), graph.edges, new HashSet<>(), false);
+        assertEquals(909, maxCost);
     }
 }
