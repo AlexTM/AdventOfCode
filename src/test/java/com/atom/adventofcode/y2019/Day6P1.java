@@ -96,7 +96,7 @@ public class Day6P1 {
         Map<String, Integer> planetOrbits = new HashMap<>();
         Orbit.updateDepth(planetMap.get("COM"), 0, planetOrbits);
 
-        assertEquals(new Integer(42), planetOrbits.values().stream().collect(Collectors.summingInt(Integer::intValue)));
+        assertEquals(Integer.valueOf(42), (Integer) planetOrbits.values().stream().mapToInt(Integer::intValue).sum());
 
     }
 
@@ -116,7 +116,7 @@ public class Day6P1 {
         Map<String, Integer> planetOrbits = new HashMap<>();
         Orbit.updateDepth(planetMap.get("COM"), 0, planetOrbits);
 
-        assertEquals(new Integer(314247), planetOrbits.values().stream().collect(Collectors.summingInt(Integer::intValue)));
+        assertEquals(Integer.valueOf(314247), (Integer) planetOrbits.values().stream().mapToInt(Integer::intValue).sum());
 
     }
 

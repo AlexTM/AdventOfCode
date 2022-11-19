@@ -53,40 +53,11 @@ public class D7 {
         return FileReader.readFileObjectList("src/test/resources/2015/D7.txt", D7::parseString);
     }
 
-    @Test
-    public void testCircuit() {
-        String inp1 = "123 -> x\n" +
-                "456 -> y\n" +
-                "x AND y -> d\n" +
-                "x OR y -> e\n" +
-                "x LSHIFT 2 -> f\n" +
-                "y RSHIFT 2 -> g\n" +
-                "NOT x -> h\n" +
-                "NOT y -> i";
-        
-        //        System.out.println(parseString("123 -> x"));
-//        System.out.println(parseString("x AND y -> z"));
-//        System.out.println(parseString("x OR y -> z"));
-//        System.out.println(parseString("x LSHIFT 2 -> f"));
-//        System.out.println(parseString("x RSHIFT 2 -> f"));
-//        System.out.println(parseString("NOT x -> h"));
-//
-//        System.out.println(FileReader.readObjectList(inp1, D7::parseString));
-        System.out.println(runInstructions(FileReader.readObjectList(inp1, D7::parseString)));
-
-        Map<String, Integer> m = runInstructions(readInstructions());
-        System.out.println(m);
-        assertEquals(5, m.get("a"));
-    }
-
     private Map<String, Integer> runInstructions(List<Instruction> instructions) {
-
         Map<String, Integer> variables = new HashMap<>();
-
         for(Instruction instruction : instructions) {
             process(variables, instruction);
         }
-
         return variables;
     }
 
@@ -97,9 +68,10 @@ public class D7 {
         for(int i=0; i<15; i++) {
             BIT_MASK_16 = (BIT_MASK_16 + 1) << 1;
         }
+        BIT_MASK_16++;
     }
 
-    private int mapInt(int num) {
+    private int applyMask(int num) {
         return num & BIT_MASK_16;
     }
 
@@ -114,32 +86,59 @@ public class D7 {
             case AND -> {
                 int lhs = variables.getOrDefault(instruction.command.lhs, 0);
                 int rhs = variables.getOrDefault(instruction.command.rhs, 0);
-                int value = lhs & rhs;
+                int value = applyMask(lhs & rhs);
                 variables.put(instruction.assignTo, value);
             }
             case OR -> {
                 int lhs = variables.getOrDefault(instruction.command.lhs, 0);
                 int rhs = variables.getOrDefault(instruction.command.rhs, 0);
-                int value = lhs | rhs;
+                int value = applyMask(lhs | rhs);
                 variables.put(instruction.assignTo, value);
             }
             case LSHIFT -> {
                 int lhs = variables.getOrDefault(instruction.command.lhs, 0);
                 int rhs = instruction.command.value;
-                int value = lhs << rhs;
+                int value = applyMask(lhs << rhs);
                 variables.put(instruction.assignTo, value);
             }
             case RSHIFT -> {
                 int lhs = variables.getOrDefault(instruction.command.lhs, 0);
                 int rhs = instruction.command.value;
-                int value = lhs >> rhs;
+                int value = applyMask(lhs >> rhs);
                 variables.put(instruction.assignTo, value);
             }
             case NOT -> {
                 int lhs = variables.getOrDefault(instruction.command.lhs, 0);
-                int value = mapInt(~lhs);
+                int value = applyMask(~lhs);
                 variables.put(instruction.assignTo, value);
             }
         }
     }
+
+    @Test
+    public void testCircuit() {
+        String inp1 = "123 -> x\n" +
+                "456 -> y\n" +
+                "x AND y -> d\n" +
+                "x OR y -> e\n" +
+                "x LSHIFT 2 -> f\n" +
+                "y RSHIFT 2 -> g\n" +
+                "NOT x -> h\n" +
+                "NOT y -> i";
+
+        Map<String, Integer> mm = runInstructions(FileReader.readObjectList(inp1, D7::parseString));
+        assertEquals(72, mm.get("d"));
+        assertEquals(507, mm.get("e"));
+        assertEquals(492, mm.get("f"));
+        assertEquals(114, mm.get("g"));
+        assertEquals(123, mm.get("x"));
+        assertEquals(65412, mm.get("h"));
+        assertEquals(456, mm.get("y"));
+        assertEquals(65079, mm.get("i"));
+
+        Map<String, Integer> m = runInstructions(readInstructions());
+        System.out.println(m);
+        assertEquals(5, m.get("a"));
+    }
+
 }
