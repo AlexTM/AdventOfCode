@@ -12,7 +12,7 @@ public class D11 {
         long num = 0;
         for(int i=str.length()-1; i>=0; i--) {
             char c = str.charAt(i);
-            int v = c - 'a'+1;
+            int v = c - 'a' + 1;
             num += v*Math.pow(26, pos);
             pos++;
         }
@@ -75,7 +75,16 @@ public class D11 {
         return false;
     }
 
-    private String preCheck(String password) {
+    private String[] banned = new String[]{"i", "o", "l"};
+    private String preChecks(String password) {
+
+        for(String s : banned) {
+            password = preCheck(s, password);
+        }
+        return password;
+    }
+
+    private String preCheck(String banned, String password) {
         // look for characters that should not be allowed
         int i = password.indexOf("i");
         if(i != -1) {
@@ -87,14 +96,19 @@ public class D11 {
     }
 
     private String getNextPassword(String password) {
+        long count = 0;
         while(true) {
-            password = preCheck(password);
+//            password = preChecks(password);
 
             password = convertLongToString(convertStringToLong(password)+1);
             if(passwordCheckOne(password) &&
-            passwordCheckTwo(password) &&
-            passwordCheckThree(password))
+                    passwordCheckTwo(password) &&
+                    passwordCheckThree(password))
                 return password;
+
+            if(count++ % 1000000 == 0) {
+                System.out.println("P "+password);
+            }
         }
     }
 
@@ -119,11 +133,12 @@ public class D11 {
         assertTrue(passwordCheckOne("hijklmmn"));
         assertFalse(passwordCheckTwo("hijklmmn"));
         assertTrue(passwordCheckThree("abbceffg"));
+        assertFalse(passwordCheckOne("abbceffg"));
         assertFalse(passwordCheckThree("abbcegjk"));
 
 //
-//        assertEquals("abcdffaa", getNextPassword("abcdefgh"));
-        assertEquals("ghjaabcc", getNextPassword("ghijklmn"));
+        assertEquals("abcdffaa", getNextPassword("abcdefgh"));
+//        assertEquals("ghjaabcc", getNextPassword("ghijklmn"));
 
     }
 }
