@@ -6,27 +6,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class D20 {
 
-    private int findHouseNumber(int targetPresents){
+    private int findHouseNumber(int targetPresents) {
         int houseNumber = 1;
-        while(true) {
-            if(presentsDeliveredForHouse(houseNumber) >= targetPresents)
+        while (true) {
+            if (presentsDeliveredForHouse(houseNumber) >= targetPresents)
                 return houseNumber;
             houseNumber++;
-            if(houseNumber%1000 == 0) {
-                System.out.println("Total :house "+houseNumber+" = "+presentsDeliveredForHouse(houseNumber));
+            if (houseNumber % 1000 == 0) {
+                System.out.println("Total :house " + houseNumber + " = " + presentsDeliveredForHouse(houseNumber));
             }
         }
     }
 
-    private int findHouseNumber3(int targetPresents) {
-    }
-
-    private int findHouseNumber2(int targetPresents) {
-        targetPresents /= 10;
-        for(int elf=1; elf<targetPresents; elf++) {
-
-        }
-    }
 
     private int presentsDeliveredForHouse(int houseNumber) {
         int presents = 0;
@@ -47,11 +38,12 @@ public class D20 {
 
 
 //        assertEquals(70, presentsDeliveredForHouse(2300000));
+//        assertEquals(70, findHouseNumber3(34000000));
 
-        assertEquals(70, findHouseNumber(34000000));
+        assertEquals(70, presentsDeliveredForHouse(200001));
 
         // 3931200
-        // 34000000
+        // 34_000_000
         // 59058720
         // 5810640
     }
