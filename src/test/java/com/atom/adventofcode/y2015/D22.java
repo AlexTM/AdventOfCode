@@ -24,18 +24,18 @@ public class D22 {
     };
     record Spell(int manaCost, Effect effect){};
 
-    record State(Wizard wizard, Boss boss, int wizardArmor, int manaUsed, List<String> effectList){};
+    record State(Wizard wizard, Boss boss, int wizardArmor, List<String> effectList){};
     static abstract class BuildState {
-        static State copy(State s) { return new State(s.wizard,s.boss,s.wizardArmor,s.manaUsed, new ArrayList<>(s.effectList)); }
-        static State copy(State s, Wizard w) { return new State(w,s.boss,s.wizardArmor,s.manaUsed, new ArrayList<>(s.effectList)); }
-        static State copy(State s, Boss b) { return new State(s.wizard,b,s.wizardArmor,s.manaUsed, new ArrayList<>(s.effectList)); }
-        static State copyArmor(State s, int a) { return new State(s.wizard,s.boss,a,s.manaUsed, new ArrayList<>(s.effectList)); }
-        static State copyMana(State s, int a) { return new State(s.wizard,s.boss,s.wizardArmor,a, new ArrayList<>(s.effectList)); }
-        static State copy(State s, Wizard w, Boss b) { return new State(w,b,s.wizardArmor,s.manaUsed, new ArrayList<>(s.effectList)); }
+        static State copy(State s) { return new State(s.wizard,s.boss,s.wizardArmor, new ArrayList<>(s.effectList)); }
+        static State copy(State s, Wizard w) { return new State(w,s.boss,s.wizardArmor, new ArrayList<>(s.effectList)); }
+        static State copy(State s, Boss b) { return new State(s.wizard,b,s.wizardArmor, new ArrayList<>(s.effectList)); }
+        static State copyArmor(State s, int a) { return new State(s.wizard,s.boss,a, new ArrayList<>(s.effectList)); }
+        //static State copyMana(State s, int a) { return new State(s.wizard,s.boss,s.wizardArmor,a, new ArrayList<>(s.effectList)); }
+        static State copy(State s, Wizard w, Boss b) { return new State(w,b,s.wizardArmor, new ArrayList<>(s.effectList)); }
         static State copySpell(State s, String spell) {
             List<String> spells = new ArrayList<>(s.effectList);
             spells.add(spell);
-            return new State(s.wizard,s.boss,s.wizardArmor,s.manaUsed,spells); }
+            return new State(s.wizard,s.boss,s.wizardArmor,spells); }
     }
 
     interface Effect {
@@ -92,6 +92,13 @@ public class D22 {
     );
 
 
+    private int getManaUsed(List<String> spellNames) {
+        int i=0;
+        for(String s : spellNames) {
+            i += spells.get(s).manaCost;
+        }
+        return i;
+    }
     // 173, 53
 
     private int fightWizard(State initialState) {
@@ -102,41 +109,46 @@ public class D22 {
         states.add(initialState);
         int count = 0;
 
-        while(!states.isEmpty() && count < 20) {
-            final State state = states.poll();
+        while(!states.isEmpty() && count < 7) {
 
-            // Cast spell
-            for(Map.Entry<String, Spell> entry : spells.entrySet()) {
+            Queue<State> newStates = new LinkedList<>();
+            while(!states.isEmpty()) {
 
-                // Can wizard case spell
-                if(state.wizard.mana < entry.getValue().manaCost)
-                    continue;
+                final State state = states.poll();
 
+                // Cast spell
+                for (Map.Entry<String, Spell> entry : spells.entrySet()) {
 
-                State newState = BuildState.copySpell(state, entry.getKey());
-                newState = BuildState.copyMana(newState, entry.getValue().manaCost);
+                    // Can wizard case spell
+                    if (state.wizard.mana < entry.getValue().manaCost)
+                        continue;
 
-                // Apply spell effects
-                for(int i=0; i<newState.effectList.size(); i++) {
-                    String sn = newState.effectList.get(i);
-                    Effect e = spells.get(sn).effect;
-                    newState = e.apply(newState, count-i);
-                }
+                    State newState = BuildState.copySpell(state, entry.getKey());
 
-                if(newState.boss.hp <= 0) {
-                    // win
-                    minManaUsed = Math.min(minManaUsed, newState.manaUsed);
-                }
+                    // Apply spell effects
+                    for (int i = 0; i < newState.effectList.size(); i++) {
+                        String sn = newState.effectList.get(i);
+                        Effect e = spells.get(sn).effect;
+                        newState = e.apply(newState, count - i);
+                    }
 
-                // Boss attack
-                int hp = newState.wizard.hp - Math.max(1, newState.boss.damage - newState.wizardArmor);
-                newState = BuildState.copy(newState, newState.wizard.takeDamage(hp));
+                    if (newState.boss.hp <= 0) {
+                        // win
+                        minManaUsed = Math.min(minManaUsed, getManaUsed(newState.effectList));
+                        continue;
+                    }
 
-                // If still alive, this is a valid state to continue to search
-                if(newState.wizard.hp > 0) {
-                    states.add(newState);
+                    // Boss attack
+                    int hp = newState.wizard.hp - Math.max(1, newState.boss.damage - newState.wizardArmor);
+                    newState = BuildState.copy(newState, newState.wizard.takeDamage(hp));
+
+                    // If still alive, this is a valid state to continue to search
+                    if (newState.wizard.hp > 0) {
+                        newStates.add(newState);
+                    }
                 }
             }
+            states = newStates;
             count++;
         }
         return minManaUsed;
@@ -145,22 +157,21 @@ public class D22 {
     @Test
     public void testFight() {
 
-        int m = fightWizard(
+//        int m = fightWizard(
+//                new State(
+//                        new Wizard(10, 250),
+//                        new Boss(13, 8),
+//                        0, 0, new ArrayList<>()));
+//
+//        System.out.println("New min: "+m);
+//        System.out.println("----- Win -----");
+
+
+//        assertEquals(226, m);
+        assertEquals(0, fightWizard(
                 new State(
-                        new Wizard(10, 250),
-                        new Boss(13, 8),
-                        0, 0, new ArrayList<>()));
-
-        System.out.println("New min: "+m);
-        System.out.println("----- Win -----");
-
-
-        assertEquals(226, m);
-//        assertEquals(0, fightWizard(
-//                new State(new Wizard(50, 500), new Boss(55, 8), 0),
-//                new Effect[10],
-//                0, 0
-//        ));
+                        new Wizard(50, 500),
+                        new Boss(55, 8), 0, new ArrayList<>())));
     }
 
 
