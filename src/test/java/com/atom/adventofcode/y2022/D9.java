@@ -52,37 +52,18 @@ public class D9 {
         int tx = tail.x, ty = tail.y;
 
         if(head.x == tail.x) {
-            if(dify == 2) {
-                ty = tail.y + 1;
-            }
-            if(dify == -2) {
-                ty = tail.y - 1;
+            if(Math.abs(dify) == 2) {
+                ty = tail.y + dify/2;
             }
         } else if(head.y == tail.y) {
-            if(difx == 2) {
-                tx = tail.x + 1;
-            }
-            if(difx == -2) {
-                tx = tail.x - 1;
+            if(Math.abs(difx) == 2) {
+                tx = tail.x + difx/2;
             }
         } else if(Math.abs(difx) == 2 || Math.abs(dify) == 2){
-            if(difx < 0)
-                tx--;
-            else
-                tx++;
-            if(dify < 0)
-                ty--;
-            else
-                ty++;
+            tx = difx < 0 ? tx - 1 : tx + 1;
+            ty = dify < 0 ? ty - 1 : ty + 1;
         }
         return new Pos(tx, ty);
-    }
-
-
-    @Test
-    public void testTailMovements() {
-        assertEquals(6044, countTailMoves(
-                FileReader.readFileObjectList("src/test/resources/2022/D9.txt", D9::readData), rope(2)));
     }
 
     private Pos[] rope(int size) {
@@ -93,11 +74,14 @@ public class D9 {
     }
 
     @Test
-    public void testTailMovements2() {
-        assertEquals(2384,
-                countTailMoves(
-                        FileReader.readFileObjectList("src/test/resources/2022/D9.txt", D9::readData),
-                        rope(10)));
+    public void testTailMovements() {
+        assertEquals(6044, countTailMoves(
+                FileReader.readFileObjectList("src/test/resources/2022/D9.txt", D9::readData), rope(2)));
     }
 
+    @Test
+    public void testTailMovements2() {
+        assertEquals(2384, countTailMoves(
+                FileReader.readFileObjectList("src/test/resources/2022/D9.txt", D9::readData), rope(10)));
+    }
 }
