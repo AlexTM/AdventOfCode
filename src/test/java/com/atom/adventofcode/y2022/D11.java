@@ -3,7 +3,6 @@ package com.atom.adventofcode.y2022;
 import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigInteger;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,14 +10,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class D11 {
 
     enum Operation {MUL, ADD}
-    record Monkey(Operation operation, Integer operationAmount, int test, int trueMonkey, int falseMonkey, Queue<Long> items){};
+    record Monkey(Operation operation, Integer operationAmount, Integer test, Integer trueMonkey, Integer falseMonkey, Queue<Long> items){};
     static class LoadingState {
         List<Long> items;
         Operation operation;
         Integer operationAmount;
-        int test;
-        int trueMonkey;
-        int falseMonkey;
+        Integer test;
+        Integer trueMonkey;
+        Integer falseMonkey;
         List<Monkey> monkeys = new ArrayList<>();
     };
 
@@ -78,10 +77,7 @@ public class D11 {
                     case ADD -> worryLevel = i + opAmount;
                 }
 
-                if(modValue == -1)
-                    worryLevel /= 3;
-                else
-                    worryLevel %= modValue;
+                worryLevel = modValue == -1 ? worryLevel/3 : worryLevel % modValue;
 
                 if(worryLevel%monkey.test == 0) {
                     monkeys.get(monkey.trueMonkey).items.add(worryLevel);
@@ -92,35 +88,35 @@ public class D11 {
         }
     }
 
-    private BigInteger calMoneyValue(List<Monkey> monkeys, int rounds, boolean divideByThree) {
+    private long calculateMonkeyValue(List<Monkey> monkeys, int rounds, boolean divideByThree) {
 
         long modValue = -1;
         if(!divideByThree)
             modValue = monkeys.stream().map(m -> m.test).reduce(1, (a, b) -> a*b);
 
-        Integer[] inspections =new Integer[monkeys.size()];
+        Integer[] inspections = new Integer[monkeys.size()];
         Arrays.fill(inspections, 0);
 
         for(int i=0; i<rounds; i++)
             monkeyRound(monkeys, inspections, modValue);
 
         Arrays.sort(inspections, Collections.reverseOrder());
-        return BigInteger.valueOf(inspections[0]).multiply(BigInteger.valueOf(inspections[1]));
+        return (long)inspections[0] * (long)inspections[1];
     }
 
     @Test
-    public void testMonkies() {
-        assertEquals(BigInteger.valueOf(118674), calMoneyValue(
+    public void testMonkeyValue() {
+        assertEquals(118674L, calculateMonkeyValue(
                 FileReader.readFileForObject("src/test/resources/2022/D11.txt", new LoadingState(), D11::loadFile).monkeys,
                 20, true
         ));
     }
 
     @Test
-    public void testMonkies2() {
-        assertEquals(BigInteger.valueOf(32333418600L), calMoneyValue(
+    public void testMonkeyValue2() {
+        assertEquals(32333418600L, calculateMonkeyValue(
                 FileReader.readFileForObject("src/test/resources/2022/D11.txt", new LoadingState(), D11::loadFile).monkeys
-                        ,10000, false
+                ,10000, false
         ));
     }
 }
