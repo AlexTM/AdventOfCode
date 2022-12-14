@@ -26,22 +26,18 @@ public class D14 {
         return pList;
     }
 
-    public static State parseLine(String line, State state) {
+    public static Set<Pos> parseLine(String line, Set<Pos> walls) {
         String[] splits1 = line.split("->");
         Pos from = null;
         for(String s : splits1) {
             String[] splits2 = s.split(",");
             Pos to = new Pos(Integer.parseInt(splits2[0].trim()), Integer.parseInt(splits2[1].trim()));
             if(from != null) {
-                state.walls.addAll(buildWall(from, to));
+                walls.addAll(buildWall(from, to));
             }
             from = to;
         }
-        return state;
-    }
-
-    static class State {
-        Set<Pos> walls = new HashSet<>();
+        return walls;
     }
 
     private Pos nextPos(final Set<Pos> walls, Pos sand) {
@@ -89,17 +85,16 @@ public class D14 {
     @Test
     public void testSandAbyss() {
         assertEquals(24, dropSandUntilAbyss(
-                FileReader.readFileForObject("src/test/resources/2022/D14_t.txt", new State(), D14::parseLine).walls));
+                FileReader.readFileForObject("src/test/resources/2022/D14_t.txt", new HashSet<>(), D14::parseLine)));
         assertEquals(610, dropSandUntilAbyss(
-                FileReader.readFileForObject("src/test/resources/2022/D14.txt", new State(), D14::parseLine).walls));
+                FileReader.readFileForObject("src/test/resources/2022/D14.txt", new HashSet<>(), D14::parseLine)));
     }
 
     @Test
     public void testSandUntilFull() {
         assertEquals(93, dropSandUntilFull(
-                FileReader.readFileForObject("src/test/resources/2022/D14_t.txt", new State(), D14::parseLine).walls));
+                FileReader.readFileForObject("src/test/resources/2022/D14_t.txt", new HashSet<>(), D14::parseLine)));
         assertEquals(27194, dropSandUntilFull(
-                FileReader.readFileForObject("src/test/resources/2022/D14.txt", new State(), D14::parseLine).walls));
+                FileReader.readFileForObject("src/test/resources/2022/D14.txt", new HashSet<>(), D14::parseLine)));
     }
-
 }
