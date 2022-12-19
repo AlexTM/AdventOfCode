@@ -37,7 +37,7 @@ public class D15 {
         return null;
     }
 
-    private int mapSensors(Map<Pos, Pos> sensors, int line) {
+    private List<Range> mapSensors(Map<Pos, Pos> sensors, int line) {
         List<Pos> orderList = new ArrayList<>(sensors.keySet());
         orderList.sort(Comparator.comparingInt(o -> o.y));
 
@@ -50,8 +50,7 @@ public class D15 {
                 rangeList.add(r);
         }
 
-        rangeList = mergeRanges(rangeList);
-        return rangeList.stream().map(m -> m.max - m.min).reduce(0, Integer::sum);
+        return mergeRanges(rangeList);
     }
 
     private List<Range> mergeRanges(List<Range> rangeList) {
@@ -76,13 +75,40 @@ public class D15 {
 
     @Test
     public void testBeacon() {
-        assertEquals(26,
-                mapSensors(FileReader.readFileForObject("src/test/resources/2022/D15_t.txt", new HashMap<>(), D15::parseLine),
-                        10));
+        List<Range> rangeList = mapSensors(FileReader.readFileForObject("src/test/resources/2022/D15_t.txt", new HashMap<>(), D15::parseLine), 10);
+        assertEquals(26, rangeList.stream().map(m -> m.max - m.min).reduce(0, Integer::sum));
 
-        assertEquals(5240818,
-                mapSensors(FileReader.readFileForObject("src/test/resources/2022/D15.txt", new HashMap<>(), D15::parseLine),
-                2000000));
+        rangeList = mapSensors(FileReader.readFileForObject("src/test/resources/2022/D15.txt", new HashMap<>(), D15::parseLine), 2000000);
+        assertEquals(5240818, rangeList.stream().map(m -> m.max - m.min).reduce(0, Integer::sum));
+    }
+
+    private long findDistress(Map<Pos, Pos> sensors, int limit) {
+        for(int y=0; y<limit; y++) {
+            List<Range> rangeList = mapSensors(sensors, y);
+            long x = checkX(rangeList, limit);
+            if(x != -1) {
+                return (x*4000000)+(long)y;
+            }
+        }
+        return -1;
+    }
+
+    private int checkX(List<Range> rangeList, int limit) {
+        int x = 0;
+        for(Range r : rangeList) {
+            if(r.min <= x && r.max > x)
+                x = r.max+1;
+        }
+        return x < limit ? x : -1;
+    }
+
+    @Test
+    public void testBeacon2() {
+        Map<Pos, Pos> sensors = FileReader.readFileForObject("src/test/resources/2022/D15_t.txt", new HashMap<>(), D15::parseLine);
+        assertEquals(56000011, findDistress(sensors, 20));
+
+        sensors = FileReader.readFileForObject("src/test/resources/2022/D15.txt", new HashMap<>(), D15::parseLine);
+        assertEquals(13213086906101L, findDistress(sensors, 4000000));
     }
 
 }
