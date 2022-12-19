@@ -84,7 +84,6 @@ public class D18 {
                 }
             }
         }
-
         return facesInContactWithWater;
     }
 
@@ -96,5 +95,4 @@ public class D18 {
         assertEquals(2466, fillBucket(
                 loopAllCubes(FileReader.readFileObjectList("src/test/resources/2022/D18.txt", D18::parseString)), 30).size());
     }
-
 }
