@@ -3,10 +3,7 @@ package com.atom.adventofcode.y2022;
 import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -64,10 +61,40 @@ public class D18 {
         assertEquals(4310, loopAllCubes(FileReader.readFileObjectList("src/test/resources/2022/D18.txt", D18::parseString)).size());
     }
 
+    private Set<Face> fillBucket(Set<Face> faces, int bucketSize) {
+        Set<Face> facesInContactWithWater = new HashSet<>();
+        Set<Cube> visited = new HashSet<>();
+        Queue<Cube> water = new LinkedList<>();
+        water.add(new Cube(bucketSize,bucketSize,bucketSize));
+        while(!water.isEmpty()) {
+            Cube cube = water.poll();
+            if(visited.contains(cube))
+                continue;
+            visited.add(cube);
+            Set<Face> waterFaces = resolveToFaces(cube);
+            for(Face wf : waterFaces) {
+                Face oppFace = createOpposite(wf);
+                if(oppFace.x > bucketSize || oppFace.y > bucketSize || oppFace.z > bucketSize ||
+                        oppFace.x < -1 || oppFace.y < -1 || oppFace.z < -1)
+                    continue;
+                if(faces.contains(oppFace)) {
+                    facesInContactWithWater.add(oppFace);
+                } else {
+                    water.add(new Cube(oppFace.x, oppFace.y, oppFace.z));
+                }
+            }
+        }
+
+        return facesInContactWithWater;
+    }
+
     @Test
     public void testLava2() {
-        assertEquals(58, loopAllCubes(FileReader.readFileObjectList("src/test/resources/2022/D18_t.txt", D18::parseString)).size());
-        //assertEquals(0, loopAll(FileReader.readFileObjectList("src/test/resources/2022/D18.txt", D18::parseString)).size());
+        assertEquals(58, fillBucket(
+                loopAllCubes(FileReader.readFileObjectList("src/test/resources/2022/D18_t.txt", D18::parseString)), 10).size());
+
+        assertEquals(2466, fillBucket(
+                loopAllCubes(FileReader.readFileObjectList("src/test/resources/2022/D18.txt", D18::parseString)), 30).size());
     }
 
 }
