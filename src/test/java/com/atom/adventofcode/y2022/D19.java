@@ -41,28 +41,46 @@ public class D19 {
     enum Robot {ORE, CLAY, OBSIDIAN, GEODE}
     enum Action {DO_NOTHING, BUILD_ORE, BUILD_CLAY, BUILD_OBSIDIAN, BUILD_GEODE}
 
-    record State(List<Robot> robots, int ore, int clay, int obsidian, int geode, Set<Action> ignored, int time){}
-    record CacheObject(int ore, int clay, int obsidian, int time) {}
+    record State(List<Robot> robots, int ore, int clay, int obsidian, int geode){}
+    record CacheObject(int ore, int clay, int obsidian, int time, String robots) {}
+
+    private static String robotCacheValue(State s) {
+        int ore = 0;
+        int clay = 0;
+        int ob = 0;
+        int ge = 0;
+        for(Robot r : s.robots) {
+            if(r == Robot.ORE)
+                ore++;
+            if(r == Robot.CLAY)
+                clay++;
+            if(r == Robot.OBSIDIAN)
+                ob++;
+            if(r == Robot.GEODE)
+                ge++;
+        }
+        return ""+ore+clay+ob+ge;
+    }
 
     private static int runBlueprint(final Blueprint blueprint) {
         return runBlueprintRec(
                 blueprint,
-                new State(List.of(Robot.ORE), 0, 0, 0, 0, null, 0),
-                new HashMap<>());
+                new State(List.of(Robot.ORE), 0, 0, 0, 0),
+                new HashMap<>(), 0);
     }
 
-    private static int runBlueprintRec(final Blueprint blueprint, final State state, final Map<CacheObject, Integer> maxGeods) {
+    private static int runBlueprintRec(final Blueprint blueprint, final State state, final Map<CacheObject, Integer> maxGeodCache, int time) {
 
-        if(state.time == 24) {
+        if(time == 24) {
             return state.geode;
         }
 
-        CacheObject co = new CacheObject(state.ore, state.clay, state.obsidian, state.time);
-        if(maxGeods.containsKey(co)) {
-            return maxGeods.get(co);
+        CacheObject co = new CacheObject(state.ore, state.clay, state.obsidian, time, robotCacheValue(state));
+        if(maxGeodCache.containsKey(co)) {
+            return maxGeodCache.get(co);
         }
 
-        Set<Action> actions = getPossibleActions(state, blueprint);
+        List<Action> actions = getPossibleActions(state, blueprint);
 
         State s = state;
         for(Robot r : state.robots) {
@@ -72,32 +90,34 @@ public class D19 {
         // Once decided not to perform an action then don't reconsider it
         int max = 0;
         for(Action a : actions) {
-            State newState = performAction(s, a, blueprint, actions);
-            max = Math.max(max, runBlueprintRec(blueprint, newState, maxGeods));
+            State newState = performAction(s, a, blueprint);
+            max = Math.max(max, runBlueprintRec(blueprint, newState, maxGeodCache, time+1));
         }
 
-        maxGeods.put(co, max);
+        maxGeodCache.put(co, max);
         return max;
     }
 
     private static List<Robot> moreRobots(final List<Robot> robots, final Robot newRobot) {
         List<Robot> newRobotList = new ArrayList<>(robots);
-        newRobotList.add(newRobot);
+        if(newRobot != null)
+            newRobotList.add(newRobot);
         return newRobotList;
     }
 
-    private static State performAction(final State s, final Action a, final Blueprint b, final Set<Action> actions) {
+    private static State performAction(final State s, final Action a, final Blueprint b) {
         return switch(a) {
-            case DO_NOTHING -> new State(s.robots, s.ore, s.clay, s.obsidian, s.geode, actions, s.time+1);
-            case BUILD_ORE -> new State(moreRobots(s.robots, Robot.ORE), s.ore-b.oreRobotOre, s.clay, s.obsidian, s.geode, null, s.time+1);
-            case BUILD_CLAY -> new State(moreRobots(s.robots, Robot.CLAY), s.ore-b.clayRobotOre, s.clay, s.obsidian, s.geode, null, s.time+1);
-            case BUILD_OBSIDIAN -> new State(moreRobots(s.robots, Robot.OBSIDIAN), s.ore-b.obsidianRobotOre, s.clay-b.obsidianRobotClay, s.obsidian, s.geode, null, s.time+1);
-            case BUILD_GEODE -> new State(moreRobots(s.robots, Robot.GEODE), s.ore-b.geodeRobotOre, s.clay, s.obsidian-b.geodeRobotObsidian, s.geode, null, s.time+1);
+            case DO_NOTHING -> new State(moreRobots(s.robots,  null), s.ore, s.clay, s.obsidian, s.geode);
+            case BUILD_ORE -> new State(moreRobots(s.robots, Robot.ORE), s.ore-b.oreRobotOre, s.clay, s.obsidian, s.geode);
+            case BUILD_CLAY -> new State(moreRobots(s.robots, Robot.CLAY), s.ore-b.clayRobotOre, s.clay, s.obsidian, s.geode);
+            case BUILD_OBSIDIAN -> new State(moreRobots(s.robots, Robot.OBSIDIAN), s.ore-b.obsidianRobotOre, s.clay-b.obsidianRobotClay, s.obsidian, s.geode);
+            case BUILD_GEODE -> new State(moreRobots(s.robots, Robot.GEODE), s.ore-b.geodeRobotOre, s.clay, s.obsidian-b.geodeRobotObsidian, s.geode);
         };
     }
 
-    private static Set<Action> getPossibleActions(final State state, final Blueprint blueprint) {
-        Set<Action> possible = new HashSet<>();
+    private static List<Action> getPossibleActions(final State state, final Blueprint blueprint) {
+        List<Action> possible = new ArrayList<>();
+        possible.add(Action.DO_NOTHING);
         if(state.ore >= blueprint.oreRobotOre)
             possible.add(Action.BUILD_ORE);
         if(state.ore >= blueprint.clayRobotOre)
@@ -107,20 +127,15 @@ public class D19 {
         if(state.ore >= blueprint.geodeRobotOre && state.obsidian >= blueprint.geodeRobotObsidian)
             possible.add(Action.BUILD_GEODE);
 
-        // If we have ignored certain actions before, lets ignore again
-//        if(state.ignored != null)
-//            possible.removeAll(state.ignored);
-
-        possible.add(Action.DO_NOTHING);
         return possible;
     }
 
     private static State processRobot(final Robot r, final State s){
         return switch(r) {
-            case ORE -> new State(s.robots, s.ore+1, s.clay, s.obsidian, s.geode, s.ignored, s.time);
-            case CLAY -> new State(s.robots, s.ore, s.clay+1, s.obsidian, s.geode, s.ignored, s.time);
-            case OBSIDIAN -> new State(s.robots, s.ore, s.clay, s.obsidian+1, s.geode, s.ignored, s.time);
-            case GEODE -> new State(s.robots, s.ore, s.clay, s.obsidian, s.geode+1, s.ignored, s.time);
+            case ORE -> new State(s.robots, s.ore+1, s.clay, s.obsidian, s.geode);
+            case CLAY -> new State(s.robots, s.ore, s.clay+1, s.obsidian, s.geode);
+            case OBSIDIAN -> new State(s.robots, s.ore, s.clay, s.obsidian+1, s.geode);
+            case GEODE -> new State(s.robots, s.ore, s.clay, s.obsidian, s.geode+1);
         };
     }
 
@@ -135,6 +150,10 @@ public class D19 {
         return sum;
     }
 
+    /**
+     * FIXME not working at the moment.  Caching is breaking it, by either capturing too little of the state
+     * FIXME and therefore storing bad cache values, or too much and cache is not being hit
+     */
     @Test
     public void testBlueprint() {
         List<Blueprint> bps = FileReader.readFileObjectList("src/test/resources/2022/D19_t.txt", D19::parseLine);
@@ -148,7 +167,7 @@ public class D19 {
         assertEquals(33, runAllBluePrints(bps));
 
         bps = FileReader.readFileObjectList("src/test/resources/2022/D19.txt", D19::parseLine);
-        assertEquals(1417, runAllBluePrints(bps));
+        assertEquals(0, runAllBluePrints(bps));
     }
 
 }
