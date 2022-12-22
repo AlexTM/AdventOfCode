@@ -45,9 +45,8 @@ public class D21 {
     private static Monkey parseString(String line) {
         String[] split = line.split(" ");
         String name = split[0].substring(0, 4);
-        if(split.length == 2) {
+        if(split.length == 2)
             return new Monkey(name, Long.parseLong(split[1]));
-        }
         return new Monkey(name, null, split[1].trim(), Operation.get(split[2].trim()), split[3].trim());
     }
 

@@ -44,6 +44,15 @@ public class D19 {
         }
     }
 
+    private static int[] getMaxOutput(Blueprint bp) {
+        int[] maxOutput = new int[4];
+        for(int j=0; j<4; j++)
+            for(int i=0; i<4; i++)
+                maxOutput[j] = Math.max(maxOutput[j], bp.cost[i][j]);
+        maxOutput[3] = Integer.MAX_VALUE;
+        return maxOutput;
+    }
+
     private static int runBlueprint(final Blueprint blueprint) {
 
         Queue<State> stateQueue = new LinkedList<>();
@@ -52,12 +61,14 @@ public class D19 {
         int max = 0;
         int loops = 0;
 
+        int[] maxOutput = getMaxOutput(blueprint);
+
         while (!stateQueue.isEmpty()) {
 
             State state = stateQueue.poll();
 
             if(loops % 1000000 == 0) {
-                System.out.println("Queue size = "+stateQueue.size()+" level="+state.time);
+                System.out.println("Queue size = "+stateQueue.size()+" level="+state.time+" max="+max);
             }
             loops++;
 
@@ -67,17 +78,21 @@ public class D19 {
                 continue;
             }
 
-            List<Order> actions = getPossibleActions(state, blueprint);
+            List<Order> actions = getPossibleActions(state, blueprint, maxOutput);
 
             for(int p=0; p<state.robots.length; p++) {
                 state.values[p] += state.robots[p];
             }
+            max = Math.max(max, state.values[Order.GEODE.ordinal()]);
 
             state = state.incTime();
-            stateQueue.add(state);
 
-            for(Order a : actions) {
-                stateQueue.add(copyStateBuildRobot(state, a, blueprint));
+            if(actions.isEmpty()) {
+                stateQueue.add(state);
+            } else {
+                for (Order a : actions) {
+                    stateQueue.add(copyStateBuildRobot(state, a, blueprint));
+                }
             }
         }
 
@@ -94,18 +109,15 @@ public class D19 {
         return new State(r, c, state.time);
     }
 
-    private static List<Order> getPossibleActions(final State state, final Blueprint b) {
+    private static List<Order> getPossibleActions(final State state, final Blueprint b, int[] maxOutput) {
         List<Order> action = new ArrayList<>();
 
-        for(int i=0; i<4; i++) {
-            if (state.values[0] >= b.cost[i][0] && state.values[1] >= b.cost[i][1] &&
-                    state.values[2] >= b.cost[i][2] && state.values[3] >= b.cost[i][3]) {
+        for(int resource=0; resource<4; resource++) {
+            if (state.values[0] >= b.cost[resource][0] && state.values[1] >= b.cost[resource][1] &&
+                    state.values[2] >= b.cost[resource][2] && state.values[3] >= b.cost[resource][3]) {
 
-                // check we don't already have enough robots to produce max resource we can use
-                if(b.cost[i][0] > state.robots[0] || b.cost[i][1] > state.robots[1] ||
-                        b.cost[i][2] > state.robots[2] || b.cost[i][3] > state.robots[3]) {
-
-                    action.add(Order.values()[i]);
+                if(maxOutput[resource] > state.robots[resource]) {
+                    action.add(Order.values()[resource]);
                 }
             }
         }
