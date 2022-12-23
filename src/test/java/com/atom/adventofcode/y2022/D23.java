@@ -8,6 +8,12 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Messy today
+ *
+ * FIXME, don't need Elf class
+ *
+ */
 public class D23 {
 
     enum Direction {N, S, W, E}
@@ -15,6 +21,7 @@ public class D23 {
 
     static class Elf {
         Pos p;
+        int count = 0;
         public Elf(Pos p) {
             this.p = p;
         }
@@ -53,9 +60,6 @@ public class D23 {
         };
     }
 
-    // FIXME
-    static Integer ccc = 0;
-
     private int run(final List<Elf> elfList) {
 
         Set<Pos> elfSet = elfList.stream().map(e -> e.p).collect(Collectors.toSet());
@@ -66,8 +70,7 @@ public class D23 {
             Map<Direction, Integer> count = assess(elfSet, elf.p);
             if(Arrays.stream(Direction.values()).map(count::get).anyMatch(i -> i != 0)) {
                 for(int c=0; c<4; c++){
-                    Direction d = Direction.values()[(c + ccc)%4];
-
+                    Direction d = Direction.values()[(c + elf.count)%4];
                     if(count.get(d) == 0) {
                         elfNewPositions.put(elf, nextPos(elf.p, d));
                         break;
@@ -84,16 +87,18 @@ public class D23 {
             mapPos.put(e.getValue(), elves);
         }
 
+        // Remove all clashes
         mapPos.entrySet().stream().filter(e -> e.getValue().size() > 1).forEach( e -> {
             e.getValue().forEach(elfNewPositions.keySet()::remove);
         });
 
-        // Finally do move
+        // Update position of remaining elves
         for(Map.Entry<Elf, Pos> e : elfNewPositions.entrySet()) {
             e.getKey().p = e.getValue();
         }
 
-        ccc++;
+        // Update all elves, even if not moved, mis-understood the question
+        elfList.forEach(e -> e.count++);
 
         return elfNewPositions.size();
     }
@@ -136,7 +141,7 @@ public class D23 {
         for(int i=0; i<10; i++) {
             run(posList);
         }
-        assertEquals(0, countEmpty(posList));
+        assertEquals(4254, countEmpty(posList));
     }
 
     private int runUntilComplete(List<Elf> elfList) {
