@@ -4,11 +4,8 @@ import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,7 +15,7 @@ public class D22 {
     enum Orientation {E, S, W, N}
     enum Turn {L, R}
     record Pos(int x, int y){}
-    record Direction(int magnitude, Turn turn){}
+    record Direction(Integer magnitude, Turn turn){}
     record Result(Pos position, Orientation orientation){}
 
     static class LoadingState {
@@ -41,31 +38,34 @@ public class D22 {
                     loadingState.map.add(new Pos(x, loadingState.y));
                 } else if (c == '#') {
                     loadingState.walls.add(new Pos(x, loadingState.y));
+                    loadingState.map.add(new Pos(x, loadingState.y));
                 }
             }
             loadingState.y++;
         } else {
-            Pattern p = Pattern.compile("([RL]\\d+)");
-            Matcher m = p.matcher("R"+line);
+            Pattern p = Pattern.compile("([RL]|\\d+)");
+            Matcher m = p.matcher(line);
             while(m.find()) {
-                Turn t = Turn.valueOf(m.group(1).substring(0,1));
-                int mag = Integer.parseInt(m.group(1).substring(1));
-                loadingState.directions.add(new Direction(mag, t));
+                String grp = m.group(1);
+                if(grp.equalsIgnoreCase("R") || grp.equalsIgnoreCase("L"))
+                    loadingState.directions.add(new Direction(null, Turn.valueOf(grp)));
+                else
+                    loadingState.directions.add(new Direction(Integer.parseInt(grp), null));
             }
         }
         return loadingState;
     }
 
 
-    private Orientation applyTurn(Orientation orientation, Turn turn) {
+    private static Orientation applyTurn(Orientation orientation, Turn turn) {
         return applyTurn(orientation, turn, 1);
     }
-    private Orientation applyTurn(Orientation orientation, Turn turn, int amount) {
+    private static Orientation applyTurn(Orientation orientation, Turn turn, int amount) {
         return Orientation.values()[
                 Math.abs((orientation.ordinal() + (turn.equals(Turn.R) ? amount : -amount))) % Orientation.values().length];
     }
 
-    private Pos applyStep(Pos pos, Orientation orientation) {
+    private static Pos applyStep(Pos pos, Orientation orientation) {
         return switch(orientation) {
             case N -> new Pos(pos.x, pos.y-1);
             case S -> new Pos(pos.x, pos.y+1);
@@ -74,27 +74,32 @@ public class D22 {
         };
     }
 
-    static final Map<Orientation, BiFunction<Set<Pos>, Pos, Pos>> getNextPos = Map.of(
-            Orientation.N, (map, p) -> new Pos(p.x, map.stream().filter(m -> m.x == p.x).mapToInt(m -> m.y).max().orElseThrow()),
-            Orientation.S, (map, p) -> new Pos(p.x, map.stream().filter(m -> m.x == p.x).mapToInt(m -> m.y).min().orElseThrow()),
-            Orientation.W, (map, p) -> new Pos(map.stream().filter(m -> m.y == p.y).mapToInt(m -> m.x).max().orElseThrow(), p.y),
-            Orientation.E, (map, p) -> new Pos(map.stream().filter(m -> m.y == p.y).mapToInt(m -> m.x).min().orElseThrow(), p.y)
-    );
+    private static Pos offMap(Set<Pos> map, Pos p, Orientation orientation) {
+        return switch(orientation) {
+            case N -> new Pos(p.x, map.stream().filter(m -> m.x == p.x).mapToInt(m -> m.y).max().orElseThrow());
+            case S -> new Pos(p.x, map.stream().filter(m -> m.x == p.x).mapToInt(m -> m.y).min().orElseThrow());
+            case W -> new Pos(map.stream().filter(m -> m.y == p.y).mapToInt(m -> m.x).max().orElseThrow(), p.y);
+            case E -> new Pos(map.stream().filter(m -> m.y == p.y).mapToInt(m -> m.x).min().orElseThrow(), p.y);
+        };
+    }
 
     /**
      * Check if wall is on the edge of a map, if so, create a new wall off map on the
      * opposite side (this preventing walking off the edge of the map)
      */
-    private void addMoreWalls(final Set<Pos> map, final Set<Pos> walls) {
+/*
+    private static void addMoreWalls(final Set<Pos> map, final Set<Pos> walls) {
+        Set<Pos> mapAndWall = new HashSet<>(map);
+        mapAndWall.addAll(walls);
         Set<Pos> newWalls = new HashSet<>();
         for(Pos wall : walls) {
             Map<Pos, Orientation> checks = Arrays.stream(Orientation.values())
                     .collect(Collectors.toMap(o -> applyStep(wall, o), Function.identity()));
 
             for(Map.Entry<Pos, Orientation> e : checks.entrySet()) {
-                if (!map.contains(e.getKey())) {
+                if (!mapAndWall.contains(e.getKey())) {
                     // this on the edge in this direction, need to create a wall on it opposite side
-                    Pos opp = getNextPos.get(e.getValue()).apply(map, e.getKey());
+                    Pos opp = offMap(map, e.getKey(), e.getValue());
                     // Need to subtract one square, do this by heading in the opposite direction
                     newWalls.add(applyStep(opp, applyTurn(e.getValue(), Turn.R, 2)));
                 }
@@ -102,48 +107,63 @@ public class D22 {
         }
         walls.addAll(newWalls);
     }
+*/
 
-    private long setUpAndRun(
-            Set<Pos> map, Set<Pos> walls, List<Direction> directions, Map<Pos, Orientation> trace) {
+    private static long setUpAndRun(
+            final Set<Pos> map, final Set<Pos> walls, final List<Direction> directions, Map<Pos, Orientation> trace) {
 
         // find the start position
-        Pos position = getNextPos.get(Orientation.E).apply(map, new Pos(0,0));
+        Pos position = offMap(map, new Pos(0,0), Orientation.E);
         // first direction will point correct Orientation of east
-        Result result = run(map, walls, directions, position, Orientation.N, trace);
+        Result result = run(map, walls, directions, position, Orientation.E, trace);
 
         return ((1+result.position.x)*4L)+((1+result.position.y)*1000L)+result.orientation.ordinal();
     }
 
 
-    private Result run(
-            Set<Pos> map, Set<Pos> walls, List<Direction> directions,
+    private static Result run(
+            final Set<Pos> map, final Set<Pos> walls,
+            final List<Direction> directions,
             Pos currentPosition,
             Orientation currentOrientation,
             Map<Pos, Orientation> trace) {
 
-        addMoreWalls(map, walls);
-        for(Direction d : directions) {
-            currentOrientation = applyTurn(currentOrientation, d.turn);
-            for(int s=0; s<d.magnitude; s++) {
+//        addMoreWalls(map, walls);
 
-                Pos newPos = applyStep(currentPosition, currentOrientation);
-                if(map.contains(newPos)) {
-                    currentPosition = newPos;
-                } else if(walls.contains(newPos)) {
-                    break;
-                } else {
-                    // gone off end of map, appear on other side
-                    currentPosition = getNextPos.get(currentOrientation).apply(map, currentPosition);
-                }
-                if(trace != null)
+        for(Direction d : directions) {
+            if(d.turn != null) {
+                currentOrientation = applyTurn(currentOrientation, d.turn);
+                if (trace != null)
                     trace.put(currentPosition, currentOrientation);
+            }
+            if(d.magnitude != null) {
+                for (int s = 0; s < d.magnitude; s++) {
+
+                    Pos newPos = applyStep(currentPosition, currentOrientation);
+
+                    if (walls.contains(newPos)) {
+                        break;
+                    } else if(map.contains(newPos)) {
+                        currentPosition = newPos;
+                    } else {
+                        // gone off end of map, appear on other side
+                        Pos p = offMap(map, currentPosition, currentOrientation);
+                        if(walls.contains(p)) {
+                            break;
+                        } else {
+                            currentPosition = p;
+                        }
+                    }
+                    if (trace != null)
+                        trace.put(currentPosition, currentOrientation);
+                }
             }
             System.out.println(d+" "+currentPosition+" "+currentOrientation);
         }
         return new Result(currentPosition, currentOrientation);
     }
 
-    private void print(Set<Pos> map, Set<Pos> walls, Map<Pos, Orientation> trace) {
+    private static void print(final Set<Pos> map, final Set<Pos> walls, final Map<Pos, Orientation> trace) {
         int minx = Stream.of(walls, map).flatMap(Collection::stream).mapToInt(m -> m.x).min().orElseThrow();
         int miny = Stream.of(walls, map).flatMap(Collection::stream).mapToInt(m -> m.y).min().orElseThrow();
         int maxx = Stream.of(walls, map).flatMap(Collection::stream).mapToInt(m -> m.x).max().orElseThrow();
@@ -175,10 +195,10 @@ public class D22 {
     @Test
     public void testAddingWalls() {
         LoadingState loadingState =
-                FileReader.readFileForObject("src/test/resources/2022/D22_t2.txt", new LoadingState(), D22::parseLine);
+                FileReader.readFileForObject("src/test/resources/2022/D22.txt", new LoadingState(), D22::parseLine);
         System.out.println("Walls size: "+loadingState.walls.size());
         print(loadingState.map, loadingState.walls, new HashMap<>());
-        addMoreWalls(loadingState.map, loadingState.walls);
+        //addMoreWalls(loadingState.map, loadingState.walls);
         System.out.println("Walls size: "+loadingState.walls.size());
         print(loadingState.map, loadingState.walls, new HashMap<>());
     }
@@ -195,18 +215,21 @@ public class D22 {
         System.out.println(r);
         assertEquals(new Pos(0,2), r.position);
 
+        trace = new HashMap<>();
         r = run(loadingState.map, loadingState.walls, loadingState.directions,
                 new Pos(2,2), Orientation.S, trace);
         print(loadingState.map, loadingState.walls, trace);
         System.out.println(r);
         assertEquals(new Pos(4, 2), r.position);
 
+        trace = new HashMap<>();
         r = run(loadingState.map, loadingState.walls, loadingState.directions,
                 new Pos(2,2), Orientation.E, trace);
         print(loadingState.map, loadingState.walls, trace);
         System.out.println(r);
         assertEquals(new Pos(2, 0), r.position);
 
+        trace = new HashMap<>();
         r = run(loadingState.map, loadingState.walls, loadingState.directions,
                 new Pos(2,2), Orientation.W, trace);
         print(loadingState.map, loadingState.walls, trace);
@@ -223,8 +246,9 @@ public class D22 {
 
         LoadingState loadingState =
                 FileReader.readFileForObject("src/test/resources/2022/D22_t.txt", new LoadingState(), D22::parseLine);
-        assertEquals(6032, setUpAndRun(loadingState.map, loadingState.walls, loadingState.directions, trace));
+        long res = setUpAndRun(loadingState.map, loadingState.walls, loadingState.directions, trace);
         print(loadingState.map, loadingState.walls, trace);
+        assertEquals(6032, res);
     }
 
     @Test
@@ -232,12 +256,14 @@ public class D22 {
         Map<Pos, Orientation> trace = new HashMap<>();
         // 44556
         // 8479
+        // 89220
+        // 89220
         LoadingState loadingState =
                 FileReader.readFileForObject("src/test/resources/2022/D22.txt", new LoadingState(), D22::parseLine);
         long res = setUpAndRun(loadingState.map, loadingState.walls, loadingState.directions, trace);
-        System.out.println("Res "+res);
 //        assertEquals(0, run(loadingState.map, loadingState.walls, loadingState.directions, trace));
         print(loadingState.map, loadingState.walls, trace);
+        System.out.println("Res "+res);
     }
 
 }
