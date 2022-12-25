@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -29,8 +30,7 @@ public class D23 {
 
     private static List<Elf> parseLine(List<Elf> posList, String line, Integer lineNum) {
         for(int x=0; x<line.length(); x++) {
-            char c = line.charAt(x);
-            if(c == '#') {
+            if(line.charAt(x) == '#') {
                 posList.add(new Elf(new Pos(x, lineNum)));
             }
         }
@@ -86,16 +86,13 @@ public class D23 {
             elves.add(e.getKey());
             mapPos.put(e.getValue(), elves);
         }
-
+        
         // Remove all clashes
-        mapPos.entrySet().stream().filter(e -> e.getValue().size() > 1).forEach( e -> {
-            e.getValue().forEach(elfNewPositions.keySet()::remove);
-        });
+        mapPos.entrySet().stream().filter(e -> e.getValue().size() > 1)
+                .forEach(e -> e.getValue().forEach(elfNewPositions.keySet()::remove));
 
         // Update position of remaining elves
-        for(Map.Entry<Elf, Pos> e : elfNewPositions.entrySet()) {
-            e.getKey().p = e.getValue();
-        }
+        elfNewPositions.forEach((key, value) -> key.p = value);
 
         // Update all elves, even if not moved, mis-understood the question
         elfList.forEach(e -> e.count++);
@@ -162,6 +159,4 @@ public class D23 {
                 FileReader.readFileForObject("src/test/resources/2022/D23.txt", new ArrayList<>(), D23::parseLine);
         assertEquals(992, runUntilComplete(posList));
     }
-
-
 }
