@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class D25 {
 
     // FIXME This is super ugly
+    // Can get rid of the 2 step approach
     private static String DecToSNAFU(long dec) {
         StringBuilder sb = new StringBuilder();
 
@@ -27,6 +28,7 @@ public class D25 {
         String p = sb.toString();
         List<Integer> arr = new ArrayList<>(p.chars().boxed().map(c -> c - '0').toList());
         Collections.reverse(arr);
+
         for(int i=0; i<arr.size(); i++) {
             if(arr.get(i) > 2) {
                 arr.set(i, arr.get(i) - 5);
