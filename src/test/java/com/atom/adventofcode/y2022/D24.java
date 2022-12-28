@@ -1,10 +1,10 @@
 package com.atom.adventofcode.y2022;
-
 import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -45,6 +45,7 @@ public class D24 {
                             case S -> System.out.print("v");
                             case W -> System.out.print("<");
                             case E -> System.out.print(">");
+                            default -> System.out.print(" ");
                         }
                     } else {
                         System.out.print(value);
@@ -74,6 +75,10 @@ public class D24 {
     }
 
     private static boolean inLimits(int xLimit, int yLimit, Pos pn) {
+        // Special positions, (outside the rectangle bounds)
+        if(pn.equals(new Pos(1,0)) || pn.equals(new Pos(xLimit-2, yLimit-1)))
+            return true;
+
         if(pn.x <= 0)
             return false;
         if(pn.y <= 0)
@@ -109,11 +114,13 @@ public class D24 {
     }
 
     private static void update(Valley valley) {
-        for(int i=0; i<valley.blizzards.size(); i++) {
-            Blizzard blizzard = valley.blizzards.get(i);
-            blizzard = new Blizzard(nextPosWrap(valley.maxx, valley.maxy, blizzard.p, blizzard.d), blizzard.d);
-            valley.blizzards.set(i, blizzard);
-        }
+        IntStream.range(0, valley.blizzards.size())
+            .forEach(i -> {
+                    Blizzard blizzard = valley.blizzards.get(i);
+                    valley.blizzards.set(i,new Blizzard(
+                            nextPosWrap(valley.maxx, valley.maxy, blizzard.p, blizzard.d),
+                            blizzard.d));
+                     });
     }
 
     private int solve(final Valley v, final Pos start, final Pos end) {
@@ -138,26 +145,24 @@ public class D24 {
             if(possibleLocations.contains(end))
                 break;
         }
-        update(v);
-        return count+1;
+        return count;
     }
 
     private List<Pos> getPossibleMoves(final Valley v, final Set<Pos> blizzards, final Pos current) {
-        return Arrays.stream(Direction.values())
+        List<Pos> ps = Arrays.stream(Direction.values())
                 .map(d -> nextPos(current, d))
                 .filter(p -> inLimits(v.maxx, v.maxy, p))
                 .filter(p -> !blizzards.contains(p))
                 .collect(Collectors.toList());
+        return ps;
     }
 
     @Test
     public void testSolveOneWayTrip() {
-
-
         Valley valley =
                 FileReader.readFileForObject("src/test/resources/2022/D24_t.txt",
                         new Valley(), D24::parseLine);
-        Pos end = new Pos(valley.maxx-2, valley.maxy-2);
+        Pos end = new Pos(valley.maxx-2, valley.maxy-1);
         Pos start = new Pos(1, 0);
 
         assertEquals(18, solve(valley, start, end));
@@ -165,11 +170,10 @@ public class D24 {
         valley =
                 FileReader.readFileForObject("src/test/resources/2022/D24.txt",
                         new Valley(), D24::parseLine);
-        end = new Pos(valley.maxx-2, valley.maxy-2);
+        end = new Pos(valley.maxx-2, valley.maxy-1);
         start = new Pos(1, 0);
 
         assertEquals(264, solve(valley, start, end));
-
     }
 
     @Test
@@ -177,18 +181,33 @@ public class D24 {
         Valley valley =
                 FileReader.readFileForObject("src/test/resources/2022/D24_t.txt",
                         new Valley(), D24::parseLine);
-        Pos end = new Pos(valley.maxx-2, valley.maxy-2);
+        Pos end = new Pos(valley.maxx-2, valley.maxy-1);
         Pos start = new Pos(1, 0);
         Pos start2 = new Pos(valley.maxx-2, valley.maxy-1);
-        Pos end2 = new Pos(1, 1);
+        Pos end2 = new Pos(1, 0);
 
-//        int trip1 = solve(valley, start, end);
-//        assertEquals(18, trip1);
+        int trip1 = solve(valley, start, end);
+        assertEquals(18, trip1);
         int trip2 = solve(valley, start2, end2);
         print(valley, start2);
         assertEquals(23, trip2);
-//        int trip3 = solve(valley, start, end);
-//        assertEquals(13, trip3);
+        int trip3 = solve(valley, start, end);
+        assertEquals(13, trip3);
+    }
 
+    @Test
+    public void testSolveThreeWayTrip2() {
+        Valley valley =
+                FileReader.readFileForObject("src/test/resources/2022/D24.txt",
+                        new Valley(), D24::parseLine);
+        Pos end = new Pos(valley.maxx-2, valley.maxy-1);
+        Pos start = new Pos(1, 0);
+        Pos start2 = new Pos(valley.maxx-2, valley.maxy-1);
+        Pos end2 = new Pos(1, 0);
+
+        int trip1 = solve(valley, start, end);
+        int trip2 = solve(valley, start2, end2);
+        int trip3 = solve(valley, start, end);
+        assertEquals(789, trip1+trip2+trip3);
     }
 }
