@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class D22 {
 
@@ -20,13 +21,12 @@ public class D22 {
 
     static class LoadingState {
         boolean loadingMap = true;
-        int y = 0;
         Set<Pos> map = new HashSet<>();
         Set<Pos> walls = new HashSet<>();
         List<Direction> directions = new ArrayList<>();
     }
 
-    private static LoadingState parseLine(LoadingState loadingState, String line, Integer integer) {
+    private static LoadingState parseLine(LoadingState loadingState, String line, Integer lineNumber) {
         if(line.isEmpty()) {
             loadingState.loadingMap = false;
             return loadingState;
@@ -35,13 +35,12 @@ public class D22 {
             for (int x = 0; x < line.length(); x++) {
                 char c = line.charAt(x);
                 if (c == '.') {
-                    loadingState.map.add(new Pos(x, loadingState.y));
+                    loadingState.map.add(new Pos(x, lineNumber));
                 } else if (c == '#') {
-                    loadingState.walls.add(new Pos(x, loadingState.y));
-                    loadingState.map.add(new Pos(x, loadingState.y));
+                    loadingState.walls.add(new Pos(x, lineNumber));
+                    loadingState.map.add(new Pos(x, lineNumber));
                 }
             }
-            loadingState.y++;
         } else {
             Pattern p = Pattern.compile("([RL]|\\d+)");
             Matcher m = p.matcher(line);
@@ -60,6 +59,7 @@ public class D22 {
     private static Orientation applyTurn(Orientation orientation, Turn turn) {
         return applyTurn(orientation, turn, 1);
     }
+
     private static Orientation applyTurn(Orientation orientation, Turn turn, int amount) {
         return Orientation.values()[
                 Math.abs((orientation.ordinal() + (turn.equals(Turn.R) ? amount : -amount))) % Orientation.values().length];
@@ -83,37 +83,15 @@ public class D22 {
         };
     }
 
-    /**
-     * Check if wall is on the edge of a map, if so, create a new wall off map on the
-     * opposite side (this preventing walking off the edge of the map)
-     */
-/*
-    private static void addMoreWalls(final Set<Pos> map, final Set<Pos> walls) {
-        Set<Pos> mapAndWall = new HashSet<>(map);
-        mapAndWall.addAll(walls);
-        Set<Pos> newWalls = new HashSet<>();
-        for(Pos wall : walls) {
-            Map<Pos, Orientation> checks = Arrays.stream(Orientation.values())
-                    .collect(Collectors.toMap(o -> applyStep(wall, o), Function.identity()));
-
-            for(Map.Entry<Pos, Orientation> e : checks.entrySet()) {
-                if (!mapAndWall.contains(e.getKey())) {
-                    // this on the edge in this direction, need to create a wall on it opposite side
-                    Pos opp = offMap(map, e.getKey(), e.getValue());
-                    // Need to subtract one square, do this by heading in the opposite direction
-                    newWalls.add(applyStep(opp, applyTurn(e.getValue(), Turn.R, 2)));
-                }
-            }
-        }
-        walls.addAll(newWalls);
-    }
-*/
-
     private static long setUpAndRun(
-            final Set<Pos> map, final Set<Pos> walls, final List<Direction> directions, Map<Pos, Orientation> trace) {
+            final Set<Pos> map,
+            final Set<Pos> walls,
+            final List<Direction> directions,
+            final Map<Pos, Orientation> trace) {
 
         // find the start position
         Pos position = offMap(map, new Pos(0,0), Orientation.E);
+
         // first direction will point correct Orientation of east
         Result result = run(map, walls, directions, position, Orientation.E, trace);
 
@@ -122,28 +100,25 @@ public class D22 {
 
 
     private static Result run(
-            final Set<Pos> map, final Set<Pos> walls,
+            final Set<Pos> map,
+            final Set<Pos> walls,
             final List<Direction> directions,
             Pos currentPosition,
             Orientation currentOrientation,
-            Map<Pos, Orientation> trace) {
-
-//        addMoreWalls(map, walls);
+            final Map<Pos, Orientation> trace) {
 
         for(Direction d : directions) {
             if(d.turn != null) {
                 currentOrientation = applyTurn(currentOrientation, d.turn);
                 if (trace != null)
                     trace.put(currentPosition, currentOrientation);
-            }
-            if(d.magnitude != null) {
+            } else if(d.magnitude != null) {
                 for (int s = 0; s < d.magnitude; s++) {
-
                     Pos newPos = applyStep(currentPosition, currentOrientation);
 
                     if (walls.contains(newPos)) {
                         break;
-                    } else if(map.contains(newPos)) {
+                    } else if (map.contains(newPos)) {
                         currentPosition = newPos;
                     } else {
                         // gone off end of map, appear on other side
@@ -158,7 +133,6 @@ public class D22 {
                         trace.put(currentPosition, currentOrientation);
                 }
             }
-            System.out.println(d+" "+currentPosition+" "+currentOrientation);
         }
         return new Result(currentPosition, currentOrientation);
     }
@@ -179,28 +153,16 @@ public class D22 {
                         case N -> System.out.print("^");
                         case S -> System.out.print("v");
                     }
-
-                } else if(map.contains(p)) {
-                    System.out.print(".");
                 } else if(walls.contains(p)) {
                     System.out.print("#");
+                } else if(map.contains(p)) {
+                    System.out.print(".");
                 } else {
                     System.out.print(" ");
                 }
             }
             System.out.println("");
         }
-    }
-
-    @Test
-    public void testAddingWalls() {
-        LoadingState loadingState =
-                FileReader.readFileForObject("src/test/resources/2022/D22.txt", new LoadingState(), D22::parseLine);
-        System.out.println("Walls size: "+loadingState.walls.size());
-        print(loadingState.map, loadingState.walls, new HashMap<>());
-        //addMoreWalls(loadingState.map, loadingState.walls);
-        System.out.println("Walls size: "+loadingState.walls.size());
-        print(loadingState.map, loadingState.walls, new HashMap<>());
     }
 
     @Test
@@ -213,37 +175,33 @@ public class D22 {
                 new Pos(2,2), Orientation.N, trace);
         print(loadingState.map, loadingState.walls, trace);
         System.out.println(r);
-        assertEquals(new Pos(0,2), r.position);
+        assertEquals(new Pos(2,4), r.position);
 
         trace = new HashMap<>();
         r = run(loadingState.map, loadingState.walls, loadingState.directions,
                 new Pos(2,2), Orientation.S, trace);
         print(loadingState.map, loadingState.walls, trace);
         System.out.println(r);
-        assertEquals(new Pos(4, 2), r.position);
+        assertEquals(new Pos(2, 0), r.position);
 
         trace = new HashMap<>();
         r = run(loadingState.map, loadingState.walls, loadingState.directions,
                 new Pos(2,2), Orientation.E, trace);
         print(loadingState.map, loadingState.walls, trace);
         System.out.println(r);
-        assertEquals(new Pos(2, 0), r.position);
+        assertEquals(new Pos(0, 2), r.position);
 
         trace = new HashMap<>();
         r = run(loadingState.map, loadingState.walls, loadingState.directions,
                 new Pos(2,2), Orientation.W, trace);
         print(loadingState.map, loadingState.walls, trace);
         System.out.println(r);
-        assertEquals(new Pos(2, 4), r.position);
+        assertEquals(new Pos(4, 2), r.position);
     }
 
-
-    // 44556 incorrect
     @Test
     public void testDirections() {
-
         Map<Pos, Orientation> trace = new HashMap<>();
-
         LoadingState loadingState =
                 FileReader.readFileForObject("src/test/resources/2022/D22_t.txt", new LoadingState(), D22::parseLine);
         long res = setUpAndRun(loadingState.map, loadingState.walls, loadingState.directions, trace);
@@ -262,8 +220,8 @@ public class D22 {
                 FileReader.readFileForObject("src/test/resources/2022/D22.txt", new LoadingState(), D22::parseLine);
         long res = setUpAndRun(loadingState.map, loadingState.walls, loadingState.directions, trace);
 //        assertEquals(0, run(loadingState.map, loadingState.walls, loadingState.directions, trace));
-        print(loadingState.map, loadingState.walls, trace);
+//        print(loadingState.map, loadingState.walls, trace);
+        assertNotEquals(89220, res);
         System.out.println("Res "+res);
     }
-
 }

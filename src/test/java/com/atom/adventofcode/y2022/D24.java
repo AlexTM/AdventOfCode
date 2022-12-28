@@ -149,12 +149,11 @@ public class D24 {
     }
 
     private List<Pos> getPossibleMoves(final Valley v, final Set<Pos> blizzards, final Pos current) {
-        List<Pos> ps = Arrays.stream(Direction.values())
+        return Arrays.stream(Direction.values())
                 .map(d -> nextPos(current, d))
                 .filter(p -> inLimits(v.maxx, v.maxy, p))
                 .filter(p -> !blizzards.contains(p))
                 .collect(Collectors.toList());
-        return ps;
     }
 
     @Test
