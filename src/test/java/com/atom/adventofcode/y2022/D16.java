@@ -27,7 +27,7 @@ public class D16 {
     }
 
 
-    public HashMap<String, Integer> doDijkstra(Map<String, Edge> map, String start) {
+    public HashMap<String, Integer> doDijkstra(final Map<String, Edge> map, final String start) {
 
         HashMap<String, Integer> distanceFromStart = new HashMap<>();
         distanceFromStart.put(start, 0);
@@ -90,6 +90,8 @@ public class D16 {
         // Get dist to all nodes from every other node
         for(String s : m.keySet())
             dist.put(s, doDijkstra(m, s));
+
+        System.out.println(dist);
 
         Set<String> nonZero = m.values().stream().filter(s -> s.rate != 0).map(s -> s.name).collect(Collectors.toSet());
         nonZero.add("AA");

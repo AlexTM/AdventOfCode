@@ -57,12 +57,8 @@ public class D22 {
 
 
     private static Orientation applyTurn(Orientation orientation, Turn turn) {
-        return applyTurn(orientation, turn, 1);
-    }
-
-    private static Orientation applyTurn(Orientation orientation, Turn turn, int amount) {
         return Orientation.values()[
-                Math.abs((orientation.ordinal() + (turn.equals(Turn.R) ? amount : -amount))) % Orientation.values().length];
+                Math.abs((orientation.ordinal() + (turn.equals(Turn.R) ? 1 : -1))) % Orientation.values().length];
     }
 
     private static Pos applyStep(Pos pos, Orientation orientation) {
@@ -217,9 +213,9 @@ public class D22 {
         // 89220
         // 89220
         LoadingState loadingState =
-                FileReader.readFileForObject("src/test/resources/2022/D22.txt", new LoadingState(), D22::parseLine);
+                FileReader.readFileForObject("src/test/resources/2022/D22.txt",
+                        new LoadingState(), D22::parseLine);
         long res = setUpAndRun(loadingState.map, loadingState.walls, loadingState.directions, trace);
-//        assertEquals(0, run(loadingState.map, loadingState.walls, loadingState.directions, trace));
 //        print(loadingState.map, loadingState.walls, trace);
         assertNotEquals(89220, res);
         System.out.println("Res "+res);
