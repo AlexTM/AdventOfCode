@@ -5,29 +5,43 @@ plugins {
 group 'com.atom.adventofcode'
 version '1.0-SNAPSHOT'
 
+project.ext.lwjglVersion = "3.3.1"
+project.ext.jomlVersion = "1.10.2"
+project.ext.lwjglNatives = "natives-linux"
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
 
-    implementation 'commons-codec:commons-codec:1.15'
+    implementation 'org.tinylog:tinylog-api:2.5.0'
+    implementation 'org.tinylog:tinylog-impl:2.5.0'
 
+    implementation 'commons-codec:commons-codec:1.15'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.0'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-}
 
-//tasks.withType(JavaCompile) {
-//    options.compilerArgs += "--enable-preview"
-//}
-//tasks.withType(Test) {
-//    jvmArgs += "--enable-preview"
-//}
-//tasks.withType(JavaExec) {
-//    jvmArgs += "--enable-preview"
-//}
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+
+    implementation "org.lwjgl:lwjgl"
+    implementation "org.lwjgl:lwjgl-assimp"
+    implementation "org.lwjgl:lwjgl-glfw"
+    implementation "org.lwjgl:lwjgl-openal"
+    implementation "org.lwjgl:lwjgl-opengl"
+    implementation "org.lwjgl:lwjgl-stb"
+    implementation "org.lwjgl:lwjgl-tinyfd"
+    runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-tinyfd::$lwjglNatives"
+    implementation "org.joml:joml:${jomlVersion}"
+}
 
 test {
     useJUnitPlatform()

@@ -21,42 +21,7 @@ public class D24 {
     static class Valley {
         final List<Blizzard> blizzards = new ArrayList<>();
         int maxx, maxy;
-    }
-
-    private static void print(Valley v, Pos pos) {
-        Map<Pos, List<Blizzard>> blizzardPos = new HashMap<>();
-        for(Blizzard b : v.blizzards) {
-            List<Blizzard> bb = blizzardPos.getOrDefault(b.p, new ArrayList<>());
-            bb.add(b);
-            blizzardPos.put(b.p, bb);
-        }
-
-        for (int y = 0; y < v.maxy; y++) {
-            for (int x = 0; x < v.maxx; x++) {
-                Pos p = new Pos(x, y);
-
-                if(pos != null && pos.equals(p)) {
-                  System.out.print("X");
-                } else if(blizzardPos.containsKey(p)) {
-                    int value = blizzardPos.get(p).size();
-                    if(value == 1) {
-                        switch (blizzardPos.get(p).get(0).d) {
-                            case N -> System.out.print("^");
-                            case S -> System.out.print("v");
-                            case W -> System.out.print("<");
-                            case E -> System.out.print(">");
-                            default -> System.out.print(" ");
-                        }
-                    } else {
-                        System.out.print(value);
-                    }
-                } else {
-                    System.out.print(".");
-                }
-            }
-            System.out.println("");
-        }
-        System.out.println("");
+        Pos currentPosition;
     }
 
     private static Valley parseLine(Valley valley, String line, Integer y) {
@@ -209,4 +174,41 @@ public class D24 {
         int trip3 = solve(valley, start, end);
         assertEquals(789, trip1+trip2+trip3);
     }
+
+    private static void print(Valley v, Pos pos) {
+        Map<Pos, List<Blizzard>> blizzardPos = new HashMap<>();
+        for(Blizzard b : v.blizzards) {
+            List<Blizzard> bb = blizzardPos.getOrDefault(b.p, new ArrayList<>());
+            bb.add(b);
+            blizzardPos.put(b.p, bb);
+        }
+
+        for (int y = 0; y < v.maxy; y++) {
+            for (int x = 0; x < v.maxx; x++) {
+                Pos p = new Pos(x, y);
+
+                if(pos != null && pos.equals(p)) {
+                    System.out.print("X");
+                } else if(blizzardPos.containsKey(p)) {
+                    int value = blizzardPos.get(p).size();
+                    if(value == 1) {
+                        switch (blizzardPos.get(p).get(0).d) {
+                            case N -> System.out.print("^");
+                            case S -> System.out.print("v");
+                            case W -> System.out.print("<");
+                            case E -> System.out.print(">");
+                            default -> System.out.print(" ");
+                        }
+                    } else {
+                        System.out.print(value);
+                    }
+                } else {
+                    System.out.print(".");
+                }
+            }
+            System.out.println("");
+        }
+        System.out.println("");
+    }
+
 }
