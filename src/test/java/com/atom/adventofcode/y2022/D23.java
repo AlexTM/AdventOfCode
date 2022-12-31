@@ -1,6 +1,12 @@
 package com.atom.adventofcode.y2022;
 
 import com.atom.adventofcode.common.FileReader;
+import com.atom.adventofcode.common.engine.DefaultAppLogic;
+import com.atom.adventofcode.common.engine.Engine;
+import com.atom.adventofcode.common.engine.Window;
+import com.atom.adventofcode.common.engine.scene.Scene;
+import com.atom.adventofcode.common.game.PlaneGeneratorSimple;
+import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -60,7 +66,7 @@ public class D23 {
         };
     }
 
-    private int run(final List<Elf> elfList) {
+    private static int step(final List<Elf> elfList) {
 
         Set<Pos> elfSet = elfList.stream().map(e -> e.p).collect(Collectors.toSet());
 
@@ -125,10 +131,68 @@ public class D23 {
                 FileReader.readFileForObject("src/test/resources/2022/D23_t1.txt", new ArrayList<>(), D23::parseLine);
 
         for(int i=0; i<10; i++) {
-            run(posList);
+            step(posList);
         }
         assertEquals(110, countEmpty(posList));
     }
+
+    static class State {
+        long count;
+        List<Elf> elfList;
+    }
+
+    static class CraterEngine extends DefaultAppLogic {
+
+        private final PlaneGeneratorSimple planeGeneratorSimple;
+        private final State state;
+
+        public CraterEngine(State state, int maxx, int maxy) {
+            this.state = state;
+            this.planeGeneratorSimple = new PlaneGeneratorSimple(
+                    maxx, maxy,
+                    pos -> {
+                        // fixme
+                        Set<Pos> posSet = state.elfList.stream().map(e -> e.p).collect(Collectors.toSet());
+                        // fixme convert to coords
+
+                        Pos p = new Pos((int)pos.xpos(), (int)pos.zpos());
+                        if(posSet.contains(p))
+                            return new Vector3f(0.8f, 0.3f, 0.3f);
+                        return new Vector3f(0.1f, 0.1f, 0.1f);
+                    });
+        }
+
+        @Override
+        public boolean update(Window window, Scene scene, long diffTimeMillis) {
+            int c = step(state.elfList);
+
+            if(scene != null) {
+                scene.addMesh("plane", planeGeneratorSimple.createMesh());
+            }
+            return c == 0;
+        }
+    }
+
+
+    @Test
+    public void testSpace3WithGUI() {
+        List<Elf> posList =
+                FileReader.readFileForObject("src/test/resources/2022/D23_t1.txt", new ArrayList<>(), D23::parseLine);
+        State state = new State();
+        state.elfList = posList;
+
+        CraterEngine engine = new CraterEngine(state, 10, 10);
+        Engine gameEng = new Engine("AdventOfCode - D24",
+                new Window.WindowOptions().setUps(5), engine);
+        gameEng.start(() -> state.count == 9);
+
+
+//        for(int i=0; i<10; i++) {
+//            step(posList);
+//        }
+        assertEquals(110, countEmpty(state.elfList));
+    }
+
 
     @Test
     public void testSpace2() {
@@ -136,14 +200,14 @@ public class D23 {
                 FileReader.readFileForObject("src/test/resources/2022/D23.txt", new ArrayList<>(), D23::parseLine);
 
         for(int i=0; i<10; i++) {
-            run(posList);
+            step(posList);
         }
         assertEquals(4254, countEmpty(posList));
     }
 
     private int runUntilComplete(List<Elf> elfList) {
         int count = 1;
-        while(run(elfList) != 0) {
+        while(step(elfList) != 0) {
             count++;
         }
         return count;
