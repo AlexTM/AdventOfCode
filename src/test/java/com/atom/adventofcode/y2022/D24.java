@@ -97,7 +97,7 @@ public class D24 {
 
     private static boolean step(State state) {
         state.count++;
-        D24.update(state);
+        update(state);
 
         final Set<Pos> blizzardPos = state.blizzards.stream()
                 .map(b -> b.p)
@@ -166,7 +166,9 @@ public class D24 {
         @Override
         public boolean update(Window window, Scene scene, long diffTimeMillis) {
             boolean res = D24.step(state);
-            scene.addMesh("plane", planeGeneratorSimple.createMesh());
+            if(scene != null) {
+                scene.addMesh("plane", planeGeneratorSimple.createMesh());
+            }
             return res;
         }
     }
@@ -220,26 +222,27 @@ public class D24 {
     public void testSolveThreeWayTripWithGraphics() {
         State state = D24.createState("src/test/resources/2022/D24.txt");
 
+        Window.WindowOptions options = new Window.WindowOptions().setUps(100).setGui(false);
         Pos start = new Pos(1, 0);
         Pos end = new Pos(state.maxx-2, state.maxy-1);
 
         ValleyEngine valleyEngine = new ValleyEngine(state);
         Engine gameEng = new Engine("AdventOfCode - D24 - 1",
-                new Window.WindowOptions().setUps(100), valleyEngine);
+                options, valleyEngine);
         state.reset(start, end);
         gameEng.start();
         int trip1 = valleyEngine.state.count;
 
         valleyEngine = new ValleyEngine(state);
         gameEng = new Engine("AdventOfCode - D24 - 2",
-                new Window.WindowOptions().setUps(100), valleyEngine);
+                options, valleyEngine);
         state.reset(end, start);
         gameEng.start();
         int trip2 = valleyEngine.state.count;
 
         valleyEngine = new ValleyEngine(state);
         gameEng = new Engine("AdventOfCode - D24 - 3",
-                new Window.WindowOptions().setUps(100), valleyEngine);
+                options, valleyEngine);
         state.reset(start, end);
         gameEng.start();
         int trip3 = valleyEngine.state.count;

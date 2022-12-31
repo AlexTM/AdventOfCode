@@ -131,6 +131,7 @@ public class Window {
         public int height;
         public int ups = Engine.TARGET_UPS;
         public int width;
+        public boolean gui;
 
         public WindowOptions setCompatibleProfile(boolean compatibleProfile) {
             this.compatibleProfile = compatibleProfile;
@@ -154,6 +155,11 @@ public class Window {
 
         public WindowOptions setWidth(int width) {
             this.width = width;
+            return this;
+        }
+
+        public WindowOptions setGui(boolean gui) {
+            this.gui = gui;
             return this;
         }
     }

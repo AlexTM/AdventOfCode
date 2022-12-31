@@ -7,27 +7,32 @@ public class Engine {
 
     public static final int TARGET_UPS = 30;
     private final IAppLogic appLogic;
-    private final Window window;
+    private Window window;
     private Render render;
     private boolean running;
     private Scene scene;
     private int targetFps;
     private int targetUps;
-    private boolean gui;
+    private Window.WindowOptions opts;
+    private String windowTitle;
 
     public Engine(String windowTitle, Window.WindowOptions opts, IAppLogic appLogic) {
+        this.appLogic = appLogic;
+        this.opts = opts;
+        this.windowTitle = windowTitle;
+    }
+
+    private void init() {
         window = new Window(windowTitle, opts, () -> {
             resize();
             return null;
         });
         targetFps = opts.fps;
         targetUps = opts.ups;
-        this.appLogic = appLogic;
         render = new Render();
         scene = new Scene();
         appLogic.init(window, scene, render);
         running = true;
-        gui = true;
     }
 
     private void cleanup() {
@@ -42,7 +47,7 @@ public class Engine {
     }
 
     private void run() {
-        if(gui)
+        if(opts.gui)
             runWithGUI();
         else
             runWithoutGUI();
@@ -50,12 +55,14 @@ public class Engine {
 
     private long runWithoutGUI() {
         long updates = 0;
-        while(appLogic.update(null, null, 0))
+        while(!appLogic.update(null, null, 0))
             updates++;
         return updates;
     }
 
     private void runWithGUI() {
+        init();
+
         long initialTime = System.currentTimeMillis();
         float timeU = 1000.0f / targetUps;
         float timeR = targetFps > 0 ? 1000.0f / targetFps : 0;
