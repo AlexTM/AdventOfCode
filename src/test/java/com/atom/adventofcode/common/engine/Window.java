@@ -131,5 +131,30 @@ public class Window {
         public int height;
         public int ups = Engine.TARGET_UPS;
         public int width;
+
+        public WindowOptions setCompatibleProfile(boolean compatibleProfile) {
+            this.compatibleProfile = compatibleProfile;
+            return this;
+        }
+
+        public WindowOptions setFps(int fps) {
+            this.fps = fps;
+            return this;
+        }
+
+        public WindowOptions setHeight(int height) {
+            this.height = height;
+            return this;
+        }
+
+        public WindowOptions setUps(int ups) {
+            this.ups = ups;
+            return this;
+        }
+
+        public WindowOptions setWidth(int width) {
+            this.width = width;
+            return this;
+        }
     }
 }

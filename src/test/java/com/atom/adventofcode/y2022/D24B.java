@@ -1,10 +1,9 @@
 package com.atom.adventofcode.y2022;
 
 import com.atom.adventofcode.common.FileReader;
+import com.atom.adventofcode.common.engine.DefaultAppLogic;
 import com.atom.adventofcode.common.engine.Engine;
-import com.atom.adventofcode.common.engine.IAppLogic;
 import com.atom.adventofcode.common.engine.Window;
-import com.atom.adventofcode.common.engine.graph.Render;
 import com.atom.adventofcode.common.engine.scene.Scene;
 import com.atom.adventofcode.common.game.PlaneGeneratorSimple;
 import org.joml.Vector3f;
@@ -27,11 +26,20 @@ public class D24B {
     }
 
     static class State {
-        final List<Blizzard> blizzards = new ArrayList<>();
         int maxx, maxy;
+        final List<Blizzard> blizzards = new ArrayList<>();
         Set<Pos> possibleLocations = new HashSet<>();
         Pos start, end;
         int count = 0;
+
+        public State reset(Pos start, Pos end) {
+            this.start = start;
+            this.end = end;
+            this.count = 0;
+            this.possibleLocations = new HashSet<>();
+            this.possibleLocations.add(start);
+            return this;
+        }
     }
 
     private static State parseLine(State valley, String line, Integer y) {
@@ -45,7 +53,6 @@ public class D24B {
             valley.maxy = y+1;
             valley.maxx = line.length();
         }
-
         return valley;
     }
 
@@ -88,14 +95,6 @@ public class D24B {
         };
     }
 
-    public static int loopUntilComplete(State state) {
-        while(state.possibleLocations.size() != 0 && state.count < 1000) {
-            if(step(state))
-                break;
-        }
-        return state.count;
-    }
-
     private static boolean step(State state) {
         state.count++;
         D24B.update(state);
@@ -133,17 +132,24 @@ public class D24B {
         State state = FileReader.readFileForObject(fileName, new State(), D24B::parseLine);
         state.end = new Pos(state.maxx-2, state.maxy-1);
         state.start = new Pos(1, 0);
-        state.possibleLocations.add(state.start);
         return state;
     }
 
-    static class ValleyEngine implements IAppLogic {
+    public static int loopUntilComplete(State state) {
+        while(state.possibleLocations.size() != 0 && state.count < 1000) {
+            if(step(state))
+                break;
+        }
+        return state.count;
+    }
+
+    static class ValleyEngine extends DefaultAppLogic {
 
         private final PlaneGeneratorSimple planeGeneratorSimple;
         private final State state;
 
-        public ValleyEngine(String fileName) {
-            this.state = D24B.createState(fileName);
+        public ValleyEngine(State state) {
+            this.state = state;
             this.planeGeneratorSimple = new PlaneGeneratorSimple(
                     state.maxx, state.maxy,
                     pos -> {
@@ -158,15 +164,6 @@ public class D24B {
         }
 
         @Override
-        public void cleanup() {}
-
-        @Override
-        public void init(Window window, Scene scene, Render render) {}
-
-        @Override
-        public void input(Window window, Scene scene, long diffTimeMillis) {}
-
-        @Override
         public boolean update(Window window, Scene scene, long diffTimeMillis) {
             boolean res = D24B.step(state);
             scene.addMesh("plane", planeGeneratorSimple.createMesh());
@@ -175,18 +172,79 @@ public class D24B {
     }
 
     @Test
+    public void testSolveOneWayTestTrip() {
+        State state = D24B.createState("src/test/resources/2022/D24_t.txt");
+        state.reset(new Pos(1, 0), new Pos(state.maxx - 2, state.maxy - 1));
+        assertEquals(18, loopUntilComplete(state));
+    }
+
+    @Test
     public void testSolveOneWayTrip() {
-        assertEquals(18, loopUntilComplete(D24B.createState("src/test/resources/2022/D24_t.txt")));
-        assertEquals(264, loopUntilComplete(D24B.createState("src/test/resources/2022/D24.txt")));
+        State state = D24B.createState("src/test/resources/2022/D24.txt");
+        state.reset(new Pos(1, 0), new Pos(state.maxx - 2, state.maxy - 1));
+        assertEquals(264, loopUntilComplete(state));
+    }
+
+    @Test
+    public void testSolveThreeWayTrip2() {
+        State state = D24B.createState("src/test/resources/2022/D24.txt");
+
+        Pos start = new Pos(1, 0);
+        Pos end = new Pos(state.maxx-2, state.maxy-1);
+
+        state.reset(start, end);
+        int trip1 = loopUntilComplete(state);
+
+        state.reset(end, start);
+        int trip2 = loopUntilComplete(state);
+
+        state.reset(start, end);
+        int trip3 = loopUntilComplete(state);
+
+        assertEquals(789, trip1+trip2+trip3);
     }
 
     @Test
     public void testSolveOneWayTripWithGraphics() {
-        ValleyEngine valleyEngine = new ValleyEngine("src/test/resources/2022/D24.txt");
+        State state = D24B.createState("src/test/resources/2022/D24.txt");
+        state.reset(new Pos(1, 0), new Pos(state.maxx - 2, state.maxy - 1));
 
+        ValleyEngine valleyEngine = new ValleyEngine(state);
         Engine gameEng = new Engine("AdventOfCode - D24",
-                new Window.WindowOptions(), valleyEngine);
+                new Window.WindowOptions().setUps(100), valleyEngine);
         gameEng.start();
         assertEquals(264, valleyEngine.state.count);
     }
+
+    @Test
+    public void testSolveThreeWayTripWithGraphics() {
+        State state = D24B.createState("src/test/resources/2022/D24.txt");
+
+        Pos start = new Pos(1, 0);
+        Pos end = new Pos(state.maxx-2, state.maxy-1);
+
+        ValleyEngine valleyEngine = new ValleyEngine(state);
+        Engine gameEng = new Engine("AdventOfCode - D24 - 1",
+                new Window.WindowOptions().setUps(100), valleyEngine);
+        state.reset(start, end);
+        gameEng.start();
+        int trip1 = valleyEngine.state.count;
+
+        valleyEngine = new ValleyEngine(state);
+        gameEng = new Engine("AdventOfCode - D24 - 2",
+                new Window.WindowOptions().setUps(100), valleyEngine);
+        state.reset(end, start);
+        gameEng.start();
+        int trip2 = valleyEngine.state.count;
+
+        valleyEngine = new ValleyEngine(state);
+        gameEng = new Engine("AdventOfCode - D24 - 3",
+                new Window.WindowOptions().setUps(100), valleyEngine);
+        state.reset(start, end);
+        gameEng.start();
+        int trip3 = valleyEngine.state.count;
+
+        assertEquals(789, trip1+trip2+trip3);
+    }
+
 }

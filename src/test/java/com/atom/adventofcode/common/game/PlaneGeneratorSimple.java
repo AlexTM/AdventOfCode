@@ -8,11 +8,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 public class PlaneGeneratorSimple {
 
     private int xsize;
     private int zsize;
+    private int[] idx = null;
+    private float[] shapes = null;
+    private final ColorGenerator colorGenerator;
 
     public record Pos(float xpos, float zpos){};
     record Triangle(int p1, int p2, int p3){
@@ -31,7 +35,6 @@ public class PlaneGeneratorSimple {
         }
     }
 
-
     private final BiFunction<Integer, Integer, Integer> coordsToIndex = (x, z) -> x + (z * (xsize+1));
     private final Function<Integer, Pos> indexToCoords = new Function<>() {
         @Override
@@ -41,8 +44,6 @@ public class PlaneGeneratorSimple {
             return new Pos(x, z);
         }
     };
-
-    private final ColorGenerator colorGenerator;
 
     public PlaneGeneratorSimple(int xsize, int zsize, ColorGenerator colorGenerator) {
         this.xsize = xsize;
@@ -82,8 +83,10 @@ public class PlaneGeneratorSimple {
     }
 
     private int[] generateIndices() {
-        int[] idx = new int[xsize*zsize*6];
+        if(idx != null)
+            return idx;
 
+        idx = new int[xsize*zsize*6];
         int c = 0;
         for(int j=0; j<zsize; j++) {
             for(int i=0; i<xsize; i++) {
@@ -97,7 +100,10 @@ public class PlaneGeneratorSimple {
     }
 
     private float[] generateShape() {
-        float[] shapes = new float[getNumberOfVertex()*3];
+        if(shapes != null)
+            return shapes;
+
+        shapes = new float[getNumberOfVertex()*3];
         for(int i=0; i<shapes.length/3; i++) {
             Vector3f vec = getVector(indexToCoords.apply(i));
             shapes[i*3] = vec.x;
@@ -110,12 +116,12 @@ public class PlaneGeneratorSimple {
     private float[] generateColors() {
         float[] colors = new float[getNumberOfVertex()*3];
 
-        for(int i=0; i<colors.length/3; i++) {
+        IntStream.range(0, colors.length/3).forEach(i -> {
             Vector3f vec = colorGenerator.getColor(indexToCoords.apply(i));
             colors[i*3] = vec.x;
             colors[(i*3)+1] = vec.y;
             colors[(i*3)+2] = vec.z;
-        }
+        });
 
         return colors;
     }

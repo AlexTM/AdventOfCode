@@ -27,7 +27,7 @@ public class Engine {
         scene = new Scene();
         appLogic.init(window, scene, render);
         running = true;
-        gui = false;
+        gui = true;
     }
 
     private void cleanup() {
@@ -45,10 +45,14 @@ public class Engine {
         if(gui)
             runWithGUI();
         else
-            runWithGUI();
+            runWithoutGUI();
     }
 
-    private void runWithoutGUI() {
+    private long runWithoutGUI() {
+        long updates = 0;
+        while(appLogic.update(null, null, 0))
+            updates++;
+        return updates;
     }
 
     private void runWithGUI() {
