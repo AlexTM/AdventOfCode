@@ -1,5 +1,12 @@
 package com.atom.adventofcode.y2022;
+
 import com.atom.adventofcode.common.FileReader;
+import com.atom.adventofcode.common.engine.DefaultAppLogic;
+import com.atom.adventofcode.common.engine.Engine;
+import com.atom.adventofcode.common.engine.Window;
+import com.atom.adventofcode.common.engine.scene.Scene;
+import com.atom.adventofcode.common.game.PlaneGeneratorSimple;
+import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -11,20 +18,31 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class D24 {
 
     enum Direction{ N, E, S, W, NONE }
-    record Pos(int x, int y){}
+    public record Pos(int x, int y){}
     record Blizzard(Pos p, Direction d){
         public Blizzard(int x, int y, Direction d) {
             this(new Pos(x, y), d);
         }
     }
 
-    static class Valley {
-        final List<Blizzard> blizzards = new ArrayList<>();
+    static class State {
         int maxx, maxy;
-        Pos currentPosition;
+        final List<Blizzard> blizzards = new ArrayList<>();
+        Set<Pos> possibleLocations = new HashSet<>();
+        Pos start, end;
+        int count = 0;
+
+        public State reset(Pos start, Pos end) {
+            this.start = start;
+            this.end = end;
+            this.count = 0;
+            this.possibleLocations = new HashSet<>();
+            this.possibleLocations.add(start);
+            return this;
+        }
     }
 
-    private static Valley parseLine(Valley valley, String line, Integer y) {
+    private static State parseLine(State valley, String line, Integer y) {
         for(int x=0; x<line.length(); x++) {
             switch(line.charAt(x)){
                 case '>' -> valley.blizzards.add(new Blizzard(x, y, Direction.E));
@@ -35,7 +53,6 @@ public class D24 {
             valley.maxy = y+1;
             valley.maxx = line.length();
         }
-
         return valley;
     }
 
@@ -78,7 +95,22 @@ public class D24 {
         };
     }
 
-    private static void update(Valley valley) {
+    private static boolean step(State state) {
+        state.count++;
+        D24.update(state);
+
+        final Set<Pos> blizzardPos = state.blizzards.stream()
+                .map(b -> b.p)
+                .collect(Collectors.toSet());
+
+        state.possibleLocations = state.possibleLocations.stream()
+                .flatMap(p -> getPossibleMoves(state, blizzardPos, p).stream())
+                .collect(Collectors.toSet());
+
+        return state.possibleLocations.contains(state.end);
+    }
+
+    private static void update(State valley) {
         IntStream.range(0, valley.blizzards.size())
             .forEach(i -> {
                     Blizzard blizzard = valley.blizzards.get(i);
@@ -88,32 +120,7 @@ public class D24 {
                      });
     }
 
-    private int solve(final Valley v, final Pos start, final Pos end) {
-
-        int count = 0;
-
-        Set<Pos> possibleLocations = new HashSet<>();
-        possibleLocations.add(start);
-
-        while(possibleLocations.size() != 0 && count < 1000) {
-            count++;
-            update(v);
-
-            final Set<Pos> blizzardPos = v.blizzards.stream()
-                    .map(b -> b.p)
-                    .collect(Collectors.toSet());
-
-            possibleLocations = possibleLocations.stream()
-                    .flatMap(p -> getPossibleMoves(v, blizzardPos, p).stream())
-                    .collect(Collectors.toSet());
-
-            if(possibleLocations.contains(end))
-                break;
-        }
-        return count;
-    }
-
-    private List<Pos> getPossibleMoves(final Valley v, final Set<Pos> blizzards, final Pos current) {
+    private static List<Pos> getPossibleMoves(final State v, final Set<Pos> blizzards, final Pos current) {
         return Arrays.stream(Direction.values())
                 .map(d -> nextPos(current, d))
                 .filter(p -> inLimits(v.maxx, v.maxy, p))
@@ -121,94 +128,123 @@ public class D24 {
                 .collect(Collectors.toList());
     }
 
-    @Test
-    public void testSolveOneWayTrip() {
-        Valley valley =
-                FileReader.readFileForObject("src/test/resources/2022/D24_t.txt",
-                        new Valley(), D24::parseLine);
-        Pos end = new Pos(valley.maxx-2, valley.maxy-1);
-        Pos start = new Pos(1, 0);
+    private static State createState(String fileName) {
+        State state = FileReader.readFileForObject(fileName, new State(), D24::parseLine);
+        state.end = new Pos(state.maxx-2, state.maxy-1);
+        state.start = new Pos(1, 0);
+        return state;
+    }
 
-        assertEquals(18, solve(valley, start, end));
+    public static int loopUntilComplete(State state) {
+        while(state.possibleLocations.size() != 0 && state.count < 1000) {
+            if(step(state))
+                break;
+        }
+        return state.count;
+    }
 
-        valley =
-                FileReader.readFileForObject("src/test/resources/2022/D24.txt",
-                        new Valley(), D24::parseLine);
-        end = new Pos(valley.maxx-2, valley.maxy-1);
-        start = new Pos(1, 0);
+    static class ValleyEngine extends DefaultAppLogic {
 
-        assertEquals(264, solve(valley, start, end));
+        private final PlaneGeneratorSimple planeGeneratorSimple;
+        private final State state;
+
+        public ValleyEngine(State state) {
+            this.state = state;
+            this.planeGeneratorSimple = new PlaneGeneratorSimple(
+                    state.maxx, state.maxy,
+                    pos -> {
+                        // fixme convert to coords
+                        Pos p = new Pos((int)pos.xpos(), (int)pos.zpos());
+                        if(state.possibleLocations.contains(p))
+                            return new Vector3f(0.8f, 0.8f, 0.8f);
+                        if(state.blizzards.stream().map(b -> b.p).anyMatch(b -> b.equals(p)))
+                            return new Vector3f(0.8f, 0.3f, 0.3f);
+                        return new Vector3f(0.1f, 0.1f, 0.1f);
+                    });
+        }
+
+        @Override
+        public boolean update(Window window, Scene scene, long diffTimeMillis) {
+            boolean res = D24.step(state);
+            scene.addMesh("plane", planeGeneratorSimple.createMesh());
+            return res;
+        }
     }
 
     @Test
-    public void testSolveThreeWayTrip() {
-        Valley valley =
-                FileReader.readFileForObject("src/test/resources/2022/D24_t.txt",
-                        new Valley(), D24::parseLine);
-        Pos end = new Pos(valley.maxx-2, valley.maxy-1);
-        Pos start = new Pos(1, 0);
-        Pos start2 = new Pos(valley.maxx-2, valley.maxy-1);
-        Pos end2 = new Pos(1, 0);
+    public void testSolveOneWayTestTrip() {
+        State state = D24.createState("src/test/resources/2022/D24_t.txt");
+        state.reset(new Pos(1, 0), new Pos(state.maxx - 2, state.maxy - 1));
+        assertEquals(18, loopUntilComplete(state));
+    }
 
-        int trip1 = solve(valley, start, end);
-        assertEquals(18, trip1);
-        int trip2 = solve(valley, start2, end2);
-        print(valley, start2);
-        assertEquals(23, trip2);
-        int trip3 = solve(valley, start, end);
-        assertEquals(13, trip3);
+    @Test
+    public void testSolveOneWayTrip() {
+        State state = D24.createState("src/test/resources/2022/D24.txt");
+        state.reset(new Pos(1, 0), new Pos(state.maxx - 2, state.maxy - 1));
+        assertEquals(264, loopUntilComplete(state));
     }
 
     @Test
     public void testSolveThreeWayTrip2() {
-        Valley valley =
-                FileReader.readFileForObject("src/test/resources/2022/D24.txt",
-                        new Valley(), D24::parseLine);
-        Pos end = new Pos(valley.maxx-2, valley.maxy-1);
-        Pos start = new Pos(1, 0);
-        Pos start2 = new Pos(valley.maxx-2, valley.maxy-1);
-        Pos end2 = new Pos(1, 0);
+        State state = D24.createState("src/test/resources/2022/D24.txt");
 
-        int trip1 = solve(valley, start, end);
-        int trip2 = solve(valley, start2, end2);
-        int trip3 = solve(valley, start, end);
+        Pos start = new Pos(1, 0);
+        Pos end = new Pos(state.maxx-2, state.maxy-1);
+
+        state.reset(start, end);
+        int trip1 = loopUntilComplete(state);
+
+        state.reset(end, start);
+        int trip2 = loopUntilComplete(state);
+
+        state.reset(start, end);
+        int trip3 = loopUntilComplete(state);
+
         assertEquals(789, trip1+trip2+trip3);
     }
 
-    private static void print(Valley v, Pos pos) {
-        Map<Pos, List<Blizzard>> blizzardPos = new HashMap<>();
-        for(Blizzard b : v.blizzards) {
-            List<Blizzard> bb = blizzardPos.getOrDefault(b.p, new ArrayList<>());
-            bb.add(b);
-            blizzardPos.put(b.p, bb);
-        }
+    @Test
+    public void testSolveOneWayTripWithGraphics() {
+        State state = D24.createState("src/test/resources/2022/D24.txt");
+        state.reset(new Pos(1, 0), new Pos(state.maxx - 2, state.maxy - 1));
 
-        for (int y = 0; y < v.maxy; y++) {
-            for (int x = 0; x < v.maxx; x++) {
-                Pos p = new Pos(x, y);
+        ValleyEngine valleyEngine = new ValleyEngine(state);
+        Engine gameEng = new Engine("AdventOfCode - D24",
+                new Window.WindowOptions().setUps(100), valleyEngine);
+        gameEng.start();
+        assertEquals(264, valleyEngine.state.count);
+    }
 
-                if(pos != null && pos.equals(p)) {
-                    System.out.print("X");
-                } else if(blizzardPos.containsKey(p)) {
-                    int value = blizzardPos.get(p).size();
-                    if(value == 1) {
-                        switch (blizzardPos.get(p).get(0).d) {
-                            case N -> System.out.print("^");
-                            case S -> System.out.print("v");
-                            case W -> System.out.print("<");
-                            case E -> System.out.print(">");
-                            default -> System.out.print(" ");
-                        }
-                    } else {
-                        System.out.print(value);
-                    }
-                } else {
-                    System.out.print(".");
-                }
-            }
-            System.out.println("");
-        }
-        System.out.println("");
+    @Test
+    public void testSolveThreeWayTripWithGraphics() {
+        State state = D24.createState("src/test/resources/2022/D24.txt");
+
+        Pos start = new Pos(1, 0);
+        Pos end = new Pos(state.maxx-2, state.maxy-1);
+
+        ValleyEngine valleyEngine = new ValleyEngine(state);
+        Engine gameEng = new Engine("AdventOfCode - D24 - 1",
+                new Window.WindowOptions().setUps(100), valleyEngine);
+        state.reset(start, end);
+        gameEng.start();
+        int trip1 = valleyEngine.state.count;
+
+        valleyEngine = new ValleyEngine(state);
+        gameEng = new Engine("AdventOfCode - D24 - 2",
+                new Window.WindowOptions().setUps(100), valleyEngine);
+        state.reset(end, start);
+        gameEng.start();
+        int trip2 = valleyEngine.state.count;
+
+        valleyEngine = new ValleyEngine(state);
+        gameEng = new Engine("AdventOfCode - D24 - 3",
+                new Window.WindowOptions().setUps(100), valleyEngine);
+        state.reset(start, end);
+        gameEng.start();
+        int trip3 = valleyEngine.state.count;
+
+        assertEquals(789, trip1+trip2+trip3);
     }
 
 }
