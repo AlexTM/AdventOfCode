@@ -1,6 +1,12 @@
 package com.atom.adventofcode.y2022;
 
 import com.atom.adventofcode.common.FileReader;
+import com.atom.adventofcode.common.engine.DefaultAppLogic;
+import com.atom.adventofcode.common.engine.Engine;
+import com.atom.adventofcode.common.engine.Window;
+import com.atom.adventofcode.common.engine.scene.Scene;
+import com.atom.adventofcode.common.game.PlaneGeneratorSimple;
+import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -17,13 +23,23 @@ public class D22 {
     enum Turn {L, R}
     record Pos(int x, int y){}
     record Direction(Integer magnitude, Turn turn){}
-    record Result(Pos position, Orientation orientation){}
+    record Vector(Pos position, Orientation orientation){}
 
+    // fixme remove
     static class LoadingState {
         boolean loadingMap = true;
         Set<Pos> map = new HashSet<>();
         Set<Pos> walls = new HashSet<>();
         List<Direction> directions = new ArrayList<>();
+    }
+
+    static class State {
+        Set<Pos> map;
+        Set<Pos> walls;
+        List<Direction> directions;
+        int directionPosition = 0;
+        Vector vector;
+        int movements = 0;
     }
 
     private static LoadingState parseLine(LoadingState loadingState, String line, Integer lineNumber) {
@@ -55,7 +71,6 @@ public class D22 {
         return loadingState;
     }
 
-
     private static Orientation applyTurn(Orientation orientation, Turn turn) {
         return Orientation.values()[
                 Math.abs((orientation.ordinal() + (turn.equals(Turn.R) ? 1 : -1))) % Orientation.values().length];
@@ -79,132 +94,136 @@ public class D22 {
         };
     }
 
-    private static long setUpAndRun(
-            final Set<Pos> map,
-            final Set<Pos> walls,
-            final List<Direction> directions,
-            final Map<Pos, Orientation> trace) {
+    private static long result(Vector vector) {
+        return ((1+ vector.position.x)*4L) + ((1+ vector.position.y)*1000L) + vector.orientation.ordinal();
+    }
+
+    private static void step(State state) {
+
+        Direction d = state.directions.get(state.directionPosition);
+
+        Pos currentPosition = state.vector.position;
+        Orientation currentOrientation = state.vector.orientation;
+
+        if(d.turn != null) {
+            currentOrientation = applyTurn(currentOrientation, d.turn);
+            state.directionPosition++;
+            state.movements = 0;
+        } else if(d.magnitude != null) {
+            Pos newPos = applyStep(currentPosition, currentOrientation);
+
+            if (state.walls.contains(newPos)) {
+                state.directionPosition++;
+            } else if (state.map.contains(newPos)) {
+                currentPosition = newPos;
+            } else {
+                // gone off end of map, appear on other side
+                Pos p = offMap(state.map, currentPosition, currentOrientation);
+                if(state.walls.contains(p)) {
+                    state.directionPosition++;
+                } else {
+                    currentPosition = p;
+                }
+            }
+            if(++state.movements == d.magnitude) {
+                state.directionPosition++;
+            }
+        }
+        state.vector = new Vector(currentPosition, currentOrientation);
+    }
+
+    public State createState(LoadingState loadingState) {
+        State state = new State();
+        state.map = loadingState.map;
+        state.walls = loadingState.walls;
+        state.directions = loadingState.directions;
 
         // find the start position
-        Pos position = offMap(map, new Pos(0,0), Orientation.E);
-
-        // first direction will point correct Orientation of east
-        Result result = run(map, walls, directions, position, Orientation.E, trace);
-
-        return ((1+result.position.x)*4L)+((1+result.position.y)*1000L)+result.orientation.ordinal();
+        state.vector = new Vector(offMap(state.map, new Pos(0,0), Orientation.E), Orientation.E);
+        return state;
     }
 
+    static class MonkeyMapEngine extends DefaultAppLogic {
 
-    private static Result run(
-            final Set<Pos> map,
-            final Set<Pos> walls,
-            final List<Direction> directions,
-            Pos currentPosition,
-            Orientation currentOrientation,
-            final Map<Pos, Orientation> trace) {
+        private final PlaneGeneratorSimple planeGeneratorSimple;
+        private final State state;
+        private Set<Pos> tracePos = new HashSet<>();
+        int minx, miny, maxx, maxy;
 
-        for(Direction d : directions) {
-            if(d.turn != null) {
-                currentOrientation = applyTurn(currentOrientation, d.turn);
-                if (trace != null)
-                    trace.put(currentPosition, currentOrientation);
-            } else if(d.magnitude != null) {
-                for (int s = 0; s < d.magnitude; s++) {
-                    Pos newPos = applyStep(currentPosition, currentOrientation);
+        public MonkeyMapEngine(State state) {
+            this.state = state;
 
-                    if (walls.contains(newPos)) {
-                        break;
-                    } else if (map.contains(newPos)) {
-                        currentPosition = newPos;
-                    } else {
-                        // gone off end of map, appear on other side
-                        Pos p = offMap(map, currentPosition, currentOrientation);
-                        if(walls.contains(p)) {
-                            break;
-                        } else {
-                            currentPosition = p;
+            minx = state.map.stream().mapToInt(m -> m.x).min().orElseThrow();
+            miny = state.map.stream().mapToInt(m -> m.y).min().orElseThrow();
+            maxx = state.map.stream().mapToInt(m -> m.x).max().orElseThrow();
+            maxy = state.map.stream().mapToInt(m -> m.y).max().orElseThrow();
+
+            this.planeGeneratorSimple = new PlaneGeneratorSimple(
+                    minx, miny, maxx+10, maxy+10,
+                    (x, y) -> {
+                        // fixme convert to coords
+                        Pos p = new Pos(x, y);
+
+                        if(tracePos.contains(p)) {
+                            return new Vector3f(1.0f, 0.0f, 0.0f);
                         }
-                    }
-                    if (trace != null)
-                        trace.put(currentPosition, currentOrientation);
-                }
+
+                        if(state.walls.contains(p)) {
+                            return new Vector3f(0.8f, 0.8f, 0.8f);
+                        }
+
+                        if(state.map.contains(p)) {
+                            return new Vector3f(0.2f, 0.2f, 0.2f);
+                        }
+
+                        return new Vector3f(0.0f, 0.0f, 0.0f);
+                    });
+        }
+
+        @Override
+        public void update(Window window, Scene scene, long diffTimeMillis) {
+            step(state);
+            tracePos.add(state.vector.position);
+
+            if(scene != null) {
+                scene.addMesh("plane", planeGeneratorSimple.createMesh());
             }
         }
-        return new Result(currentPosition, currentOrientation);
-    }
-
-    private static void print(final Set<Pos> map, final Set<Pos> walls, final Map<Pos, Orientation> trace) {
-        int minx = Stream.of(walls, map).flatMap(Collection::stream).mapToInt(m -> m.x).min().orElseThrow();
-        int miny = Stream.of(walls, map).flatMap(Collection::stream).mapToInt(m -> m.y).min().orElseThrow();
-        int maxx = Stream.of(walls, map).flatMap(Collection::stream).mapToInt(m -> m.x).max().orElseThrow();
-        int maxy = Stream.of(walls, map).flatMap(Collection::stream).mapToInt(m -> m.y).max().orElseThrow();
-
-        for(int y=miny; y<maxy+1; y++) {
-            for (int x = minx; x <= maxx; x++) {
-                Pos p = new Pos(x, y);
-                if(trace.containsKey(p)) {
-                    switch(trace.get(p)) {
-                        case E -> System.out.print(">");
-                        case W -> System.out.print("<");
-                        case N -> System.out.print("^");
-                        case S -> System.out.print("v");
-                    }
-                } else if(walls.contains(p)) {
-                    System.out.print("#");
-                } else if(map.contains(p)) {
-                    System.out.print(".");
-                } else {
-                    System.out.print(" ");
-                }
-            }
-            System.out.println("");
-        }
-    }
-
-    @Test
-    public void testDirectionsOffMap() {
-
-        Map<Pos, Orientation> trace = new HashMap<>();
-        LoadingState loadingState =
-                FileReader.readFileForObject("src/test/resources/2022/D22_t1.txt", new LoadingState(), D22::parseLine);
-        Result r = run(loadingState.map, loadingState.walls, loadingState.directions,
-                new Pos(2,2), Orientation.N, trace);
-        print(loadingState.map, loadingState.walls, trace);
-        System.out.println(r);
-        assertEquals(new Pos(2,4), r.position);
-
-        trace = new HashMap<>();
-        r = run(loadingState.map, loadingState.walls, loadingState.directions,
-                new Pos(2,2), Orientation.S, trace);
-        print(loadingState.map, loadingState.walls, trace);
-        System.out.println(r);
-        assertEquals(new Pos(2, 0), r.position);
-
-        trace = new HashMap<>();
-        r = run(loadingState.map, loadingState.walls, loadingState.directions,
-                new Pos(2,2), Orientation.E, trace);
-        print(loadingState.map, loadingState.walls, trace);
-        System.out.println(r);
-        assertEquals(new Pos(0, 2), r.position);
-
-        trace = new HashMap<>();
-        r = run(loadingState.map, loadingState.walls, loadingState.directions,
-                new Pos(2,2), Orientation.W, trace);
-        print(loadingState.map, loadingState.walls, trace);
-        System.out.println(r);
-        assertEquals(new Pos(4, 2), r.position);
     }
 
     @Test
     public void testDirections() {
-        Map<Pos, Orientation> trace = new HashMap<>();
-        LoadingState loadingState =
-                FileReader.readFileForObject("src/test/resources/2022/D22_t.txt", new LoadingState(), D22::parseLine);
-        long res = setUpAndRun(loadingState.map, loadingState.walls, loadingState.directions, trace);
-        print(loadingState.map, loadingState.walls, trace);
-        assertEquals(6032, res);
+        State state = createState(
+                FileReader.readFileForObject(
+                        "src/test/resources/2022/D22_t.txt", new LoadingState(), D22::parseLine));
+
+        Engine gameEng = new Engine(
+                "AdventOfCode - D22",
+                new Window.WindowOptions().setGui(true).setUps(1).setWidth(500).setHeight(500),
+                new MonkeyMapEngine(state));
+
+        gameEng.start(() -> state.directions.size() == state.directionPosition);
+        assertEquals(6032, result(state.vector));
     }
 
+
+    @Test
+    public void testDirectionsWithGUI() {
+        LoadingState loadingState =
+                FileReader.readFileForObject("src/test/resources/2022/D22.txt", new LoadingState(), D22::parseLine);
+
+        State state = createState(loadingState);
+
+        MonkeyMapEngine engine = new MonkeyMapEngine(state);
+        Engine gameEng = new Engine("AdventOfCode - D22",
+                new Window.WindowOptions().setFps(10).setUps(200).setGui(true), engine);
+
+        gameEng.start(() -> state.directions.size() == state.directionPosition);
+        assertEquals(6032, result(state.vector));
+    }
+
+
+/*
     @Test
     public void testProblem() {
         Map<Pos, Orientation> trace = new HashMap<>();
@@ -212,6 +231,7 @@ public class D22 {
         // 8479
         // 89220
         // 89220
+        // 120247
         LoadingState loadingState =
                 FileReader.readFileForObject("src/test/resources/2022/D22.txt",
                         new LoadingState(), D22::parseLine);
@@ -220,4 +240,5 @@ public class D22 {
         assertNotEquals(89220, res);
         System.out.println("Res "+res);
     }
+*/
 }

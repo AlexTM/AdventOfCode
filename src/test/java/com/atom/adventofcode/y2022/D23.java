@@ -125,20 +125,11 @@ public class D23 {
         return count;
     }
 
-    @Test
-    public void testSpace3() {
-        List<Elf> posList =
-                FileReader.readFileForObject("src/test/resources/2022/D23_t1.txt", new ArrayList<>(), D23::parseLine);
-
-        for(int i=0; i<10; i++) {
-            step(posList);
-        }
-        assertEquals(110, countEmpty(posList));
-    }
-
     static class State {
         long count;
         List<Elf> elfList;
+        Set<Pos> elfSet;
+        long lastUpdated = -1;
     }
 
     static class CraterEngine extends DefaultAppLogic {
@@ -149,56 +140,39 @@ public class D23 {
         public CraterEngine(State state, int maxx, int maxy) {
             this.state = state;
             this.planeGeneratorSimple = new PlaneGeneratorSimple(
-                    maxx, maxy,
-                    pos -> {
-                        // fixme
-                        Set<Pos> posSet = state.elfList.stream().map(e -> e.p).collect(Collectors.toSet());
+                    0,0,maxx, maxy,
+                    (x, y) -> {
                         // fixme convert to coords
-
-                        Pos p = new Pos((int)pos.xpos(), (int)pos.zpos());
-                        if(posSet.contains(p))
+                        Pos p = new Pos(x, y);
+                        if(state.elfSet.contains(p))
                             return new Vector3f(0.8f, 0.3f, 0.3f);
                         return new Vector3f(0.1f, 0.1f, 0.1f);
                     });
         }
 
         @Override
-        public boolean update(Window window, Scene scene, long diffTimeMillis) {
-            int c = step(state.elfList);
+        public void update(Window window, Scene scene, long diffTimeMillis) {
+            state.lastUpdated = step(state.elfList);
+            state.count++;
 
             if(scene != null) {
+                state.elfSet = state.elfList.stream().map(e -> e.p).collect(Collectors.toSet());
                 scene.addMesh("plane", planeGeneratorSimple.createMesh());
             }
-            return c == 0;
         }
     }
 
-
     @Test
-    public void testSpace3WithGUI() {
+    public void testSpace3() {
         List<Elf> posList =
                 FileReader.readFileForObject("src/test/resources/2022/D23_t1.txt", new ArrayList<>(), D23::parseLine);
-        State state = new State();
-        state.elfList = posList;
+        for(int i=0; i<10; i++) {
+            step(posList);
+        }
+        assertEquals(110, countEmpty(posList));
 
-        CraterEngine engine = new CraterEngine(state, 10, 10);
-        Engine gameEng = new Engine("AdventOfCode - D24",
-                new Window.WindowOptions().setUps(5), engine);
-        gameEng.start(() -> state.count == 9);
-
-
-//        for(int i=0; i<10; i++) {
-//            step(posList);
-//        }
-        assertEquals(110, countEmpty(state.elfList));
-    }
-
-
-    @Test
-    public void testSpace2() {
-        List<Elf> posList =
+        posList =
                 FileReader.readFileForObject("src/test/resources/2022/D23.txt", new ArrayList<>(), D23::parseLine);
-
         for(int i=0; i<10; i++) {
             step(posList);
         }
@@ -222,5 +196,19 @@ public class D23 {
         posList =
                 FileReader.readFileForObject("src/test/resources/2022/D23.txt", new ArrayList<>(), D23::parseLine);
         assertEquals(992, runUntilComplete(posList));
+    }
+
+    @Test
+    public void testUntilCompleteWithGUI() {
+        List<Elf> posList =
+                FileReader.readFileForObject("src/test/resources/2022/D23.txt", new ArrayList<>(), D23::parseLine);
+        State state = new State();
+        state.elfList = posList;
+
+        CraterEngine engine = new CraterEngine(state, 200, 200);
+        Engine gameEng = new Engine("AdventOfCode - D23",
+                new Window.WindowOptions().setUps(30).setGui(true), engine);
+        gameEng.start(() -> state.lastUpdated == 0);
+        assertEquals(992, state.count);
     }
 }

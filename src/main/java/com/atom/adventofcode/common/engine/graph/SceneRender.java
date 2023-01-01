@@ -1,11 +1,9 @@
 package com.atom.adventofcode.common.engine.graph;
 
 import com.atom.adventofcode.common.engine.scene.Scene;
-import com.atom.adventofcode.common.game.GameService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static org.lwjgl.opengl.GL30.*;
 

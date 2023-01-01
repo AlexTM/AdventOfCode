@@ -31,6 +31,7 @@ public class D24 {
         Set<Pos> possibleLocations = new HashSet<>();
         Pos start, end;
         int count = 0;
+        boolean finished;
 
         public State reset(Pos start, Pos end) {
             this.start = start;
@@ -38,6 +39,7 @@ public class D24 {
             this.count = 0;
             this.possibleLocations = new HashSet<>();
             this.possibleLocations.add(start);
+            this.finished = false;
             return this;
         }
     }
@@ -151,10 +153,9 @@ public class D24 {
         public ValleyEngine(State state) {
             this.state = state;
             this.planeGeneratorSimple = new PlaneGeneratorSimple(
-                    state.maxx, state.maxy,
-                    pos -> {
-                        // fixme convert to coords
-                        Pos p = new Pos((int)pos.xpos(), (int)pos.zpos());
+                    0,0,state.maxx, state.maxy,
+                    (x, y) -> {
+                        Pos p = new Pos(x, y);
                         if(state.possibleLocations.contains(p))
                             return new Vector3f(0.8f, 0.8f, 0.8f);
                         if(state.blizzards.stream().map(b -> b.p).anyMatch(b -> b.equals(p)))
@@ -164,12 +165,11 @@ public class D24 {
         }
 
         @Override
-        public boolean update(Window window, Scene scene, long diffTimeMillis) {
-            boolean res = D24.step(state);
+        public void update(Window window, Scene scene, long diffTimeMillis) {
+            state.finished = D24.step(state);
             if(scene != null) {
                 scene.addMesh("plane", planeGeneratorSimple.createMesh());
             }
-            return res;
         }
     }
 
@@ -214,7 +214,7 @@ public class D24 {
         ValleyEngine valleyEngine = new ValleyEngine(state);
         Engine gameEng = new Engine("AdventOfCode - D24",
                 new Window.WindowOptions().setUps(100), valleyEngine);
-        gameEng.start();
+        gameEng.start(() -> state.finished);
         assertEquals(264, valleyEngine.state.count);
     }
 
@@ -222,7 +222,7 @@ public class D24 {
     public void testSolveThreeWayTripWithGraphics() {
         State state = D24.createState("src/test/resources/2022/D24.txt");
 
-        Window.WindowOptions options = new Window.WindowOptions().setUps(100).setGui(false);
+        Window.WindowOptions options = new Window.WindowOptions().setUps(100).setGui(true);
         Pos start = new Pos(1, 0);
         Pos end = new Pos(state.maxx-2, state.maxy-1);
 
@@ -230,21 +230,21 @@ public class D24 {
         Engine gameEng = new Engine("AdventOfCode - D24 - 1",
                 options, valleyEngine);
         state.reset(start, end);
-        gameEng.start();
+        gameEng.start(() -> state.finished);
         int trip1 = valleyEngine.state.count;
 
         valleyEngine = new ValleyEngine(state);
         gameEng = new Engine("AdventOfCode - D24 - 2",
                 options, valleyEngine);
         state.reset(end, start);
-        gameEng.start();
+        gameEng.start(() -> state.finished);
         int trip2 = valleyEngine.state.count;
 
         valleyEngine = new ValleyEngine(state);
         gameEng = new Engine("AdventOfCode - D24 - 3",
                 options, valleyEngine);
         state.reset(start, end);
-        gameEng.start();
+        gameEng.start(() -> state.finished);
         int trip3 = valleyEngine.state.count;
 
         assertEquals(789, trip1+trip2+trip3);

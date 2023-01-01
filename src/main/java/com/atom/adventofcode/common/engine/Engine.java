@@ -3,7 +3,6 @@ package com.atom.adventofcode.common.engine;
 import com.atom.adventofcode.common.engine.graph.Render;
 import com.atom.adventofcode.common.engine.scene.Scene;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Engine {
@@ -49,78 +48,25 @@ public class Engine {
         // Nothing to be done yet
     }
 
-    private void run() {
+    private void run(Supplier<Boolean> fn) {
         if(opts.gui)
-            runWithGUI();
+            runWithGUI(fn);
         else
-            runWithoutGUI();
+            runWithoutGUI(fn);
     }
 
-    private long runWithoutGUI() {
-        long updates = 0;
-        while(!appLogic.update(null, null, 0))
-            updates++;
-        return updates;
-    }
-
-    private void runWithGUI() {
-        init();
-
-        long initialTime = System.currentTimeMillis();
-        float timeU = 1000.0f / targetUps;
-        float timeR = targetFps > 0 ? 1000.0f / targetFps : 0;
-        float deltaUpdate = 0;
-        float deltaFps = 0;
-
-        long updateTime = initialTime;
-        while (running && !window.windowShouldClose()) {
-            window.pollEvents();
-
-            long now = System.currentTimeMillis();
-            deltaUpdate += (now - initialTime) / timeU;
-            deltaFps += (now - initialTime) / timeR;
-
-            if (targetFps <= 0 || deltaFps >= 1) {
-                appLogic.input(window, scene, now - initialTime);
-            }
-
-            if (deltaUpdate >= 1) {
-                long diffTimeMillis = now - updateTime;
-                if(appLogic.update(window, scene, diffTimeMillis)) {
-                    running = false;
-                }
-                updateTime = now;
-                deltaUpdate--;
-            }
-
-            if (targetFps <= 0 || deltaFps >= 1) {
-                render.render(window, scene);
-                deltaFps--;
-                window.update();
-            }
-            initialTime = now;
+    private void runWithoutGUI(Supplier<Boolean> fn) {
+        while(!fn.get()) {
+            appLogic.update(null, null, 0);
         }
-
-        cleanup();
     }
 
-    public void start() {
+    public void start(Supplier<Boolean> endCondition) {
         running = true;
-        run();
+        run(endCondition);
     }
 
-    public void start(Supplier<Boolean> fn) {
-        running = true;
-        runWithGUITmp(fn);
-    }
-
-
-    public void stop() {
-        running = false;
-    }
-
-
-    private void runWithGUITmp(Supplier<Boolean> fn) {
+    private void runWithGUI(Supplier<Boolean> fn) {
         init();
 
         long initialTime = System.currentTimeMillis();
@@ -143,10 +89,7 @@ public class Engine {
 
             if (deltaUpdate >= 1) {
                 long diffTimeMillis = now - updateTime;
-                // FIXME use endCondition instead
-                if(appLogic.update(window, scene, diffTimeMillis)) {
-                    running = false;
-                }
+                appLogic.update(window, scene, diffTimeMillis);
                 updateTime = now;
                 deltaUpdate--;
             }
