@@ -12,10 +12,8 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class D22 {
 
@@ -25,36 +23,29 @@ public class D22 {
     record Direction(Integer magnitude, Turn turn){}
     record Vector(Pos position, Orientation orientation){}
 
-    // fixme remove
-    static class LoadingState {
+    static class State {
         boolean loadingMap = true;
         Set<Pos> map = new HashSet<>();
         Set<Pos> walls = new HashSet<>();
         List<Direction> directions = new ArrayList<>();
-    }
-
-    static class State {
-        Set<Pos> map;
-        Set<Pos> walls;
-        List<Direction> directions;
         int directionPosition = 0;
         Vector vector;
         int movements = 0;
     }
 
-    private static LoadingState parseLine(LoadingState loadingState, String line, Integer lineNumber) {
+    private static State parseLine(State state, String line, Integer lineNumber) {
         if(line.isEmpty()) {
-            loadingState.loadingMap = false;
-            return loadingState;
+            state.loadingMap = false;
+            return state;
         }
-        if(loadingState.loadingMap) {
+        if(state.loadingMap) {
             for (int x = 0; x < line.length(); x++) {
                 char c = line.charAt(x);
                 if (c == '.') {
-                    loadingState.map.add(new Pos(x, lineNumber));
+                    state.map.add(new Pos(x, lineNumber));
                 } else if (c == '#') {
-                    loadingState.walls.add(new Pos(x, lineNumber));
-                    loadingState.map.add(new Pos(x, lineNumber));
+                    state.walls.add(new Pos(x, lineNumber));
+                    state.map.add(new Pos(x, lineNumber));
                 }
             }
         } else {
@@ -63,12 +54,14 @@ public class D22 {
             while(m.find()) {
                 String grp = m.group(1);
                 if(grp.equalsIgnoreCase("R") || grp.equalsIgnoreCase("L"))
-                    loadingState.directions.add(new Direction(null, Turn.valueOf(grp)));
+                    state.directions.add(new Direction(null, Turn.valueOf(grp)));
                 else
-                    loadingState.directions.add(new Direction(Integer.parseInt(grp), null));
+                    state.directions.add(new Direction(Integer.parseInt(grp), null));
             }
+            // find the start position
+            state.vector = new Vector(offMap(state.map, new Pos(0,0), Orientation.E), Orientation.E);
         }
-        return loadingState;
+        return state;
     }
 
     private static Orientation applyTurn(Orientation orientation, Turn turn) {
@@ -132,52 +125,38 @@ public class D22 {
         state.vector = new Vector(currentPosition, currentOrientation);
     }
 
-    public State createState(LoadingState loadingState) {
-        State state = new State();
-        state.map = loadingState.map;
-        state.walls = loadingState.walls;
-        state.directions = loadingState.directions;
-
-        // find the start position
-        state.vector = new Vector(offMap(state.map, new Pos(0,0), Orientation.E), Orientation.E);
-        return state;
-    }
-
     static class MonkeyMapEngine extends DefaultAppLogic {
 
         private final PlaneGeneratorSimple planeGeneratorSimple;
+        private final Set<Pos> tracePos = new HashSet<>();
         private final State state;
-        private Set<Pos> tracePos = new HashSet<>();
-        int minx, miny, maxx, maxy;
 
         public MonkeyMapEngine(State state) {
             this.state = state;
 
-            minx = state.map.stream().mapToInt(m -> m.x).min().orElseThrow();
-            miny = state.map.stream().mapToInt(m -> m.y).min().orElseThrow();
-            maxx = state.map.stream().mapToInt(m -> m.x).max().orElseThrow();
-            maxy = state.map.stream().mapToInt(m -> m.y).max().orElseThrow();
+            int minx = state.map.stream().mapToInt(m -> m.x).min().orElseThrow();
+            int miny = state.map.stream().mapToInt(m -> m.y).min().orElseThrow();
+            int maxx = state.map.stream().mapToInt(m -> m.x).max().orElseThrow();
+            int maxy = state.map.stream().mapToInt(m -> m.y).max().orElseThrow()+1;
 
             this.planeGeneratorSimple = new PlaneGeneratorSimple(
-                    minx, miny, maxx+10, maxy+10,
-                    (x, y) -> {
-                        // fixme convert to coords
-                        Pos p = new Pos(x, y);
+                    minx, miny, maxx+10, maxy+10, (x, y) -> {
+                    Pos p = new Pos(x, maxy - y-1);
 
-                        if(tracePos.contains(p)) {
-                            return new Vector3f(1.0f, 0.0f, 0.0f);
-                        }
+                    if(tracePos.contains(p)) {
+                        return new Vector3f(1.0f, 0.0f, 0.0f);
+                    }
 
-                        if(state.walls.contains(p)) {
-                            return new Vector3f(0.8f, 0.8f, 0.8f);
-                        }
+                    if(state.walls.contains(p)) {
+                        return new Vector3f(0.8f, 0.8f, 0.8f);
+                    }
 
-                        if(state.map.contains(p)) {
-                            return new Vector3f(0.2f, 0.2f, 0.2f);
-                        }
+                    if(state.map.contains(p)) {
+                        return new Vector3f(0.2f, 0.2f, 0.2f);
+                    }
 
-                        return new Vector3f(0.0f, 0.0f, 0.0f);
-                    });
+                    return new Vector3f(0.0f, 0.0f, 0.0f);
+                });
         }
 
         @Override
@@ -193,9 +172,9 @@ public class D22 {
 
     @Test
     public void testDirections() {
-        State state = createState(
-                FileReader.readFileForObject(
-                        "src/test/resources/2022/D22_t.txt", new LoadingState(), D22::parseLine));
+        State state =
+                FileReader.readFileForObject("src/test/resources/2022/D22_t.txt",
+                        new State(), D22::parseLine);
 
         Engine gameEng = new Engine(
                 "AdventOfCode - D22",
@@ -206,17 +185,15 @@ public class D22 {
         assertEquals(6032, result(state.vector));
     }
 
-
     @Test
     public void testDirectionsWithGUI() {
-        LoadingState loadingState =
-                FileReader.readFileForObject("src/test/resources/2022/D22.txt", new LoadingState(), D22::parseLine);
+        State state =
+                FileReader.readFileForObject("src/test/resources/2022/D22.txt",
+                        new State(), D22::parseLine);
 
-        State state = createState(loadingState);
-
-        MonkeyMapEngine engine = new MonkeyMapEngine(state);
         Engine gameEng = new Engine("AdventOfCode - D22",
-                new Window.WindowOptions().setFps(10).setUps(200).setGui(true), engine);
+                new Window.WindowOptions().setFps(10).setUps(200).setGui(true),
+                new MonkeyMapEngine(state));
 
         gameEng.start(() -> state.directions.size() == state.directionPosition);
         assertEquals(6032, result(state.vector));

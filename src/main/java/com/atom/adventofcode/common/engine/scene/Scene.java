@@ -14,11 +14,14 @@ public class Scene {
     }
 
     public void addMesh(String meshId, Mesh mesh) {
+        if(meshMap.containsKey(meshId)) {
+            meshMap.get(meshId).cleanup();
+        }
         meshMap.put(meshId, mesh);
     }
 
     public void cleanup() {
-        meshMap.values().stream().forEach(Mesh::cleanup);
+        meshMap.values().forEach(Mesh::cleanup);
     }
 
     public Map<String, Mesh> getMeshMap() {

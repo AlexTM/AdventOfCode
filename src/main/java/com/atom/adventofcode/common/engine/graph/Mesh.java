@@ -18,7 +18,7 @@ public class Mesh {
     private List<Integer> vboIdList;
 
     public Mesh(float[] positions, float[] colours, int[] indices) {
-        try (MemoryStack stack = MemoryStack.stackPush()) {
+//        try (MemoryStack stack = MemoryStack.stackPush()) {
             this.numVertices = indices.length;
             vboIdList = new ArrayList<>();
 
@@ -56,10 +56,13 @@ public class Mesh {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboId);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL_STATIC_DRAW);
 
-
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindVertexArray(0);
-        }
+
+            MemoryUtil.memFree(indicesBuffer);
+            MemoryUtil.memFree(coloursBuffer);
+            MemoryUtil.memFree(positionsBuffer);
+//        }
     }
 
     public void cleanup() {

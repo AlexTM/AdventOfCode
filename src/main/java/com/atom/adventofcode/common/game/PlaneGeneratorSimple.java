@@ -4,17 +4,19 @@ import com.atom.adventofcode.common.engine.ColorGenerator;
 import com.atom.adventofcode.common.engine.graph.Mesh;
 import org.joml.Vector3f;
 
-import java.util.stream.IntStream;
-
+/**
+ * Grid
+ */
 public class PlaneGeneratorSimple {
 
     private final int xSize, ySize;
-    private final int x1,y1,x2,y2;
+    private final int x1,y1;
     private int[] idx = null;
     private float[] shapes = null;
     private final ColorGenerator colorGenerator;
+    private final float xDelta, yDelta;
 
-    public record Pos(int x, int y){};
+    public record Pos(int x, int y){}
     record Triangle(int p1, int p2, int p3){
         public void copy(int[] indexes, int p) {
             indexes[p++] = p1;
@@ -32,25 +34,21 @@ public class PlaneGeneratorSimple {
     }
 
     private int coordsToIndex(int x, int y) {
-        return (x - x1) + ((y - y1) * (xSize + 1));
-    }
-
-    private Pos indexToPos(int c) {
-        return new Pos(x1 + c % (xSize + 1), y1 + c / (xSize + 1));
+        return (x) + ((y) * (xSize + 1));
     }
 
     public PlaneGeneratorSimple(int x1, int y1, int x2, int y2, ColorGenerator colorGenerator) {
         this.x1 = x1;
-        this.x2 = x2;
         this.y1 = y1;
-        this.y2 = y2;
         this.xSize = x2-x1;
         this.ySize = y2-y1;
         this.colorGenerator = colorGenerator;
+        this.xDelta = 1f/xSize;
+        this.yDelta = 1f/ySize;
     }
 
     private int getNumberOfVertex() {
-        return (ySize +1)*(xSize +1);
+        return (ySize+1)*(xSize+1);
     }
 
     public Mesh createMesh() {
@@ -65,15 +63,16 @@ public class PlaneGeneratorSimple {
         return new SquareIdx(topLeft, topRight, bottomLeft, bottomRight);
     }
 
-    private int[] generateIndices() {
+    protected int[] generateIndices() {
         if(idx != null)
             return idx;
 
         idx = new int[xSize * ySize * 6];
         int c = 0;
-        for(int j=y1; j<y2; j++) {
-            for(int i=x1; i<x2; i++) {
-                SquareIdx vm = getMapping(i, j);
+
+        for(int y=0; y<ySize; y++) {
+            for(int x=0; x<xSize; x++) {
+                SquareIdx vm = getMapping(x, y);
                 vm.getTriangleA().copy(idx, c);
                 vm.getTriangleB().copy(idx, c+3);
                 c = c + 6;
@@ -82,32 +81,35 @@ public class PlaneGeneratorSimple {
         return idx;
     }
 
-    private float[] generateShape() {
+    protected float[] generateShape() {
         if(shapes != null)
             return shapes;
 
         shapes = new float[getNumberOfVertex()*3];
-        for(int i=0; i<shapes.length/3; i++) {
-            Pos p = indexToPos(i);
-            shapes[i*3] = (float)p.x/xSize - 0.1f;
-            shapes[(i*3)+1] = (float)p.y/ySize - 0.1f;
-            shapes[(i*3)+2] = 0f;
+
+        for(int y=0; y<=ySize; y++) {
+            for(int x=0; x<=xSize; x++) {
+                int i = coordsToIndex(x, y);
+                shapes[i*3] = (float)x * xDelta;
+                shapes[(i*3)+1] = (float)y * yDelta;
+                shapes[(i*3)+2] = 0f;
+            }
         }
         return shapes;
     }
 
-    private float[] generateColors() {
+    protected float[] generateColors() {
         float[] colors = new float[getNumberOfVertex()*3];
 
-        // FIXME this is unnecessarily complicated
-        IntStream.range(0, getNumberOfVertex()).forEach(i -> {
-            Pos p = indexToPos(i);
-            Vector3f vec = colorGenerator.getColor(p.x, ySize - p.y);
-            colors[i*3] = vec.x;
-            colors[(i*3)+1] = vec.y;
-            colors[(i*3)+2] = vec.z;
-        });
-
+        for(int y=0; y<=ySize; y++) {
+            for(int x=0; x<=xSize; x++) {
+                int i = coordsToIndex(x, y);
+                Vector3f vec = colorGenerator.getColor(x-x1, y-y1);
+                colors[i*3] = vec.x;
+                colors[(i*3)+1] = vec.y;
+                colors[(i*3)+2] = vec.z;
+            }
+        }
         return colors;
     }
 }

@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -111,52 +110,37 @@ public class D23 {
         int miny = elfList.stream().mapToInt(e -> e.p.y).min().orElseThrow();
         int maxx = elfList.stream().mapToInt(e -> e.p.x).max().orElseThrow();
         int maxy = elfList.stream().mapToInt(e -> e.p.y).max().orElseThrow();
-        int count = 0;
-
         Set<Pos> elfSet = elfList.stream().map(e -> e.p).collect(Collectors.toSet());
-
-        for (int y = miny; y <= maxy; y++) {
-            for (int x = minx; x <= maxx; x++) {
-                if(!elfSet.contains(new Pos(x, y))) {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
-
-    static class State {
-        long count;
-        List<Elf> elfList;
-        Set<Pos> elfSet;
-        long lastUpdated = -1;
+        return (1+maxx - minx) * (1+maxy - miny) - elfSet.size();
     }
 
     static class CraterEngine extends DefaultAppLogic {
 
         private final PlaneGeneratorSimple planeGeneratorSimple;
-        private final State state;
+        final List<Elf> elfList;
+        long count = 0;
+        Set<Pos> elfSet;
+        long lastUpdated = -1;
 
-        public CraterEngine(State state, int maxx, int maxy) {
-            this.state = state;
+        public CraterEngine(int maxx, int maxy, List<Elf> elfList) {
+            this.elfList = elfList;
             this.planeGeneratorSimple = new PlaneGeneratorSimple(
-                    0,0,maxx, maxy,
+                    20,20,20+maxx, 20+maxy,
                     (x, y) -> {
-                        // fixme convert to coords
                         Pos p = new Pos(x, y);
-                        if(state.elfSet.contains(p))
-                            return new Vector3f(0.8f, 0.3f, 0.3f);
+                        if(elfSet.contains(p))
+                            return new Vector3f(0.3f, 0.8f, 0.3f);
                         return new Vector3f(0.1f, 0.1f, 0.1f);
                     });
         }
 
         @Override
         public void update(Window window, Scene scene, long diffTimeMillis) {
-            state.lastUpdated = step(state.elfList);
-            state.count++;
+            lastUpdated = step(elfList);
+            count++;
 
             if(scene != null) {
-                state.elfSet = state.elfList.stream().map(e -> e.p).collect(Collectors.toSet());
+                elfSet = elfList.stream().map(e -> e.p).collect(Collectors.toSet());
                 scene.addMesh("plane", planeGeneratorSimple.createMesh());
             }
         }
@@ -202,13 +186,11 @@ public class D23 {
     public void testUntilCompleteWithGUI() {
         List<Elf> posList =
                 FileReader.readFileForObject("src/test/resources/2022/D23.txt", new ArrayList<>(), D23::parseLine);
-        State state = new State();
-        state.elfList = posList;
 
-        CraterEngine engine = new CraterEngine(state, 200, 200);
+        CraterEngine engine = new CraterEngine(200, 200, posList);
         Engine gameEng = new Engine("AdventOfCode - D23",
                 new Window.WindowOptions().setUps(30).setGui(true), engine);
-        gameEng.start(() -> state.lastUpdated == 0);
-        assertEquals(992, state.count);
+        gameEng.start(() -> engine.lastUpdated == 0);
+        assertEquals(992, engine.count);
     }
 }
