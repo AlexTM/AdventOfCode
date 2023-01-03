@@ -4,6 +4,7 @@ import com.atom.adventofcode.common.FileReader;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -15,7 +16,8 @@ public class D16 {
     record Edge(String name, int rate, List<String> edges){};
 
     // Valve AA has flow rate=0; tunnels lead to valves DD, II, BB
-    private static Pattern p = Pattern.compile("Valve (..) has flow rate=(\\d+); tunnel(s?) lead(s?) to valve(s?) (.*)");
+    private static Pattern p =
+            Pattern.compile("Valve (..) has flow rate=(\\d+); tunnel(s?) lead(s?) to valve(s?) (.*)");
 
     private static Map<String, Edge> parseLine(String line, Map<String, Edge> sensors) {
         Matcher m = p.matcher(line);
@@ -54,11 +56,19 @@ public class D16 {
         return distanceFromStart;
     }
 
+    record Person(int remainingTime, String pos){};
+
     private int goDeep(final Map<String, Edge> m,
                        final Map<String, Map<String, Integer>> dist,
-                       int remainingTime,
-                       String pos,
+                       final Person me,
+                       final Person elephant,
                        final Set<String> remaining) {
+
+//        Person current = me.remainingTime > elephant.remainingTime ? me : elephant;
+        Person current = me;
+
+        String pos = current.pos;
+        int remainingTime = current.remainingTime;
 
         Map<String, Integer> distFromPos = dist.get(pos);
         Edge node = m.get(pos);
@@ -72,40 +82,60 @@ public class D16 {
             remainingTime--;
             impact += remainingTime * node.rate;
         }
+        final int rem = remainingTime;
 
-        int max = 0;
-        for(String p : remaining) {
-            if(distFromPos.get(p) < remainingTime) {
-                max = Math.max(max,
-                                goDeep(m, dist, remainingTime - distFromPos.get(p), p, next));
-            }
-        }
-        return impact+max;
+        return impact + next.stream().filter(p -> distFromPos.get(p) < rem)
+                .mapToInt(p -> goDeep(m, dist,
+                        new Person(rem - distFromPos.get(p), p),
+                        elephant, next))
+                .max().orElse(0);
     }
 
 
-    private int calculateDistanceFromNode(final Map<String, Edge> m) {
-        Map<String, Map<String, Integer>> dist = new HashMap<>();
+    private int calculateDistanceFromNode(final Map<String, Edge> m, final int remainingTime) {
 
         // Get dist to all nodes from every other node
-        for(String s : m.keySet())
-            dist.put(s, doDijkstra(m, s));
+        Map<String, Map<String, Integer>> dist =
+                m.keySet().stream().collect(
+                        Collectors.toMap(Function.identity(), s -> doDijkstra(m , s)));
 
-        System.out.println(dist);
-
-        Set<String> nonZero = m.values().stream().filter(s -> s.rate != 0).map(s -> s.name).collect(Collectors.toSet());
+        Set<String> nonZero = m.values().stream()
+                .filter(s -> s.rate != 0).map(s -> s.name).collect(Collectors.toSet());
         nonZero.add("AA");
 
         // do depth
-        return goDeep(m, dist, 30, "AA", nonZero);
+        return goDeep(m, dist, new Person(remainingTime, "AA"),
+                new Person(remainingTime, "AA"), nonZero);
     }
 
 
-    // FIXME not working
     @Test
     public void testValves() {
-        Map<String, Edge> m = FileReader.readFileForObject("src/test/resources/2022/D16_t.txt", new HashMap<>(), D16::parseLine);
-        System.out.println(m);
-        assertEquals(1651, calculateDistanceFromNode(m));
+        assertEquals(1651,
+                calculateDistanceFromNode(
+                        FileReader.readFileForObject("src/test/resources/2022/D16_t.txt", new HashMap<>(), D16::parseLine)
+                        ,30
+                ));
+
+        assertEquals(1584,
+                calculateDistanceFromNode(
+                        FileReader.readFileForObject("src/test/resources/2022/D16.txt", new HashMap<>(), D16::parseLine)
+                        ,30
+                ));
     }
+
+    @Test
+    public void testValvesWithTwo() {
+        assertEquals(1707,
+                calculateDistanceFromNode(
+                        FileReader.readFileForObject("src/test/resources/2022/D16_t.txt", new HashMap<>(), D16::parseLine)
+                        ,26
+                ));
+
+//        assertEquals(1584,
+//                calculateDistanceFromNode(
+//                        FileReader.readFileForObject("src/test/resources/2022/D16.txt", new HashMap<>(), D16::parseLine)
+//                ));
+    }
+
 }
