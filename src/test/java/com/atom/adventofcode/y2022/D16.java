@@ -58,41 +58,53 @@ public class D16 {
 
     record Person(int remainingTime, String pos){};
 
-    private int goDeep(final Map<String, Edge> m,
+    private int goDeep(final Map<String, Edge> map,
                        final Map<String, Map<String, Integer>> dist,
-                       final Person me,
-                       final Person elephant,
+                       final List<Person> people,
                        final Set<String> remaining) {
 
-//        Person current = me.remainingTime > elephant.remainingTime ? me : elephant;
-        Person current = me;
+        // sort by remaining time
+        int biggerMax = 0;
+        for (int i = 0; i < people.size(); i++) {
+            Person current = people.get(i);
 
-        String pos = current.pos;
-        int remainingTime = current.remainingTime;
+//            System.out.println(current);
 
-        Map<String, Integer> distFromPos = dist.get(pos);
-        Edge node = m.get(pos);
+            String pos = current.pos;
+            int remainingTime = current.remainingTime;
 
-        Set<String> next = new HashSet<>(remaining);
-        next.remove(pos);
+            Map<String, Integer> distFromPos = dist.get(pos);
+            Edge node = map.get(pos);
 
-        int impact = 0;
-        // must account for speical case "AA"
-        if(node.rate != 0) {
-            remainingTime--;
-            impact += remainingTime * node.rate;
+            int impact = 0;
+            if (node.rate != 0)
+                impact += --remainingTime * node.rate;
+
+            int max = 0;
+            for (String p : remaining) {
+                if (distFromPos.get(p) < remainingTime) {
+                    List<Person> newList = new ArrayList<>(people);
+                    newList.set(i, new Person(remainingTime - distFromPos.get(p), p));
+                    Set<String> nextTwo = new HashSet<>(remaining);
+                    nextTwo.remove(p);
+                    max = Math.max(max, goDeep(map, dist, newList, nextTwo));
+                }
+            }
+            biggerMax = Math.max(biggerMax, impact + max);
         }
-        final int rem = remainingTime;
-
-        return impact + next.stream().filter(p -> distFromPos.get(p) < rem)
-                .mapToInt(p -> goDeep(m, dist,
-                        new Person(rem - distFromPos.get(p), p),
-                        elephant, next))
-                .max().orElse(0);
+        return biggerMax;
     }
+//        return impact + next.stream().filter(p -> distFromPos.get(p) < rem)
+//                .mapToInt(p -> {
+//                    List<Person> newList = new ArrayList<>(people);
+//                    newList.set(0, new Person(rem - distFromPos.get(p), p));
+//                    return goDeep(m, dist, newList, next);
+//                })
+//                .max().orElse(0);
 
 
-    private int calculateDistanceFromNode(final Map<String, Edge> m, final int remainingTime) {
+    private int calculateDistanceFromNode(
+            final Map<String, Edge> m, final List<Person> people) {
 
         // Get dist to all nodes from every other node
         Map<String, Map<String, Integer>> dist =
@@ -101,26 +113,24 @@ public class D16 {
 
         Set<String> nonZero = m.values().stream()
                 .filter(s -> s.rate != 0).map(s -> s.name).collect(Collectors.toSet());
-        nonZero.add("AA");
 
         // do depth
-        return goDeep(m, dist, new Person(remainingTime, "AA"),
-                new Person(remainingTime, "AA"), nonZero);
+        return goDeep(m, dist, new ArrayList<>(people), nonZero);
     }
-
 
     @Test
     public void testValves() {
+
         assertEquals(1651,
                 calculateDistanceFromNode(
                         FileReader.readFileForObject("src/test/resources/2022/D16_t.txt", new HashMap<>(), D16::parseLine)
-                        ,30
+                        , List.of(new Person(30, "AA"))
                 ));
 
         assertEquals(1584,
                 calculateDistanceFromNode(
                         FileReader.readFileForObject("src/test/resources/2022/D16.txt", new HashMap<>(), D16::parseLine)
-                        ,30
+                        , List.of(new Person(30, "AA"))
                 ));
     }
 
@@ -129,7 +139,7 @@ public class D16 {
         assertEquals(1707,
                 calculateDistanceFromNode(
                         FileReader.readFileForObject("src/test/resources/2022/D16_t.txt", new HashMap<>(), D16::parseLine)
-                        ,26
+                        , List.of(new Person(26, "AA"), new Person(26, "AA"))
                 ));
 
 //        assertEquals(1584,
