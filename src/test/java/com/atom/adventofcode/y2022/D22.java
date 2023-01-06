@@ -10,10 +10,13 @@ import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 public class D22 {
 
@@ -59,14 +62,24 @@ public class D22 {
                     state.directions.add(new Direction(Integer.parseInt(grp), null));
             }
             // find the start position
-            state.vector = new Vector(offMap(state.map, new Pos(0,0), Orientation.E), Orientation.E);
+            state.vector = offBasicMap(state.map, new Pos(0,0), Orientation.E);
         }
         return state;
     }
 
     private static Orientation applyTurn(Orientation orientation, Turn turn) {
-        return Orientation.values()[
-                Math.abs((orientation.ordinal() + (turn.equals(Turn.R) ? 1 : -1))) % Orientation.values().length];
+        int p = Turn.R.equals(turn) ? orientation.ordinal() + 1 : orientation.ordinal() - 1;
+        if(p < 0)
+            p += 4;
+        if(p > 3)
+            p -= 4;
+        return Orientation.values()[p];
+//        return Orientation.values()[
+//                Math.abs((orientation.ordinal() + (turn.equals(Turn.R) ? 1 : -1))) % Orientation.values().length];
+    }
+
+    interface TriFunction {
+        Vector apply(Set<Pos> map, Pos p, Orientation o);
     }
 
     private static Pos applyStep(Pos pos, Orientation orientation) {
@@ -78,20 +91,54 @@ public class D22 {
         };
     }
 
-    private static Pos offMap(Set<Pos> map, Pos p, Orientation orientation) {
-        return switch(orientation) {
+    private static Vector offBasicMap(Set<Pos> map, Pos p, Orientation orientation) {
+        Pos np = switch(orientation) {
             case N -> new Pos(p.x, map.stream().filter(m -> m.x == p.x).mapToInt(m -> m.y).max().orElseThrow());
             case S -> new Pos(p.x, map.stream().filter(m -> m.x == p.x).mapToInt(m -> m.y).min().orElseThrow());
             case W -> new Pos(map.stream().filter(m -> m.y == p.y).mapToInt(m -> m.x).max().orElseThrow(), p.y);
             case E -> new Pos(map.stream().filter(m -> m.y == p.y).mapToInt(m -> m.x).min().orElseThrow(), p.y);
         };
+        return new Vector(np, orientation);
     }
 
-    private static long result(Vector vector) {
+    private static long resultWithOrientation(Vector vector) {
         return ((1+ vector.position.x)*4L) + ((1+ vector.position.y)*1000L) + vector.orientation.ordinal();
     }
 
-    private static void step(State state) {
+    private static void step(State state, TriFunction fn) {
+
+        Direction d = state.directions.get(state.directionPosition);
+
+        Pos currentPosition = state.vector.position;
+        Orientation currentOrientation = state.vector.orientation;
+
+        if(d.turn != null) {
+            currentOrientation = applyTurn(currentOrientation, d.turn);
+            state.directionPosition++;
+        } else if(d.magnitude != null) {
+            for(int t = 0; t<d.magnitude; t++) {
+                Pos newPos = applyStep(currentPosition, currentOrientation);
+                if (state.walls.contains(newPos)) {
+                    break;
+                } else if (state.map.contains(newPos)) {
+                    currentPosition = newPos;
+                } else {
+                    // gone off end of map, appear on other side
+                    Vector newVector = fn.apply(state.map, currentPosition, currentOrientation);
+                    if (state.walls.contains(newVector.position)) {
+                        break;
+                    } else {
+                        currentPosition = newVector.position;
+                        currentOrientation = newVector.orientation;
+                    }
+                }
+            }
+            state.directionPosition++;
+        }
+        state.vector = new Vector(currentPosition, currentOrientation);
+    }
+
+/*    private static void step(State state) {
 
         Direction d = state.directions.get(state.directionPosition);
 
@@ -107,32 +154,37 @@ public class D22 {
 
             if (state.walls.contains(newPos)) {
                 state.directionPosition++;
+                state.movements = 0;
             } else if (state.map.contains(newPos)) {
                 currentPosition = newPos;
             } else {
                 // gone off end of map, appear on other side
-                Pos p = offMap(state.map, currentPosition, currentOrientation);
-                if(state.walls.contains(p)) {
+                newPos = offMap(state.map, currentPosition, currentOrientation);
+                if(state.walls.contains(newPos)) {
                     state.directionPosition++;
+                    state.movements = 0;
                 } else {
-                    currentPosition = p;
+                    currentPosition = newPos;
                 }
             }
             if(++state.movements == d.magnitude) {
                 state.directionPosition++;
+                state.movements = 0;
             }
         }
         state.vector = new Vector(currentPosition, currentOrientation);
-    }
+    }*/
 
     static class MonkeyMapEngine extends DefaultAppLogic {
 
         private final PlaneGeneratorSimple planeGeneratorSimple;
         private final Set<Pos> tracePos = new HashSet<>();
         private final State state;
+        private final TriFunction fn;
 
-        public MonkeyMapEngine(State state) {
+        public MonkeyMapEngine(State state, TriFunction fn) {
             this.state = state;
+            this.fn = fn;
 
             int minx = state.map.stream().mapToInt(m -> m.x).min().orElseThrow();
             int miny = state.map.stream().mapToInt(m -> m.y).min().orElseThrow();
@@ -161,7 +213,7 @@ public class D22 {
 
         @Override
         public void update(Window window, Scene scene, long diffTimeMillis) {
-            step(state);
+            step(state, fn);
             tracePos.add(state.vector.position);
 
             if(scene != null) {
@@ -171,18 +223,18 @@ public class D22 {
     }
 
     @Test
-    public void testDirections() {
+    public void testDirectionsTestcase() {
         State state =
                 FileReader.readFileForObject("src/test/resources/2022/D22_t.txt",
                         new State(), D22::parseLine);
 
         Engine gameEng = new Engine(
                 "AdventOfCode - D22",
-                new Window.WindowOptions().setGui(true).setUps(1).setWidth(500).setHeight(500),
-                new MonkeyMapEngine(state));
+                new Window.WindowOptions().setGui(false).setUps(1).setWidth(500).setHeight(500),
+                new MonkeyMapEngine(state, D22::offBasicMap));
 
         gameEng.start(() -> state.directions.size() == state.directionPosition);
-        assertEquals(6032, result(state.vector));
+        assertEquals(6032, resultWithOrientation(state.vector));
     }
 
     @Test
@@ -192,30 +244,65 @@ public class D22 {
                         new State(), D22::parseLine);
 
         Engine gameEng = new Engine("AdventOfCode - D22",
-                new Window.WindowOptions().setFps(10).setUps(200).setGui(true),
-                new MonkeyMapEngine(state));
+                new Window.WindowOptions().setFps(10).setUps(200).setGui(false),
+                new MonkeyMapEngine(state, D22::offBasicMap));
 
         gameEng.start(() -> state.directions.size() == state.directionPosition);
-        assertEquals(6032, result(state.vector));
+        assertEquals(197160, resultWithOrientation(state.vector));
     }
 
+    static final Map<Pos, Integer> faces = Map.of(
+                new Pos(2,0), 1,
+                new Pos(0,1), 2,
+                new Pos(1,1), 3,
+                new Pos(2,1), 4,
+                new Pos(2,2), 5,
+                new Pos(3,2), 6);
 
-/*
+    // fixme forget vector
+    record CubeMap(Integer i, Orientation o){};
+    record CoordMap(BiFunction<Integer, Integer, Integer> xFn, BiFunction<Integer, Integer, Integer> yFn){};
+    static final Map<CubeMap, CoordMap> mappingFns = Map.of(
+            new CubeMap(1, Orientation.N), new CoordMap((x,s) -> s-x, (y, s) -> s));
+
+    //            new CubeMap(1, Orientation.W), (p, s) -> { return p; },
+//            new CubeMap(1, Orientation.E), (p, s) -> { return p; },
+//            new CubeMap(2, Orientation.N), (p, s) -> new Vector(new Pos((s*3)-1-p.x, 0), Orientation.S)
+
+  //  );
+
+    private static int getFace(Pos p, int size) {
+        return faces.get(new Pos(p.x/size, p.y/size));
+    }
+
+    private static Vector offCubeMap(Set<Pos> map, Pos p, Orientation orientation) {
+        int size = 4;
+        int face = getFace(p, size);
+        return mappingFns.get(new CubeMap(face, orientation)).apply(p, 4);
+    }
+
+    private static long resultWithFace(Vector vector, int size) {
+        return ((1+ vector.position.x)*4L) + ((1+ vector.position.y)*1000L) + getFace(vector.position, size);
+    }
+
     @Test
-    public void testProblem() {
-        Map<Pos, Orientation> trace = new HashMap<>();
-        // 44556
-        // 8479
-        // 89220
-        // 89220
-        // 120247
-        LoadingState loadingState =
-                FileReader.readFileForObject("src/test/resources/2022/D22.txt",
-                        new LoadingState(), D22::parseLine);
-        long res = setUpAndRun(loadingState.map, loadingState.walls, loadingState.directions, trace);
-//        print(loadingState.map, loadingState.walls, trace);
-        assertNotEquals(89220, res);
-        System.out.println("Res "+res);
+    public void testDirectionsTestcaseTwo() {
+        State state =
+                FileReader.readFileForObject("src/test/resources/2022/D22_t.txt",
+                        new State(), D22::parseLine);
+
+        Engine gameEng = new Engine(
+                "AdventOfCode - D22",
+                new Window.WindowOptions().setGui(false).setUps(1).setWidth(500).setHeight(500),
+                new MonkeyMapEngine(state, D22::offCubeMap));
+
+        gameEng.start(() -> state.directions.size() == state.directionPosition);
+        assertEquals(5031, resultWithFace(state.vector, 4));
     }
-*/
+
+    @Test
+    public void testEdgeCases() {
+        assertEquals(new Vector(new Pos(0, 4), Orientation.S), offCubeMap(null, new Pos(11, 0), Orientation.N));
+    }
+
 }

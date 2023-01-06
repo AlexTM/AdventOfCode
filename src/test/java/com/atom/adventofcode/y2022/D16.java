@@ -8,11 +8,13 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class D16 {
 
+    record Person(int remainingTime, String pos){};
     record Edge(String name, int rate, List<String> edges){};
 
     // Valve AA has flow rate=0; tunnels lead to valves DD, II, BB
@@ -56,66 +58,50 @@ public class D16 {
         return distanceFromStart;
     }
 
-    record Person(int remainingTime, String pos){};
 
-    private int goDeep(final Map<String, Edge> map,
-                       final Map<String, Map<String, Integer>> dist,
-                       final List<Person> people,
-                       final Set<String> remaining) {
+    private int depthFirstSearch(final Map<String, Edge> map,
+                                 final Map<String, Map<String, Integer>> distances,
+                                 final List<Person> people,
+                                 final Set<String> remaining) {
 
-        // sort by remaining time
         int biggerMax = 0;
         for (int i = 0; i < people.size(); i++) {
-            Person current = people.get(i);
-
-//            System.out.println(current);
-
-            String pos = current.pos;
-            int remainingTime = current.remainingTime;
-
-            Map<String, Integer> distFromPos = dist.get(pos);
-            Edge node = map.get(pos);
-
-            int impact = 0;
-            if (node.rate != 0)
-                impact += --remainingTime * node.rate;
+            final Person current = people.get(i);
+            final Edge node = map.get(current.pos);
+            final Map<String, Integer> distFromPos = distances.get(current.pos);
 
             int max = 0;
             for (String p : remaining) {
-                if (distFromPos.get(p) < remainingTime) {
+                if (distFromPos.get(p)+1 < current.remainingTime) {
                     List<Person> newList = new ArrayList<>(people);
-                    newList.set(i, new Person(remainingTime - distFromPos.get(p), p));
-                    Set<String> nextTwo = new HashSet<>(remaining);
-                    nextTwo.remove(p);
-                    max = Math.max(max, goDeep(map, dist, newList, nextTwo));
+                    newList.set(i, new Person(current.remainingTime - distFromPos.get(p) - 1, p));
+                    Set<String> next = remaining.stream().filter(s -> !s.equals(p)).collect(Collectors.toSet());
+                    max = Math.max(max, depthFirstSearch(map, distances, newList, next));
                 }
             }
-            biggerMax = Math.max(biggerMax, impact + max);
+
+            biggerMax = Math.max(biggerMax, max+(current.remainingTime * node.rate));
         }
         return biggerMax;
     }
-//        return impact + next.stream().filter(p -> distFromPos.get(p) < rem)
-//                .mapToInt(p -> {
-//                    List<Person> newList = new ArrayList<>(people);
-//                    newList.set(0, new Person(rem - distFromPos.get(p), p));
-//                    return goDeep(m, dist, newList, next);
-//                })
-//                .max().orElse(0);
 
 
     private int calculateDistanceFromNode(
-            final Map<String, Edge> m, final List<Person> people) {
+            final Map<String, Edge> m, int starters, int time) {
 
         // Get dist to all nodes from every other node
         Map<String, Map<String, Integer>> dist =
                 m.keySet().stream().collect(
                         Collectors.toMap(Function.identity(), s -> doDijkstra(m , s)));
 
+        // Only care about the non-zero nodes
         Set<String> nonZero = m.values().stream()
                 .filter(s -> s.rate != 0).map(s -> s.name).collect(Collectors.toSet());
 
-        // do depth
-        return goDeep(m, dist, new ArrayList<>(people), nonZero);
+        List<Person> people = IntStream.range(0, starters).mapToObj(i ->
+                new Person(time, "AA")).toList();
+
+        return depthFirstSearch(m ,dist, people, nonZero);
     }
 
     @Test
@@ -124,13 +110,13 @@ public class D16 {
         assertEquals(1651,
                 calculateDistanceFromNode(
                         FileReader.readFileForObject("src/test/resources/2022/D16_t.txt", new HashMap<>(), D16::parseLine)
-                        , List.of(new Person(30, "AA"))
+                        , 1, 30
                 ));
 
         assertEquals(1584,
                 calculateDistanceFromNode(
                         FileReader.readFileForObject("src/test/resources/2022/D16.txt", new HashMap<>(), D16::parseLine)
-                        , List.of(new Person(30, "AA"))
+                        , 1, 30
                 ));
     }
 
@@ -139,13 +125,15 @@ public class D16 {
         assertEquals(1707,
                 calculateDistanceFromNode(
                         FileReader.readFileForObject("src/test/resources/2022/D16_t.txt", new HashMap<>(), D16::parseLine)
-                        , List.of(new Person(26, "AA"), new Person(26, "AA"))
+                        ,2, 26
                 ));
 
-//        assertEquals(1584,
+//        assertEquals(0,
 //                calculateDistanceFromNode(
 //                        FileReader.readFileForObject("src/test/resources/2022/D16.txt", new HashMap<>(), D16::parseLine)
+//                        ,2, 26
 //                ));
+
     }
 
 }
