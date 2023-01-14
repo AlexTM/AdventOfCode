@@ -126,7 +126,7 @@ public class D8 {
     @Test
     public void testPart1() {
         assertEquals(26, countUnique(loadData("src/test/resources/2021/D8_t.txt")));
-        assertEquals(530, countUnique(loadData("src/test/resources/2021/D8.txt")));
+        assertEquals(261, countUnique(loadData("src/test/resources/2021/D8.txt")));
     }
 
 
@@ -260,7 +260,7 @@ public class D8 {
         assertEquals(5353, computeCorrectOutput(mapToSegmentTakeTwo(row.inputs), row.outputs));
 
         assertEquals(61229, addAll(loadData("src/test/resources/2021/D8_t.txt")));
-        assertEquals(1051087, addAll(loadData("src/test/resources/2021/D8.txt")));
+        assertEquals(987553, addAll(loadData("src/test/resources/2021/D8.txt")));
     }
 
 }

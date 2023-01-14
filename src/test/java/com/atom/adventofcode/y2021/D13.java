@@ -227,7 +227,7 @@ public class D13 {
         assertEquals(17, fold(data.pos, data.folds.get(0)).size());
 
         data = loadData("src/test/resources/2021/D13.txt");
-        assertEquals(687, fold(data.pos, data.folds.get(0)).size());
+        assertEquals(847, fold(data.pos, data.folds.get(0)).size());
 
         print(foldAll(data));
     }

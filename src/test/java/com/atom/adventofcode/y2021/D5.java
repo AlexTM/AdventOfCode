@@ -140,7 +140,7 @@ public class D5 {
 
         List<Cloud> clouds2 = loadData("src/test/resources/2021/D5.txt");
         List<Cloud> straightLines2 = clouds2.stream().filter(c -> c.x1 == c.x2 || c.y1 == c.y2).collect(Collectors.toList());
-        assertEquals(7473, countCoords(straightLines2));
+        assertEquals(6548, countCoords(straightLines2));
     }
 
     @Test
@@ -149,6 +149,6 @@ public class D5 {
         assertEquals(12, countCoords(clouds));
 
         List<Cloud> clouds2 = loadData("src/test/resources/2021/D5.txt");
-        assertEquals(24164, countCoords(clouds2));
+        assertEquals(19663, countCoords(clouds2));
     }
 }

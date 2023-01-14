@@ -113,7 +113,7 @@ public class D14 {
         assertEquals(1588, getAnswer(testData.polymerTemplate, testData.rules, 10));
 
         Data puzzleData = loadData("src/test/resources/2021/D14.txt");
-        assertEquals(3906, getAnswer(puzzleData.polymerTemplate, puzzleData.rules, 10));
+        assertEquals(2509, getAnswer(puzzleData.polymerTemplate, puzzleData.rules, 10));
     }
 
     /**
@@ -146,19 +146,6 @@ public class D14 {
             m = stepMethod2(rules, m);
         }
 
-/*
-        Map<Character, Long> freqMap = new HashMap<>();
-        var iterator = m.entrySet().iterator();
-        var first = iterator.next();
-        freqMap.put(first.getKey().a, freqMap.getOrDefault(first.getKey().a, 0L)+first.getValue());
-        freqMap.put(first.getKey().b, freqMap.getOrDefault(first.getKey().b, 0L)+first.getValue());
-
-        while(iterator.hasNext()) {
-            var item = iterator.next();
-            freqMap.put(item.getKey().b, freqMap.getOrDefault(item.getKey().b, 0L)+item.getValue());
-        }
-*/
-
         Map<Character, Long> freqMap = m.entrySet().stream().flatMap(e -> {
             List<Map.Entry<Character, Long>> l = new ArrayList<>();
 //            l.add(new AbstractMap.SimpleEntry<>(e.getKey().a, e.getValue()));
@@ -185,50 +172,12 @@ public class D14 {
 
         Data testData = loadData("src/test/resources/2021/D14_t.txt");
 
-//        List<Character> inp = testData.polymerTemplate.chars().mapToObj(c -> (char) c).toList();
-//        Map<Pair, Long> m2 = countPairs(testData.rules, inp);
-
-/*
-        for(int i=1; i<=10; i++) {
-            Map<Pair, Long> m1 = countPairs(testData.rules, loop(inp, testData.rules, i));
-            System.out.println(i+"A: " + m1);
-
-            m2 = stepMethod2(testData.rules, m2);
-            System.out.println(i+"B: "+m2);
-            System.out.println("");
-
-            for(Map.Entry<Pair, Long> e : m1.entrySet()) {
-                if(!e.getValue().equals(m2.get(e.getKey()))) {
-                    System.out.println(e.getKey() + " " + e.getValue() + " "+m2.get(e.getKey()));
-                }
-            }
-        }
-*/
-
         assertEquals(1588, getAnswer(testData.polymerTemplate, testData.rules, 10));
         assertEquals(1588, getAnswer2(testData.polymerTemplate, testData.rules, 10));
         assertEquals(2188189693529L, getAnswer2(testData.polymerTemplate, testData.rules, 40));
 
         Data puzzleData = loadData("src/test/resources/2021/D14.txt");
-        // not 4441317262451
-        assertEquals(0, getAnswer2(puzzleData.polymerTemplate, puzzleData.rules, 40));
-
-
-//        List<Character> inp = testData.polymerTemplate.chars().mapToObj(c -> (char) c).toList();
-/*
-        Map<Pair, Long> c = countPairs(testData.rules, inp);
-
-        for(int i=1; i<10; i++) {
-            c = stepMethod2(testData.rules, c);
-            System.out.println(c);
-        }
-        assertEquals(1588, getAnswer2(c));
-
-        for(int i=1; i<40; i++) {
-            c = stepMethod2(testData.rules, c);
-        }
-        assertEquals(2188189693529L, getAnswer2(c));
-*/
+        assertEquals(2827627697643L, getAnswer2(puzzleData.polymerTemplate, puzzleData.rules, 40));
     }
 
 }

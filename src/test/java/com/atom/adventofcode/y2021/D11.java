@@ -380,17 +380,16 @@ public class D11 {
             "4846848554" +
             "5283751526";
     private String puzzleData =
-            "8826876714" +
-            "3127787238" +
-            "8182852861" +
-            "4655371483" +
-            "3864551365" +
-            "1878253581" +
-            "8317422437" +
-            "1517254266" +
-            "2621124761" +
-            "3473331514";
-
+            "8261344656" +
+                    "7773351175" +
+                    "7527856852" +
+                    "1763614673" +
+                    "8674556743" +
+                    "6853382153" +
+                    "4135852388" +
+                    "2846715522" +
+                    "7477425863" +
+                    "4723888888";
     record Pos(int x, int y) {};
 
     static private Map<Pos, Integer> loadData(String data) {
@@ -448,7 +447,7 @@ public class D11 {
     @Test
     public void testPart1() {
         assertEquals(1656, countFlashesInLoops(loadData(testData), 100));
-        assertEquals(1683, countFlashesInLoops(loadData(puzzleData), 100));
+        assertEquals(1649, countFlashesInLoops(loadData(puzzleData), 100));
     }
 
     public long loopUntilSync(Map<Pos, Integer> data) {
@@ -461,6 +460,6 @@ public class D11 {
     @Test
     public void testPart2() {
         assertEquals(195, loopUntilSync(loadData(testData)));
-        assertEquals(788, loopUntilSync(loadData(puzzleData)));
+        assertEquals(256, loopUntilSync(loadData(puzzleData)));
     }
 }

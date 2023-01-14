@@ -99,7 +99,7 @@ public class D22 {
         assertEquals(39, evaluateAllRules(loadData("src/test/resources/2021/D22_t2.txt")));
         assertEquals(590784, evaluateAllRules(
                 addConstraint(loadData("src/test/resources/2021/D22_t.txt"))));
-        assertEquals(582644, evaluateAllRules(
+        assertEquals(580810, evaluateAllRules(
                 addConstraint(loadData("src/test/resources/2021/D22.txt"))));
     }
 

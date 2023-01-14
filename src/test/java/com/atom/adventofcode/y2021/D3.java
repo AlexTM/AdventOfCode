@@ -143,7 +143,7 @@ public class D3 {
         assertEquals(198, getPowerRating(
                 FileReader.readFileObjectList("src/test/resources/2021/D3_t.txt", line -> line), 5));
 
-        assertEquals(3895776, getPowerRating(
+        assertEquals(3901196, getPowerRating(
                 FileReader.readFileObjectList("src/test/resources/2021/D3.txt", line -> line), 12));
     }
 
@@ -183,7 +183,7 @@ public class D3 {
         assertEquals(230, getLifeSupportRating(
                 FileReader.readFileObjectList("src/test/resources/2021/D3_t.txt", line -> line)));
 
-        assertEquals(7928162, getLifeSupportRating(
+        assertEquals(4412188, getLifeSupportRating(
                 FileReader.readFileObjectList("src/test/resources/2021/D3.txt", line -> line)));
     }
 

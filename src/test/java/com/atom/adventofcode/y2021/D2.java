@@ -121,7 +121,7 @@ public class D2 {
 
         assertEquals(150, moveSubmarineAndReturnResult(
                 new Submarine(), orderMap, readOrders("src/test/resources/2021/D2_t.txt")));
-        assertEquals(2070300, moveSubmarineAndReturnResult(
+        assertEquals(1693300, moveSubmarineAndReturnResult(
                 new Submarine(), orderMap, readOrders("src/test/resources/2021/D2.txt")));
     }
 
@@ -135,7 +135,7 @@ public class D2 {
 
         assertEquals(900, moveSubmarineAndReturnResult(
                 new Submarine(), orderMap, readOrders("src/test/resources/2021/D2_t.txt")));
-        assertEquals(2078985210, moveSubmarineAndReturnResult(
+        assertEquals(1857958050, moveSubmarineAndReturnResult(
                 new Submarine(), orderMap, readOrders("src/test/resources/2021/D2.txt")));
     }
 }

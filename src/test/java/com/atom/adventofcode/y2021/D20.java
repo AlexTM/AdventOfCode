@@ -224,7 +224,7 @@ public class D20 {
         assertEquals(35, enhance(data, 2));
 
         Data puzzleData = loadData("src/test/resources/2021/D20.txt");
-        assertEquals(5597, enhance(puzzleData, 2));
+        assertEquals(5437, enhance(puzzleData, 2));
     }
 
     @Test
@@ -233,7 +233,7 @@ public class D20 {
         assertEquals(3351, enhance(data, 50));
 
         Data puzzleData = loadData("src/test/resources/2021/D20.txt");
-        assertEquals(18723, enhance(puzzleData, 50));
+        assertEquals(19340, enhance(puzzleData, 50));
     }
 
 }

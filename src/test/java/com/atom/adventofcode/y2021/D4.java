@@ -200,7 +200,7 @@ public class D4 {
 
         game = loadGame("src/test/resources/2021/D4.txt");
         game.generateCombinations();
-        assertEquals(58374, playGame(game));
+        assertEquals(4662, playGame(game));
     }
 
     @Test
@@ -211,6 +211,6 @@ public class D4 {
 
         game = loadGame("src/test/resources/2021/D4.txt");
         game.generateCombinations();
-        assertEquals(11377, loseGame(game));
+        assertEquals(12080, loseGame(game));
     }
 }

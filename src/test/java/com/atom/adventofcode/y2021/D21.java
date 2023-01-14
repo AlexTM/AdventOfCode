@@ -73,8 +73,8 @@ public class D21 {
         // Player 1 starting position: 2
         // Player 2 starting position: 5
         game = new Game();
-        game.playerPositions = new int[]{2, 5};
-        assertEquals(576600, playUntilWinner(game, i -> i >= 1000));
+        game.playerPositions = new int[]{4, 10};
+        assertEquals(855624, playUntilWinner(game, i -> i >= 1000));
     }
 
     // Not sure how to make this work.
@@ -129,7 +129,7 @@ public class D21 {
     @Test
     public void testPart2() {
         Game game = new Game();
-        game.playerPositions = new int[]{4, 8};
+        game.playerPositions = new int[]{4, 10};
         assertEquals(444356092776315L, universeWins(game));
 
 //        universeWins(game);

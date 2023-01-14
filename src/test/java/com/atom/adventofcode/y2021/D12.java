@@ -231,13 +231,13 @@ public class D12 {
         assertEquals(10, mapAllRoutes(loadData("src/test/resources/2021/D12_t1.txt"), 1).size());
         assertEquals(19, mapAllRoutes(loadData("src/test/resources/2021/D12_t2.txt"), 1).size());
         assertEquals(226, mapAllRoutes(loadData("src/test/resources/2021/D12_t3.txt"), 1).size());
-        assertEquals(3421, mapAllRoutes(loadData("src/test/resources/2021/D12.txt"), 1).size());
+        assertEquals(5157, mapAllRoutes(loadData("src/test/resources/2021/D12.txt"), 1).size());
     }
 
     @Test
     public void testPart2() {
         assertEquals(36, mapAllRoutes(loadData("src/test/resources/2021/D12_t1.txt"), 2).size());
         assertEquals(103, mapAllRoutes(loadData("src/test/resources/2021/D12_t2.txt"), 2).size());
-        assertEquals(84870, mapAllRoutes(loadData("src/test/resources/2021/D12.txt"), 2).size());
+        assertEquals(144309, mapAllRoutes(loadData("src/test/resources/2021/D12.txt"), 2).size());
     }
 }

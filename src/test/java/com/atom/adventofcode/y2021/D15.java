@@ -273,7 +273,7 @@ public class D15 {
                 loadData("src/test/resources/2021/D15_t.txt"), new Pos(0,0),
                 (p, m) -> m[p.x][p.y]
         ));
-        assertEquals(696, getRisk(
+        assertEquals(393, getRisk(
                 loadData("src/test/resources/2021/D15.txt"), new Pos(0,0),
                 (p, m) -> m[p.x][p.y]
         ));
@@ -295,7 +295,7 @@ public class D15 {
                 loadData("src/test/resources/2021/D15_t.txt", 5), new Pos(0,0), costFunction
         ));
 
-        assertEquals(2952, getRisk(
+        assertEquals(2823, getRisk(
                 loadData("src/test/resources/2021/D15.txt", 5), new Pos(0,0), costFunction
         ));
     }

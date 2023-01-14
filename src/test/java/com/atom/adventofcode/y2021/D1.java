@@ -155,14 +155,14 @@ public class D1 {
     @Test
     public void testDayOnePart1() {
         assertEquals(7, countDepthIncreases(depth));
-        assertEquals(1167,
+        assertEquals(1233,
                 countDepthIncreases(FileReader.readFileIntegerList("src/test/resources/2021/D1.txt")));
     }
 
     @Test
     public void testDayOnePart2() {
         assertEquals(5, countDepthIncreasesWithSlidingWindow(depth));
-        assertEquals(1130,
+        assertEquals(1275,
                 countDepthIncreasesWithSlidingWindow(FileReader.readFileIntegerList("src/test/resources/2021/D1.txt")));
     }
 

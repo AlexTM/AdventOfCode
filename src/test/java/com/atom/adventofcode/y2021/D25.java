@@ -412,7 +412,7 @@ public class D25 {
     @Test
     public void testPart1() {
         assertEquals(58, findStopStep(loadData("src/test/resources/2021/D25_t.txt")));
-        assertEquals(453, findStopStep(loadData("src/test/resources/2021/D25.txt")));
+        assertEquals(337, findStopStep(loadData("src/test/resources/2021/D25.txt")));
     }
 
 }

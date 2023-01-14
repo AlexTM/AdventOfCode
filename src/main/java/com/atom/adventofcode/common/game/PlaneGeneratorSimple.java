@@ -5,7 +5,7 @@ import com.atom.adventofcode.common.engine.graph.Mesh;
 import org.joml.Vector3f;
 
 /**
- * Grid
+ * Simple grid
  */
 public class PlaneGeneratorSimple {
 

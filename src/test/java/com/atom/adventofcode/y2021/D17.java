@@ -195,7 +195,7 @@ public class D17 {
     @Test
     public void testPart1() {
         assertEquals(45, getHighestPoint(new TargetArea(20, -5, 30, -10)));
-        assertEquals(9180, getHighestPoint(new TargetArea(150, -86, 193, -136)));
+        assertEquals(4005, getHighestPoint(new TargetArea(240, -57, 292, -90)));
     }
 
     // brute force it.  Could add bounds based on target area
@@ -235,7 +235,7 @@ public class D17 {
     @Test
     public void testPart2() {
         assertEquals(112, solutionSize(new TargetArea(20, -5, 30, -10)));
-        assertEquals(3767, solutionSize(new TargetArea(150, -86, 193, -136)));
+        assertEquals(2953, solutionSize(new TargetArea(240, -57, 292, -90)));
     }
 
 }

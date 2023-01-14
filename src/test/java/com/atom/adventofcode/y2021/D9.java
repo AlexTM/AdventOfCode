@@ -142,7 +142,7 @@ public class D9 {
     @Test
     public void testPart1() {
         assertEquals(15, riskLevel(loadFile("src/test/resources/2021/D9_t.txt")));
-        assertEquals(600, riskLevel(loadFile("src/test/resources/2021/D9.txt")));
+        assertEquals(478, riskLevel(loadFile("src/test/resources/2021/D9.txt")));
     }
 
     class Basin {
@@ -194,7 +194,7 @@ public class D9 {
     @Test
     public void testPart2() {
         assertEquals(1134, topThree(loadFile("src/test/resources/2021/D9_t.txt")));
-        assertEquals(987840, topThree(loadFile("src/test/resources/2021/D9.txt")));
+        assertEquals(1327014, topThree(loadFile("src/test/resources/2021/D9.txt")));
     }
 
 }

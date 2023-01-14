@@ -199,13 +199,13 @@ public class D10 {
     @Test
     public void testPart1() {
         assertEquals(26397, calculateSyntaxScore(loadFile("src/test/resources/2021/D10_t.txt")));
-        assertEquals(193275, calculateSyntaxScore(loadFile("src/test/resources/2021/D10.txt")));
+        assertEquals(243939, calculateSyntaxScore(loadFile("src/test/resources/2021/D10.txt")));
     }
 
     @Test
     public void testPart2() {
         assertEquals(288957, calculateAutoCompleteScore(loadFile("src/test/resources/2021/D10_t.txt")));
-        assertEquals(2429644557L, calculateAutoCompleteScore(loadFile("src/test/resources/2021/D10.txt")));
+        assertEquals(2421222841L, calculateAutoCompleteScore(loadFile("src/test/resources/2021/D10.txt")));
     }
 
 }
