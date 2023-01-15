@@ -1,0 +1,85 @@
+package com.atom.adventofcode.y2016;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class D2 {
+
+    private static final String puzzleInput = "DDDURLURURUDLDURRURULLRRDULRRLRLRURDLRRDUDRUDLRDUUDRRUDLLLURLUURLRURURLRLUDDURUULDURDRUUDLLDDDRLDUULLUDURRLUULUULDLDDULRLDLURURUULRURDULLLURLDRDULLULRRRLRLRULLULRULUUULRLLURURDLLRURRUUUDURRDLURUURDDLRRLUURLRRULURRDDRDULLLDRDDDDURURLLULDDULLRLDRLRRDLLURLRRUDDDRDLLRUDLLLLRLLRUDDLUUDRLRRRDRLRDLRRULRUUDUUDULLRLUDLLDDLLDLUDRURLULDLRDDLDRUDLDDLDDDRLLDUURRUUDLLULLRLDLUURRLLDRDLRRRRUUUURLUUUULRRUDDUDDRLDDURLRLRLLRRUDRDLRLDRRRRRRUDDURUUUUDDUDUDU\n" +
+            "RLULUULRDDRLULRDDLRDUURLRUDDDUULUUUDDRDRRRLDUURDURDRLLLRDDRLURLDRRDLRLUURULUURDRRULRULDULDLRRDDRLDRUDUDDUDDRULURLULUDRDUDDDULRRRURLRRDLRDLDLLRLUULURLDRURRRLLURRRRRLLULRRRDDLRLDDUULDLLRDDRLLUUDRURLRULULRLRUULUUUUUDRURLURLDDUDDLRDDLDRRLDLURULUUDRDLULLURDLLLRRDRURUDDURRLURRDURURDLRUDRULUULLDRLRRDRLDDUDRDLLRURURLUDUURUULDURUDULRLRDLDURRLLDRDUDRUDDRLRURUDDLRRDLLLDULRRDRDRRRLURLDLURRDULDURUUUDURLDLRURRDRULLDDLLLRUULLLLURRRLLLDRRUDDDLURLRRRDRLRDLUUUDDRULLUULDURLDUUURUDRURUDRDLRRLDRURRLRDDLLLULUDDUULDURLRUDRDDD\n" +
+            "RDDRUDLRLDDDRLRRLRRLUULDRLRUUURULRRLUURLLLRLULDDLDLRLULULUUDDDRLLLUDLLRUDURUDDLLDUDLURRULLRDLDURULRLDRLDLDRDDRUDRUULLLLRULULLLDDDULUUDUUDDLDRLRRDLRLURRLLDRLDLDLULRLRDLDLRLUULLDLULRRRDDRUULDUDLUUUUDUDRLUURDURRULLDRURUDURDUULRRULUULULRLDRLRLLRRRLULURLUDULLDRLDRDRULLUUUDLDUUUDLRDULRDDDDDDDDLLRDULLUDRDDRURUDDLURRUULUURURDUDLLRRRRDUDLURLLURURLRDLDUUDRURULRDURDLDRUDLRRLDLDULRRUDRDUUDRLURUURLDLUDLLRDDRDU\n" +
+            "LLDDDDLUDLLDUDURRURLLLLRLRRLDULLURULDULDLDLLDRRDLUDRULLRUUURDRLLURDDLLUDDLRLLRDDLULRLDDRURLUDRDULLRUDDLUURULUUURURLRULRLDLDDLRDLDLLRUURDLUDRRRDDRDRLLUDDRLDRLLLRULRDLLRLRRDDLDRDDDUDUDLUULDLDUDDLRLDUULRULDLDULDDRRLUUURUUUDLRDRULDRRLLURRRDUDULDUDUDULLULLULULURLLRRLDULDULDLRDDRRLRDRLDRLUDLLLUULLRLLRLDRDDRUDDRLLDDLRULLLULRDDDLLLDRDLRULDDDLULURDULRLDRLULDDLRUDDUDLDDDUDRDRULULDDLDLRRDURLLRLLDDURRLRRULLURLRUDDLUURULULURLRUDLLLUDDURRLURLLRLLRRLDULRRUDURLLDDRLDLRRLULUULRRUURRRDULRLRLRDDRDULULUUDULLLLURULURRUDRLL\n" +
+            "UULLULRUULUUUUDDRULLRLDDLRLDDLULURDDLULURDRULUURDLLUDDLDRLUDLLRUURRUDRLDRDDRRLLRULDLLRUUULLLDLDDULDRLRURLDRDUURLURDRUURUULURLRLRRURLDDDLLDDLDDDULRUDLURULLDDRLDLUDURLLLLLRULRRLLUDRUURLLURRLLRDRLLLRRDDDRRRDLRDRDUDDRLLRRDRLRLDDDLURUUUUULDULDRRRRLUDRLRDRUDUDDRULDULULDRUUDUULLUDULRLRRURDLDDUDDRDULLUURLDRDLDDUURULRDLUDDLDURUDRRRDUDRRDRLRLULDRDRLRLRRUDLLLDDDRURDRLRUDRRDDLDRRLRRDLUURLRDRRUDRRDLDDDLRDDLRDUUURRRUULLDDDLLRLDRRLLDDRLRRRLUDLRURULLDULLLUDLDLRLLDDRDRUDLRRDDLUU";
+
+    private static final String testInput = "ULL\n" +
+            "RRDDD\n" +
+            "LURDL\n" +
+            "UUUUD\n";
+
+    record Pos(int x, int y){}
+
+    private Pos follow(Pos pos, String line, final Map<Pos, String> mask) {
+        for(int i=0; i<line.length(); i++) {
+            char c = line.charAt(i);
+            Pos newPos = switch(c) {
+                case 'U' -> new Pos(pos.x, pos.y-1);
+                case 'D' -> new Pos(pos.x, pos.y+1);
+                case 'R' -> new Pos(pos.x+1, pos.y);
+                case 'L' -> new Pos(pos.x-1, pos.y);
+                default -> throw new RuntimeException("Unknown character");
+            };
+            if(mask.containsKey(newPos))
+                pos = newPos;
+        }
+        return pos;
+    }
+
+    private String getCode(final String testInput, final Map<Pos, String> mask, Pos pos) {
+        String[] lines = testInput.split("\\n");
+        StringBuilder code = new StringBuilder();
+        for(String line : lines) {
+            pos = follow(pos, line, mask);
+            code.append(mask.get(pos));
+        }
+        return code.toString();
+    }
+
+    private Map<Pos, String> squareKeyPad() {
+        Map<Pos, String> posSet = new HashMap<>();
+        for(int i=0; i<3; i++) {
+            for(int j=0; j<3; j++) {
+                posSet.put(new Pos(i, j), Integer.toString(j*3+i+1));
+            }
+        }
+        return posSet;
+    }
+
+    private Map<Pos, String> diamondKeyPad() {
+        Map<Pos, String> mask = new HashMap<>();
+        String inp = "  1\n 234\n56789\n ABC\n  D";
+        String[] d = inp.split("\\n");
+        for(int c = 0; c<d.length; c++) {
+            for(int r=0; r<d[c].length(); r++) {
+                char cc = d[c].charAt(r);
+                if(cc != ' ') {
+                    mask.put(new Pos(r, c), String.valueOf(cc));
+                }
+            }
+        }
+        return mask;
+    }
+
+    @Test
+    public void testKeyPad() {
+        assertEquals("1985", getCode(testInput, squareKeyPad(), new Pos(1,1)));
+        assertEquals("69642", getCode(puzzleInput, squareKeyPad(), new Pos(1,1)));
+
+        assertEquals("5DB3", getCode(testInput, diamondKeyPad(), new Pos(0,2)));
+        assertEquals("8CB23", getCode(puzzleInput, diamondKeyPad(), new Pos(0,2)));
+    }
+
+}
