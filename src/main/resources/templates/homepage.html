@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <!--<link
+            rel="stylesheet"
+            href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+            integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+            crossorigin="anonymous"
+    />
+-->
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.2.3/cerulean/bootstrap.min.css"
+            />
+
+<!--
+    <script
+            src="https://code.jquery.com/jquery-3.5.1.min.js"
+            integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2"
+            crossorigin="anonymous"
+    ></script>
+-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js" />
+
+    <link rel="stylesheet"
+          href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+
+    <style>
+    pre {
+        font-size: 0.8em;
+    }
+    </style>
+
+
+    <title>Code Display and Problem List using Bootstrap and Thymeleaf</title>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-3 p-3 bg-light">
+            <h3 class="text-center">Problem List</h3>
+            <ul class="list-group">
+                <li class="list-group-item" th:each="prob : ${problems}">
+                    <a class="problem-link" href="#" th:text="${prob}" th:attr="data-problem=${prob}"></a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-9 p-3">
+          <pre>
+            <code class="language-java" id="code-block" th:text="${code}"></code>
+          </pre>
+
+            <div class="col-9 p-3">
+                <button type="button" class="btn btn-danger mb-3" id="run-button">Run</button>
+            </div>
+
+            <div class="d-flex justify-content-center" id="spinner" style="display: none;">
+                <div class="spinner-border" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+
+      $(document).ready(function() {
+
+        $(".problem-link").click(function(e) {
+          e.preventDefault();
+          var problemName = $(this).data("problem");
+          $.ajax({
+            type: "GET",
+            url: "/getCode",
+            data: { problem: problemName },
+            success: function(data) {
+              $("#code-block").text(data);
+//              hljs.highlightAll();
+            }
+          });
+        });
+
+        $("#run-button").click(function(e) {
+          e.preventDefault();
+          //var problemName = $(".problem-link.active").data("problem");
+          var problemName = "test";
+          $("#spinner").show();
+          $.ajax({
+            type: "GET",
+            url: "/getCode",
+            data: { problem: problemName },
+            success: function(data) {
+              $("#code-block").text(data);
+              $("#spinner").hide();
+            }
+          });
+        });
+
+      });
+
+    </script>
+</body>
+</html>

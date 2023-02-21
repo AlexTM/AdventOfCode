@@ -16,14 +16,14 @@ repositories {
     mavenCentral()
 }
 
-sourceSets {
-    main {
-        resources {
-            include '**'
-            srcDirs = ['src/main/java', 'src/main/resources']
-        }
-    }
-}
+//sourceSets {
+//    main {
+//        resources {
+//            include '**'
+//            srcDirs = ['src/main/java', 'src/main/resources']
+//        }
+//    }
+//}
 
 
 //sourceSets {
@@ -45,6 +45,9 @@ sourceSets {
 //    from sourceSets.main.java
 //}
 
+jar {
+    from sourceSets.main.java
+}
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
