@@ -58,18 +58,22 @@
                 <button type="button" class="btn btn-danger mb-3" id="run-button">Run</button>
             </div>
 
-            <div class="d-flex justify-content-center" id="spinner" style="display: none;">
-                <div class="spinner-border" role="status">
+            <!-- add a hidden spinner -->
+            <div class="col-9 p-3">
+                <div class="spinner-border text-primary" role="status" id="spinner" style="display: none;">
                     <span class="sr-only">Loading...</span>
                 </div>
-            </div>
 
+            </div>
         </div>
     </div>
 </div>
 <script>
 
       $(document).ready(function() {
+
+      // ensure spinner is hidden
+        $("#spinner").hide();
 
         $(".problem-link").click(function(e) {
           e.preventDefault();
@@ -80,7 +84,12 @@
             data: { problem: problemName },
             success: function(data) {
               $("#code-block").text(data);
-//              hljs.highlightAll();
+
+              // now highlight the code
+                $('pre code').each(function(i, block) {
+                    hljs.highlightBlock(block);
+                });
+
             }
           });
         });

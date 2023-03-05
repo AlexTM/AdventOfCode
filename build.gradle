@@ -1,12 +1,13 @@
 plugins {
-    id 'java'
     id 'org.springframework.boot' version '3.0.1'
     id 'io.spring.dependency-management' version '1.1.0'
+    id 'java'
 }
 
-group 'com.atom.adventofcode'
-version '1.0-SNAPSHOT'
-sourceCompatibility = '17'
+group = 'com.atom.adventofcode'
+version = '1.0-SNAPSHOT'
+sourceCompatibility = 1.17
+targetCompatibility = 1.17
 
 project.ext.lwjglVersion = "3.3.1"
 project.ext.jomlVersion = "1.10.2"
@@ -14,39 +15,6 @@ project.ext.lwjglNatives = "natives-linux"
 
 repositories {
     mavenCentral()
-}
-
-//sourceSets {
-//    main {
-//        resources {
-//            include '**'
-//            srcDirs = ['src/main/java', 'src/main/resources']
-//        }
-//    }
-//}
-
-
-//sourceSets {
-//    main {
-//        java {
-//            srcDirs = ['src/main/java']
-//        }
-//        resources {
-//            srcDirs = ["src/main/java"]
-//        }
-//    }
-//}
-
-//java {
-//    withSourcesJar()
-//}
-
-//jar {
-//    from sourceSets.main.java
-//}
-
-jar {
-    from sourceSets.main.java
 }
 
 dependencies {
@@ -89,6 +57,6 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
+test {
+	useJUnitPlatform()
 }
