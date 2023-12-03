@@ -1,18 +1,17 @@
 package com.atom.adventofcode.controllers;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 import com.atom.adventofcode.services.CodeService;
 import com.atom.adventofcode.services.ProblemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.util.HtmlUtils;
 
 @Controller
 @RequestMapping
@@ -54,6 +53,7 @@ public class DemoController {
 
     @GetMapping("/cube")
     public String showCube() {
+        logger.info("cube");
         return "cube";
     }
 

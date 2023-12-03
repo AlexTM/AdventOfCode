@@ -9,6 +9,7 @@ import com.atom.adventofcode.common.game.PlaneGeneratorSimple;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
 
+import java.io.InputStream;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -225,7 +226,7 @@ public class D22 {
 
         Engine gameEng = new Engine(
                 "AdventOfCode - D22",
-                new Window.WindowOptions().setGui(false).setUps(1).setWidth(500).setHeight(500),
+                new Window.WindowOptions().setGui(Window.GUI_OPTIONS.NONE).setUps(1).setWidth(500).setHeight(500),
                 new MonkeyMapTwoD(state, D22::offBasicMap));
 
         gameEng.start(() -> state.directions.size() == state.directionPosition);
@@ -239,7 +240,7 @@ public class D22 {
                         new State(), D22::parseLine);
 
         Engine gameEng = new Engine("AdventOfCode - D22",
-                new Window.WindowOptions().setFps(10).setUps(200).setGui(true),
+                new Window.WindowOptions().setFps(10).setUps(200).setGui(Window.GUI_OPTIONS.GUI),
                 new MonkeyMapTwoD(state, D22::offBasicMap));
 
         gameEng.start(() -> state.directions.size() == state.directionPosition);
@@ -340,16 +341,24 @@ public class D22 {
 
     @Test
     public void testDirectionsTestcaseTwo() {
+        ClassLoader classLoader = getClass().getClassLoader();
+        InputStream inputStream = classLoader.getResourceAsStream("src/test/resources/2022/D22_t.txt");
+
         State state =
-                FileReader.readFileForObject("src/test/resources/2022/D22_t.txt",
-                        new State(), D22::parseLine);
+        FileReader.readFileForObject(inputStream,
+                new State(), D22::parseLine);
+
+
+        // State state =
+        //         FileReader.readFileForObject("src/test/resources/2022/D22_t.txt",
+        //                 new State(), D22::parseLine);
 
 //        state.map = mapToFaces(state.map, 4, rotations);
 //        state.walls = mapToFaces(state.walls, 4, rotations);
 
         Engine gameEng = new Engine(
                 "AdventOfCode - D22",
-                new Window.WindowOptions().setGui(true).setUps(1).setWidth(500).setHeight(500),
+                new Window.WindowOptions().setGui(Window.GUI_OPTIONS.GUI).setUps(1).setWidth(500).setHeight(500),
                 new MonkeyMapTwoD(state, D22::offCubeMap));
 
         gameEng.start(() -> state.directions.size() == state.directionPosition);

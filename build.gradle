@@ -1,8 +1,9 @@
-plugins {
-    id 'org.springframework.boot' version '3.0.1'
-    id 'io.spring.dependency-management' version '1.1.0'
-    id 'java'
-}
+ plugins {
+     id 'org.springframework.boot' version '3.0.1'
+     id 'io.spring.dependency-management' version '1.1.0'
+     id 'java'
+ }
+
 
 group = 'com.atom.adventofcode'
 version = '1.0-SNAPSHOT'
@@ -13,8 +14,20 @@ project.ext.lwjglVersion = "3.3.1"
 project.ext.jomlVersion = "1.10.2"
 project.ext.lwjglNatives = "natives-linux"
 
-repositories {
+apply plugin: 'idea'
+apply plugin: 'java'
+
+
+ repositories {
     mavenCentral()
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs "src/main/java"
+        }
+    }
 }
 
 dependencies {
@@ -48,13 +61,22 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-tinyfd::$lwjglNatives"
     implementation "org.joml:joml:${jomlVersion}"
 
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.webjars:webjars-locator-core'
+    implementation 'org.webjars:sockjs-client:1.0.2'
+    implementation 'org.webjars:stomp-websocket:2.3.3'
+    implementation 'org.webjars:bootstrap:3.4.0'
+    implementation 'org.webjars:jquery:3.5.0'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-
     testImplementation 'io.github.furstenheim:copy_down:1.1'
     testImplementation 'org.jsoup:jsoup:1.15.3'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 
 test {

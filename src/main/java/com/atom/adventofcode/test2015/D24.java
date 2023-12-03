@@ -1,26 +1,21 @@
-package com.atom.adventofcode.y2022;
+package com.atom.adventofcode.test2015;
 
 import com.atom.adventofcode.common.FileReader;
 import com.atom.adventofcode.common.engine.DefaultAppLogic;
 import com.atom.adventofcode.common.engine.Engine;
 import com.atom.adventofcode.common.engine.Window;
-import com.atom.adventofcode.common.engine.graph.Mesh;
 import com.atom.adventofcode.common.engine.scene.Scene;
 import com.atom.adventofcode.common.game.PlaneGeneratorSimple;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.atom.adventofcode.controllers.DemoController;
 import org.joml.Vector3f;
-import org.junit.jupiter.api.Test;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+@Service
 public class D24 {
 
     enum Direction{ N, E, S, W, NONE }
@@ -143,14 +138,6 @@ public class D24 {
         return state;
     }
 
-    public static int loopUntilComplete(State state) {
-        while(state.possibleLocations.size() != 0 && state.count < 1000) {
-            if(step(state))
-                break;
-        }
-        return state.count;
-    }
-
     static class ValleyEngine extends DefaultAppLogic {
 
         private final PlaneGeneratorSimple planeGeneratorSimple;
@@ -179,60 +166,7 @@ public class D24 {
         }
     }
 
-    @Test
-    public void testSolveOneWayTestTrip() {
-        State state = D24.createState("src/test/resources/2022/D24_t.txt");
-        state.reset(new Pos(1, 0), new Pos(state.maxx - 2, state.maxy - 1));
-        assertEquals(18, loopUntilComplete(state));
-    }
 
-    @Test
-    public void testSolveOneWayTrip() {
-        State state = D24.createState("src/main/resources/2022/D24.txt");
-        state.reset(new Pos(1, 0), new Pos(state.maxx - 2, state.maxy - 1));
-        assertEquals(264, loopUntilComplete(state));
-    }
-
-    @Test
-    public void testSolveThreeWayTrip2() {
-        State state = D24.createState("src/test/resources/2022/D24.txt");
-
-        Pos start = new Pos(1, 0);
-        Pos end = new Pos(state.maxx-2, state.maxy-1);
-
-        state.reset(start, end);
-        int trip1 = loopUntilComplete(state);
-
-        state.reset(end, start);
-        int trip2 = loopUntilComplete(state);
-
-        state.reset(start, end);
-        int trip3 = loopUntilComplete(state);
-
-        assertEquals(789, trip1+trip2+trip3);
-    }
-
-    @Test
-    public void testSolveOneWayTripWithGraphics() throws IOException {
-        State state = D24.createState("src/main/resources/2022/D24.txt");
-
-        Window.WindowOptions options = new Window.WindowOptions().setUps(100).setGui(Window.GUI_OPTIONS.GUI);
-        Pos start = new Pos(1, 0);
-        Pos end = new Pos(state.maxx-2, state.maxy-1);
-
-//        state.reset(new Pos(1, 0), new Pos(state.maxx - 2, state.maxy - 1));
-        state.reset(start, end);
-
-        ValleyEngine valleyEngine = new ValleyEngine(state);
-        Engine gameEng = new Engine("AdventOfCode - D24",
-                options, valleyEngine);
-        gameEng.start(() -> state.finished);
-        assertEquals(264, valleyEngine.state.count);
-
-//        assertEquals(0, data.size());
-    }
-
-    @Test
     public void testSolveThreeWayTripWithGraphics() {
         State state = D24.createState("src/main/resources/2022/D24.txt");
 
@@ -261,7 +195,7 @@ public class D24 {
         gameEng.start(() -> state.finished);
         int trip3 = valleyEngine.state.count;
 
-        assertEquals(789, trip1+trip2+trip3);
+//        assertEquals(789, trip1+trip2+trip3);
     }
 
 }

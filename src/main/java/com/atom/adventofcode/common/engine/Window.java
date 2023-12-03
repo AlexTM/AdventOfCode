@@ -127,13 +127,19 @@ public class Window {
         return glfwWindowShouldClose(windowHandle);
     }
 
+    public enum GUI_OPTIONS {
+        NONE,
+        WEB,
+        GUI
+    }
+
     public static class WindowOptions {
         public boolean compatibleProfile;
         public int fps;
         public int height;
         public int ups = Engine.TARGET_UPS;
         public int width;
-        public boolean gui;
+        public GUI_OPTIONS gui;
 
         public WindowOptions setCompatibleProfile(boolean compatibleProfile) {
             this.compatibleProfile = compatibleProfile;
@@ -160,7 +166,7 @@ public class Window {
             return this;
         }
 
-        public WindowOptions setGui(boolean gui) {
+        public WindowOptions setGui(GUI_OPTIONS gui) {
             this.gui = gui;
             return this;
         }

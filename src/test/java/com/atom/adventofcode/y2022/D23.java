@@ -189,7 +189,7 @@ public class D23 {
 
         CraterEngine engine = new CraterEngine(200, 200, posList);
         Engine gameEng = new Engine("AdventOfCode - D23",
-                new Window.WindowOptions().setUps(30).setGui(true), engine);
+                new Window.WindowOptions().setUps(30).setGui(Window.GUI_OPTIONS.GUI), engine);
         gameEng.start(() -> engine.lastUpdated == 0);
         assertEquals(992, engine.count);
     }

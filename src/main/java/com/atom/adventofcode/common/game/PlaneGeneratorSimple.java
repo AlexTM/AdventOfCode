@@ -4,6 +4,9 @@ import com.atom.adventofcode.common.engine.ColorGenerator;
 import com.atom.adventofcode.common.engine.graph.Mesh;
 import org.joml.Vector3f;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Simple grid
  */
@@ -53,6 +56,9 @@ public class PlaneGeneratorSimple {
 
     public Mesh createMesh() {
         return new Mesh(generateShape(), generateColors(), generateIndices());
+    }
+    public Map createData() {
+        return Map.of("shape", generateShape(), "colors", generateColors(), "indices", generateIndices());
     }
 
     private SquareIdx getMapping(int x, int z) {

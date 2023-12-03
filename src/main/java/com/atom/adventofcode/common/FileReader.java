@@ -2,6 +2,7 @@ package com.atom.adventofcode.common;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -20,6 +21,7 @@ public abstract class FileReader {
     public static List<String> readFileStringList(String filename) {
         List<String> values = new ArrayList<>();
         try(Scanner in = new Scanner(new File(filename))) {
+            in.useDelimiter("\n");
             while (in.hasNext()) {
                 values.add(in.next());
             }
@@ -128,4 +130,16 @@ public abstract class FileReader {
         }
         return state;
     }
+
+    public static <R> R readFileForObject(InputStream inputStream, R state, TriFunction<R, String, Integer, R> function) {
+        try(Scanner in = new Scanner(inputStream)) {
+            in.useDelimiter("\n");
+            int count = 0;
+            while (in.hasNext()) {
+                state = function.apply(state, in.next(), count++);
+            }
+        }
+        return state;
+    }
+
 }
