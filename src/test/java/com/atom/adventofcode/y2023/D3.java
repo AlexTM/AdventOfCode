@@ -28,7 +28,7 @@ public class D3 {
     record Number(int value, int length) {}
     record Data(Map<Point, Number> numberMap, Map<Point, Character> symbolMap) {}
 
-    private static  Data  pasreInput(String input1) {
+    private static  Data parseInput(String input1) {
         Map<Point, Number> points = new HashMap<>();
         Map<Point, Character> symbols = new HashMap<>();
         String[] lines = input1.split("\n");
@@ -91,11 +91,11 @@ public class D3 {
 
     @Test
     public void partOne() {
-        Data p = pasreInput(input1);
+        Data p = parseInput(input1);
         assertEquals(4361, sumOfPartNumbers(p));
         String file = String.join("\n",
                 FileReader.readFileStringList("src/main/resources/2023/D3.txt"));
-        Data p2 = pasreInput(file);
+        Data p2 = parseInput(file);
         assertEquals(543867, sumOfPartNumbers(p2));
     }
 
@@ -128,10 +128,10 @@ public class D3 {
 
     @Test
     public void partTwo() {
-        assertEquals(467835, sumOfGearRatios(pasreInput(input1)));
+        assertEquals(467835, sumOfGearRatios(parseInput(input1)));
         String file = String.join("\n",
                 FileReader.readFileStringList("src/main/resources/2023/D3.txt"));
-        Data p2 = pasreInput(file);
+        Data p2 = parseInput(file);
         assertEquals(79613331, sumOfGearRatios(p2));
     }
 }
