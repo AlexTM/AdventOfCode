@@ -142,4 +142,23 @@ public abstract class FileReader {
         return state;
     }
 
+    public static <R> R parseStringForObject(String content, R state, TriFunction<R, String, Integer, R> function) {
+        try(Scanner in = new Scanner(content)) {
+            in.useDelimiter("\n");
+            int count = 0;
+            while (in.hasNext()) {
+                state = function.apply(state, in.next(), count++);
+            }
+        }
+        return state;
+//        try(Scanner in = new Scanner(inputStream)) {
+//            in.useDelimiter("\n");
+//            int count = 0;
+//            while (in.hasNext()) {
+//                state = function.apply(state, in.next(), count++);
+//            }
+//        }
+//        return state;
+    }
+
 }
