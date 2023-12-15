@@ -125,38 +125,7 @@ public class D13 {
 //    }
 
     private static List<Solution> findMirrorsWithSmudge(List<List<String>> maps) {
-        List<Solution> solutionMap = new ArrayList<>();
-        for(List<String> m : maps) {
-            // find first solution
-            Solution firstSolution = findMirror(m);
-//            solutionMap.add(tmp);
-            // iterate over all the x, y and toggle the value, does this result in a new solution?
-            int xsize = m.get(0).length();
-            int ysize = m.size();
-            for(int x=0; x<xsize; x++) {
-                for(int y=0; y<ysize; y++) {
-                    // toggle the value
-                    String row = m.get(y);
-                    char[] chars = row.toCharArray();
-                    chars[x] = chars[x] == '#' ? '.' : '#';
-                    row = new String(chars);
-                    m.set(y, row);
-
-                    // check if this is a new solution
-                    Solution newSolution = findMirror(m);
-                    if(!newSolution.equals(firstSolution)) {
-                        // found a new solution
-                        solutionMap.add(newSolution);
-                    }
-
-                    // toggle back
-//                    chars[x] = chars[x] == '#' ? '.' : '#';
-//                    row = new String(chars);
-//                    m.set(y, row);
-                }
-            }
-        }
-        return solutionMap;
+        return null;
     }
 
 

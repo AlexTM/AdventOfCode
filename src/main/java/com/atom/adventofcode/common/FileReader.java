@@ -18,6 +18,21 @@ public abstract class FileReader {
         return readFileIntegerList(filename).toArray(new Integer[0]);
     }
 
+    public static String readFileString(String filename) {
+        List<String> values = new ArrayList<>();
+        try(Scanner in = new Scanner(new File(filename))) {
+            in.useDelimiter("\n");
+            while (in.hasNext()) {
+                values.add(in.next());
+            }
+            in.close();
+            // join the list of string into a single string
+            return String.join("\n", values);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static List<String> readFileStringList(String filename) {
         List<String> values = new ArrayList<>();
         try(Scanner in = new Scanner(new File(filename))) {
