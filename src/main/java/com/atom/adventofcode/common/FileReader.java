@@ -17,9 +17,14 @@ public abstract class FileReader {
         return readFileIntegerList(filename).toArray(new Integer[0]);
     }
 
+    public static String readFileString(String filename) {
+        return String.join("\n", readFileStringList(filename));
+    }
+
     public static List<String> readFileStringList(String filename) {
         List<String> values = new ArrayList<>();
         try(Scanner in = new Scanner(new File(filename))) {
+            in.useDelimiter("\n");
             while (in.hasNext()) {
                 values.add(in.next());
             }
@@ -129,4 +134,14 @@ public abstract class FileReader {
         return state;
     }
 
+    public static <R> R parseStringForObject(String content, R state, TriFunction<R, String, Integer, R> function) {
+        try(Scanner in = new Scanner(content)) {
+            in.useDelimiter("\n");
+            int count = 0;
+            while (in.hasNext()) {
+                state = function.apply(state, in.next(), count++);
+            }
+        }
+        return state;
+    }
 }
