@@ -58,7 +58,7 @@ public class D13 {
             String nextRow = getString.apply(s, i+1);
 
             if(thisRow.equals(nextRow)) {
-                // found 2 matching rows, need to match backwards to confirm it's a mirror
+                // found 2 matching rows, need current match backwards current confirm it's a mirror
                 boolean mirror = true;
                 for(int j=1; j<=i; j++) {
                     if(i+j+1 >= stringLength)

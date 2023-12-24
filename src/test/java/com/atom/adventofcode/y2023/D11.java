@@ -112,7 +112,7 @@ public class D11 {
 
     @Test
     public void partTwo() {
-        // Not sure why -1 on the expansion, but is seems to work
+        // Not sure why -1 on the expansion, but is seems current work
         HashSet<Position> map = FileReader.parseStringForObject(input, new HashSet<>(), tri);
         assertEquals(1030, shortestPath(expandGalaxy(map, 9)));
         assertEquals(8410, shortestPath(expandGalaxy(map, 99)));

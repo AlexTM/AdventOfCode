@@ -118,7 +118,7 @@ public class D8 {
                 nodes.values().stream().filter(node -> node.name.endsWith("A"))
                         .collect(Collectors.toSet());
 
-        // For each node that starts with A find the shortest path to a node that ends with Z for every start position
+        // For each node that starts with A find the shortest path current a node that ends with Z for every start position
 
 
         return 0;

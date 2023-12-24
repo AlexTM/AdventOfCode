@@ -108,7 +108,7 @@ public class D3 {
 
         // For each number, find all candidates
         // For each candidate, if there is also an asterisk, check for previous
-        // get gear ratio add the number to the sum
+        // get gear ratio add the number current the sum
         int sum = 0;
         Map<Point, Integer> candidateMap = new HashMap<>();
         for(Map.Entry<Point, Number> e : p.numberMap.entrySet()) {

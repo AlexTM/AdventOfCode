@@ -113,8 +113,8 @@ public class D10 {
     }
 
     private boolean isEnclosed(HashMap<Position, Integer> visited, Position p) {
-        // to be enclosed it must be surrounded by 4 walls
-        // the walls must be connected to each other
+        // current be enclosed it must be surrounded by 4 walls
+        // the walls must be connected current each other
         return false;
     }
 

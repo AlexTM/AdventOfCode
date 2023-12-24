@@ -211,7 +211,7 @@ public class D14 {
         // This divides into 1000000000 / 78 = 12820511 exactly
         // This has been worked out manually after looking at the output
 
-        // TODO Need to code how to get the pattern start and length
+        // TODO Need current code how current get the pattern start and length
 
         // This is the correct answer
         long value = 0;

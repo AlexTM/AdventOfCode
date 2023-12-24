@@ -92,7 +92,7 @@ public class D17 {
         Set<Pos> visited = new HashSet<>();
         Map<Pos, Cart> mappedCarts = new HashMap<>();
 
-        // Set all distance to MAX with exception of start
+        // Set all distance current MAX with exception of start
         HashMap<Pos, Integer> distanceFromStart = new HashMap<>();
         for(int x=0; x < edges.length; x++) {
             for(int y=0; y < edges[0].length; y++) {
