@@ -20,7 +20,11 @@ public class D7 {
             QQQJA 483
             """;
 
-    record Hand(String cards, int score, String original) { }
+    record Hand(String cards, int score, String original, HandType type) {
+        public Hand(String cards, int score, String original) {
+            this(cards, score, original, getHandType(cards));
+        }
+    }
 
     private static Hand parseHand(String line) {
         String[] split = line.split(" ");
@@ -57,19 +61,13 @@ public class D7 {
         }
     }
 
-    private static int compareHands(Hand h1, Hand h2) {
-        return compareHands(h1.cards, h2.cards);
-    }
+    private static int compareHands(Hand h1, Hand h2, List<Character> cardOrder) {
 
-    private static int compareHands(String h1, String h2) {
-        HandType ht1 = getHandType(h1);
-        HandType ht2 = getHandType(h2);
-
-        int diff = ht2.ordinal() - ht1.ordinal();
+        int diff = h2.type.ordinal() - h1.type.ordinal();
 
         if (diff == 0) {
-            char[] c1 = h1.toCharArray();
-            char[] c2 = h2.toCharArray();
+            char[] c1 = h1.cards.toCharArray();
+            char[] c2 = h2.cards.toCharArray();
             int i = 0;
             while (diff == 0 && i<c1.length) {
                 diff = cardOrder.indexOf(c1[i]) -
@@ -78,6 +76,10 @@ public class D7 {
             }
         }
         return diff;
+    }
+
+    private static int compareHands(Hand h1, Hand h2) {
+        return compareHands(h1, h2, cardOrder);
     }
 
     private static long score(List<Hand> hands) {
@@ -99,102 +101,31 @@ public class D7 {
 
         List<Hand> hands2 =
                 new java.util.ArrayList<>(
-                        FileReader.readFileStringList("src/main/resources/2023/D7.txt").stream()
+                        FileReader.readFileStringList("src/test/resources/2023/D7.txt").stream()
                                 .map(D7::parseHand)
                                 .toList());
         hands2.sort(D7::compareHands);
         assertEquals(248812215, score(hands2));
     }
 
-    private static Hand modifyHand(Hand hand) {
-        return new Hand(modifyHand(hand.cards), hand.score, hand.cards);
+    private static final List<Character> cardOrder2 = List.of(
+            'J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'Q', 'K', 'A');
+
+    private static int compareHands2(Hand h1, Hand h2) {
+        return compareHands(h1, h2, cardOrder2);
     }
 
-    private static String modifyHand(String hand) {
-
-        Set<String> freq = Arrays.stream(hand.split("")).collect(Collectors.toSet());
-        freq.add(cardOrder.get(cardOrder.size()-1).toString());
-
-        if(!freq.contains("J")) {
-            return hand;
-        }
-
-        String stripJokers = hand.replaceAll("J", "");
-        int jokerCount = hand.length() - stripJokers.length();
-
-        // try replacing the jokers with each of the new cards and check if that results in a better hand
-        for(String e : freq) {
-            String newCards = stripJokers + e.repeat(jokerCount);
-            if(compareHands(hand, newCards) < 0){
-                hand = newCards;
-            }
-        }
-
-        return hand;
-    }
-
-    private static Set<String> generateCandidates(String hand) {
-        Set<String> freq = Arrays.stream(hand.split("")).collect(Collectors.toSet());
-        freq.add(cardOrder.get(cardOrder.size()-1).toString());
-
-        if(!freq.contains("J")) {
-            return Set.of(hand);
-        }
-
-        String stripJokers = hand.replaceAll("J", "");
-        int jokerCount = hand.length() - stripJokers.length();
-
-        // try replacing the jokers with each of the new cards and check if that results in a better hand
-        Set<String> candidates = new HashSet<>();
-        for(String e : freq) {
-            candidates.add(stripJokers + e.repeat(jokerCount));
-        }
-
-        return candidates;
-    }
-
-    private static Set<String> genCan(String hand, Set<String> freq, int jokerCount) {
-
-        if(jokerCount == 0) {
-            return Set.of(hand);
-        }
-
-        String stripJokers = hand.replaceAll("J", "");
-
-        // try replacing the jokers with each of the new cards and check if that results in a better hand
-        Set<String> candidates = new HashSet<>();
-        for(String e : freq) {
-            candidates.add(stripJokers + e.repeat(jokerCount));
-        }
-
-        return candidates;
-    }
+    
 
     @Test
     public void partTwo() {
-//        assertEquals("QQQQ2", modifyHand("QJJQ2"));
 
-
-/*
         List<Hand> hands = new java.util.ArrayList<>(Arrays.stream(input.split("\n"))
                 .map(D7::parseHand)
-                .map(D7::modifyHand)
                 .toList());
-        hands.sort(D7::compareHands);
+
+        hands.sort(D7::compareHands2);
         assertEquals(5905, score(hands));
-
-
-        List<Hand> hands2 =
-                new java.util.ArrayList<>(FileReader.readFileStringList("src/main/resources/2023/D7.txt")
-                        .stream()
-                        .map(D7::parseHand)
-                        .map(D7::modifyHand)
-                        .toList());
-        hands2.sort(D7::compareHands);
-
-        assertNotEquals(250024765, score(hands2));
-        assertEquals(0, score(hands2));
-*/
 
     }
 }
