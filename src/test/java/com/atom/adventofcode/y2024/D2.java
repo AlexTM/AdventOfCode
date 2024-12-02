@@ -55,10 +55,10 @@ public class D2 {
     @Test
     public void testPart1() {
         List<List<Integer>> data = parseInput(TEST_INPUT);
-        assertEquals(2, data.stream().map(this::isSafe).count());
+        assertEquals(2, data.stream().filter(this::isSafe).count());
 
         data = parseInput(FileReader.readFileString("src/test/resources/2024/D2.txt"));
-        assertEquals(220, data.stream().map(this::isSafe).count());
+        assertEquals(220, data.stream().filter(this::isSafe).count());
     }
 
     private boolean isSafeWithDroppedValue(List<Integer> list) {
@@ -84,4 +84,5 @@ public class D2 {
         data = parseInput(FileReader.readFileString("src/test/resources/2024/D2.txt"));
         assertEquals(296, data.stream().filter(this::isSafeWithDroppedValue).count());
     }
+
 }
