@@ -42,7 +42,7 @@ public class D7 {
             (a, b) -> a * b
     );
 
-    private long validateEquation(Equation equation, int pos, long sum, List<BiFunction<Long, Long, Long>> operators) {
+    private long validateEquation(final List<BiFunction<Long, Long, Long>> operators, Equation equation, int pos, long sum) {
 
         if (pos == equation.values.length) {
             if (sum == equation.value) {
@@ -52,7 +52,7 @@ public class D7 {
         }
 
         for (BiFunction<Long, Long, Long> operator : operators) {
-            long result = validateEquation(equation, pos + 1, operator.apply(sum, equation.values[pos]), operators);
+            long result = validateEquation(operators, equation, pos + 1, operator.apply(sum, equation.values[pos]));
             if (result != 0) {
                 return result;
             }
@@ -64,13 +64,13 @@ public class D7 {
     public void testPart1() {
         List<Equation> equations = parseEquations(TEST_INPUT);
         long sum = equations.stream().mapToLong(equation ->
-                validateEquation(equation, 1, equation.values[0], OPERATORS_PART_ONE))
+                validateEquation(OPERATORS_PART_ONE, equation, 1, equation.values[0]))
                 .sum();
         assertEquals(3749, sum);
 
         equations = parseEquations(FileReader.readFileString("src/test/resources/2024/D7.txt"));
         sum = equations.stream().mapToLong(equation ->
-                validateEquation(equation, 1, equation.values[0], OPERATORS_PART_ONE))
+                validateEquation(OPERATORS_PART_ONE, equation, 1, equation.values[0]))
                 .sum();
         assertEquals(3351424677624L, sum);
     }
@@ -85,13 +85,13 @@ public class D7 {
     public void testPart2() {
         List<Equation> equations = parseEquations(TEST_INPUT);
         long sum = equations.stream().mapToLong(equation ->
-                validateEquation(equation, 1, equation.values[0], OPERATORS_PART_TWO))
+                validateEquation(OPERATORS_PART_TWO, equation, 1, equation.values[0]))
                 .sum();
         assertEquals(11387, sum);
 
         equations = parseEquations(FileReader.readFileString("src/test/resources/2024/D7.txt"));
         sum = equations.stream().mapToLong(equation ->
-                validateEquation(equation, 1, equation.values[0], OPERATORS_PART_TWO))
+                validateEquation(OPERATORS_PART_TWO, equation, 1, equation.values[0]))
                 .sum();
         assertEquals(204976636995111L, sum);
     }
