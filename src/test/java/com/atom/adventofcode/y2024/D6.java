@@ -5,10 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class D6 {
     private static final String TEST_INPUT = """
@@ -48,7 +46,7 @@ public class D6 {
     private enum Direction {UP, RIGHT, DOWN, LEFT}
 
     private Map<Position, TravelData> patrolLab(final Puzzle puzzle, final Position position) {
-        return patrolLabEnd(puzzle, position, (currentPosition, step) -> currentPosition.x >= 0 && currentPosition.y >= 0 &&
+        return patrolLabEnd(puzzle, Direction.UP, position, (currentPosition, step) -> currentPosition.x >= 0 && currentPosition.y >= 0 &&
                 currentPosition.x < puzzle.size.x && currentPosition.y < puzzle.size.y);
     }
 
@@ -61,9 +59,8 @@ public class D6 {
         };
     }
 
-    private Map<Position, TravelData> patrolLabEnd(Puzzle puzzle, Position position, BiFunction<Position, Integer, Boolean> endCondition) {
+    private Map<Position, TravelData> patrolLabEnd(Puzzle puzzle, Direction direction, Position position, BiFunction<Position, Integer, Boolean> endCondition) {
         Map<Position, TravelData> visited = new HashMap<>();
-        Direction direction = Direction.UP;
 
         int step = 0;
         while(endCondition.apply(position, step)) {
@@ -117,9 +114,10 @@ public class D6 {
             }
 
             puzzle.positions.add(nextPosition);
+/*
 
-/*            // run and see if at any point we reach back track with the same direction
-            patrolLabEnd(puzzle, position, (currentPosition, step) -> {
+            // run and see if at any point we reach back track with the same direction
+            patrolLabEnd(puzzle, travelData.direction, position, (currentPosition, step) -> {
                 // check boundary conditions
                 if(currentPosition.x < 0 || currentPosition.y < 0 ||
                         currentPosition.x >= puzzle.size.x || currentPosition.y >= puzzle.size.y)
@@ -130,7 +128,8 @@ public class D6 {
                     TravelData data = visited.get(currentPosition);
                     return data.direction == travelData.direction && data.step == travelData.step;
                 }
-            });*/
+            });
+*/
 
             puzzle.positions.remove(nextPosition);
 
