@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class D6 {
     private static final String TEST_INPUT = """
@@ -22,7 +23,7 @@ public class D6 {
             ......#...""";
 
     record Position(int x, int y) { }
-    record TravelData(int step, Direction direction) { }
+    record Travel(Position position, Direction direction) { }
     record Puzzle(List<Position> positions, Position size, Position start) { }
 
     private Puzzle parseInput(String input) {
@@ -45,37 +46,35 @@ public class D6 {
 
     private enum Direction {UP, RIGHT, DOWN, LEFT}
 
-    private Map<Position, TravelData> patrolLab(final Puzzle puzzle, final Position position) {
-        return patrolLabEnd(puzzle, Direction.UP, position, (currentPosition, step) -> currentPosition.x >= 0 && currentPosition.y >= 0 &&
-                currentPosition.x < puzzle.size.x && currentPosition.y < puzzle.size.y);
+    private Map<Travel, Integer> patrolLab(final Puzzle puzzle, final Travel travelStart) {
+        return patrolLabEnd(puzzle, travelStart,
+                (travel, step) -> travel.position.x >= 0 && travel.position.y >= 0 &&
+                        travel.position.x < puzzle.size.x && travel.position.y < puzzle.size.y);
     }
 
-    private Position getNextPosition(Position position, Direction direction) {
-        return switch (direction) {
-            case UP -> new Position(position.x, position.y-1);
-            case DOWN -> new Position(position.x, position.y+1);
-            case LEFT -> new Position(position.x-1, position.y);
-            case RIGHT -> new Position(position.x+1, position.y);
+    private Travel getNextPosition(Travel travel) {
+        return switch (travel.direction) {
+            case UP -> new Travel(new Position(travel.position.x, travel.position.y-1), Direction.UP);
+            case DOWN -> new Travel(new Position(travel.position.x, travel.position.y+1), Direction.DOWN);
+            case LEFT -> new Travel(new Position(travel.position.x-1, travel.position.y), Direction.LEFT);
+            case RIGHT -> new Travel(new Position(travel.position.x+1, travel.position.y), Direction.RIGHT);
         };
     }
 
-    private Map<Position, TravelData> patrolLabEnd(Puzzle puzzle, Direction direction, Position position, BiFunction<Position, Integer, Boolean> endCondition) {
-        Map<Position, TravelData> visited = new HashMap<>();
+    private Map<Travel, Integer> patrolLabEnd(Puzzle puzzle, Travel travel, BiFunction<Travel, Integer, Boolean> endCondition) {
+        Map<Travel, Integer> visited = new LinkedHashMap<>();
 
         int step = 0;
-        while(endCondition.apply(position, step)) {
-            visited.put(position, new TravelData(step, direction));
-            Position next = getNextPosition(position, direction);
-            if(puzzle.positions.contains(next)) {
+        while(endCondition.apply(travel, step)) {
+            visited.put(travel, step);
+            Travel next = getNextPosition(travel);
+            if(puzzle.positions.contains(next.position)) {
                 // turn right
-                direction = Direction.values()[(direction.ordinal() + 1) % 4];
-            } else {
-                position = next;
+                next = new Travel(travel.position, Direction.values()[(travel.direction.ordinal() + 1) % 4]);
             }
+            travel = next;
             step++;
         }
-
-        printVisted(visited.keySet(), puzzle.size);
         return visited;
     }
 
@@ -95,55 +94,72 @@ public class D6 {
     @Test
     public void testPart1() {
         Puzzle puzzle = parseInput(TEST_INPUT);
-        assertEquals(41, patrolLab(puzzle, puzzle.start).size());
+        assertEquals(41,
+                patrolLab(puzzle, new Travel(puzzle.start, Direction.UP))
+                        .keySet().stream().map(t -> t.position).distinct().count());
 
         puzzle = parseInput(FileReader.readFileString("src/test/resources/2024/D6.txt"));
-        assertEquals(4580, patrolLab(puzzle, puzzle.start).size());
+        assertEquals(4580,
+                patrolLab(puzzle, new Travel(puzzle.start, Direction.UP))
+                        .keySet().stream().map(t -> t.position).distinct().count());
     }
 
-    private int countLoopPositions(final Puzzle puzzle, final Map<Position, TravelData> visited) {
+    private int countLoopPositions(final Puzzle puzzle, final Map<Travel, Integer> visited) {
+
+        Set<Position> loopPositions = new HashSet<>();
 
         // for every position in visited, check if turning right will lead to a loop
-        for(Position position : visited.keySet()) {
-            TravelData travelData = visited.get(position);
+        for(Travel travel : visited.keySet()) {
 
-            Position nextPosition = getNextPosition(position, travelData.direction);
-            if(puzzle.positions.contains(nextPosition)) {
+            Travel nextTravel = getNextPosition(travel);
+            if(puzzle.positions.contains(nextTravel.position)) {
                 // already blocks, no need to check
                 continue;
             }
 
-            puzzle.positions.add(nextPosition);
-/*
+            puzzle.positions.add(nextTravel.position);
 
             // run and see if at any point we reach back track with the same direction
-            patrolLabEnd(puzzle, travelData.direction, position, (currentPosition, step) -> {
+            patrolLabEnd(puzzle, travel, (currentTravel, step) -> {
+                if(step > 10000)
+                    return false;
+
                 // check boundary conditions
-                if(currentPosition.x < 0 || currentPosition.y < 0 ||
-                        currentPosition.x >= puzzle.size.x || currentPosition.y >= puzzle.size.y)
+                if(currentTravel.position.x < 0 || currentTravel.position.y < 0 ||
+                        currentTravel.position.x >= puzzle.size.x || currentTravel.position.y >= puzzle.size.y)
                     return false;
 
                 // check if we are back at the same position with the same direction with an earlier step
-                if(visited.containsKey(currentPosition)) {
-                    TravelData data = visited.get(currentPosition);
-                    return data.direction == travelData.direction && data.step == travelData.step;
+                if(visited.containsKey(currentTravel)) {
+                    Integer stepCountLastTime = visited.get(currentTravel);
+                    if(stepCountLastTime < step) {
+                        loopPositions.add(currentTravel.position);
+                        return false;
+                    }
                 }
+
+                return true;
             });
-*/
 
-            puzzle.positions.remove(nextPosition);
-
-
-
+            puzzle.positions.remove(nextTravel.position);
         }
 
-        return 0;
+        System.out.println(loopPositions);
+        printVisted(loopPositions, puzzle.size);
+
+        return loopPositions.size();
     }
 
     @Test
     public void testPart2() {
         Puzzle puzzle = parseInput(TEST_INPUT);
-        assertEquals(6, countLoopPositions(puzzle, patrolLab(puzzle, puzzle.start)));
+        assertEquals(6,
+                countLoopPositions(puzzle, patrolLab(puzzle, new Travel(puzzle.start, Direction.UP))));
+
+//        puzzle = parseInput(FileReader.readFileString("src/test/resources/2024/D6.txt"));
+//        int total = countLoopPositions(puzzle, patrolLab(puzzle, puzzle.start));
+//        assertNotEquals(743, total);
+//        assertEquals(0, total);
     }
 
 }
