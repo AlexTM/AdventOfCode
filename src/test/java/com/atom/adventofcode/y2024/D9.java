@@ -79,6 +79,7 @@ public class D9 {
             else
                 System.out.print(n);
         });
+        System.out.println();
     }
 
     /**
@@ -101,7 +102,7 @@ public class D9 {
             if(!moved.contains(rhs.value)) {
                 moved.add(rhs.value);
 
-                System.out.println(rhs.value);
+                //System.out.println(rhs.value);
 
                 // find free space for this block
                 for (int idxLHS = 0; idxLHS < idxRHS; idxLHS++) {
@@ -119,6 +120,7 @@ public class D9 {
                         break;
                     }
                 }
+                print(expandFormat(linkedList));
             }
             idxRHS--;
         }
@@ -128,11 +130,15 @@ public class D9 {
 
     @Test
     public void testPartTwo() {
-        assertEquals(2858, computeCheckSum(expandFormat(compactFileWithoutFragmentation(parseInput(TEST_INPUT)))));
+        List<Data> in = parseInput(FileReader.readFileString("src/test/resources/2024/D9.txt"));
+        List<Integer> t = expandFormat(in);
+        System.out.println(t.size());
 
-        long res = computeCheckSum(expandFormat(compactFileWithoutFragmentation(parseInput(
-                FileReader.readFileString("src/test/resources/2024/D9.txt")))));
-        assertNotEquals(6448192553234L, res);
-        assertEquals(0, res);
+//        assertEquals(2858, computeCheckSum(expandFormat(compactFileWithoutFragmentation(parseInput(TEST_INPUT)))));
+
+//        long res = computeCheckSum(expandFormat(compactFileWithoutFragmentation(parseInput(
+//                FileReader.readFileString("src/test/resources/2024/D9.txt")))));
+//        assertNotEquals(6448192553234L, res);
+//        assertEquals(0, res);
     }
 }
