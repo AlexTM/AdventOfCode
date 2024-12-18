@@ -81,12 +81,12 @@ public class D15 {
     }
 
     private String preProcessInput(String input) {
-        return input.chars().mapToObj(c -> {
-            if(c == '#') return "##";
-            else if(c == 'O') return "[]";
-            else if(c == '@') return "@.";
-            else if (c== '.') return "..";
-            else return "" + (char)c;
+        return input.chars().mapToObj(c -> switch (c) {
+            case '#' -> "##";
+            case '.' -> "..";
+            case '@' -> "@.";
+            case 'O' -> "[]";
+            default -> "" + (char)c;
         }).collect(Collectors.joining());
     }
 
@@ -149,7 +149,7 @@ public class D15 {
         return boxes;
     }
 
-    private Data runProgram2(Data data, boolean doubleBoxes) {
+    private Data runProgram(Data data, boolean doubleBoxes) {
         for (int i = 0; i < data.direction.size(); i++) {
             data = stepProgram(data, i, doubleBoxes);
         }
@@ -162,15 +162,15 @@ public class D15 {
 
     @Test
     public void testPartOne() {
-        assertEquals(2028,sumGPS(runProgram2(parseInput(TEST_INPUT), false)));
-        assertEquals(1490942,sumGPS(runProgram2(parseInput(FileReader.readFileString("src/test/resources/2024/D15.txt")), false)));
+        assertEquals(2028,sumGPS(runProgram(parseInput(TEST_INPUT), false)));
+        assertEquals(1490942,sumGPS(runProgram(parseInput(FileReader.readFileString("src/test/resources/2024/D15.txt")), false)));
     }
 
     @Test
     public void testPartTwo() {
-        assertEquals(9021, sumGPS(runProgram2(
+        assertEquals(9021, sumGPS(runProgram(
                 parseInput(preProcessInput(INPUT)), true)));
-        assertEquals(1519202, sumGPS(runProgram2(
+        assertEquals(1519202, sumGPS(runProgram(
                 parseInput(preProcessInput(
                 FileReader.readFileString("src/test/resources/2024/D15.txt"))), true)));
     }
