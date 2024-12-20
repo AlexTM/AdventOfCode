@@ -34,7 +34,7 @@ public class D19 {
         return new Data(Arrays.asList(towels), patterns);
     }
 
-    private long matchPattern(final List<String> towels, final String pattern, Map<String, Long> cache) {
+    private long matchPattern(final List<String> towels, final String pattern, final Map<String, Long> cache) {
 
         if(cache.containsKey(pattern)) {
             return cache.get(pattern);
@@ -91,6 +91,5 @@ public class D19 {
         data = parseInput(FileReader.readFileString("src/test/resources/2024/D19.txt"));
         long res = sumMatches(data.towels, data.patterns);
         assertEquals(777669668613191L, res);
-
     }
 }
