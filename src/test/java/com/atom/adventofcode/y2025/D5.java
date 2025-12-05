@@ -28,13 +28,6 @@ public class D5 {
 
     record Range(long min, long max){}
     record Data(List<Range> ranges, List<Long> ids){}
-    class RangeMutable {
-        public long min, max;
-        public RangeMutable(long min, long max) {
-            this.min = min;
-            this.max = max;
-        }
-    }
 
     private Data parseInput(String input) {
         var ranges = new ArrayList<Range>();
