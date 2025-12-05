@@ -78,58 +78,44 @@ public class D5 {
         assertEquals(664, countFresh(parseInput(FileReader.readFileString("src/test/resources/2025/D5.txt"))));
     }
 
+    
     private List<Range> condenseRanges2(List<Range> ranges) {
-        List<Range> result = null;
-        Set<Range> merged;
+        List<Range> result = new ArrayList<>(ranges);
+        boolean changed;
 
-        while(result == null || result.size() != ranges.size()) {
-            merged = new HashSet<>();
-            if(result != null) {
-                ranges = result;
-            }
-            result = new ArrayList<>();
+        do {
+            changed = false;
+            List<Range> newRanges = new ArrayList<>();
+            Set<Range> processed = new HashSet<>();
 
-            for (Range r : ranges) {
-                Range toAdd = null;
+            for (Range r1 : result) {
+                if (processed.contains(r1)) continue;
 
-                if (merged.contains(r))
-                    continue;
+                Range current = r1;
+                processed.add(r1);
 
-                merged.add(r);
+                for (Range r2 : result) {
+                    if (processed.contains(r2)) continue;
 
-                for (Range r2 : ranges) {
-
-                    if (merged.contains(r2))
-                        continue;
-
-                    if (r.min < r2.min && r.max >= r2.min && r.max <= r2.max) {
-                        toAdd = new Range(r.min, r2.max);
-                        merged.add(r2);
-                        break;
+                    // Adjacent ranges
+                    if (current.max + 1 == r2.min) {
+                        current = new Range(current.min, r2.max);
+                        processed.add(r2);
+                        changed = true;
                     }
-                    // total overlap
-                    else if (r.min <= r2.min && r.max >= r2.max) {
-                        toAdd = new Range(r.min, r.max);
-                        merged.add(r2);
-                        break;
+                    // Overlapping ranges
+                    else if (current.max >= r2.min - 1 && current.min <= r2.max + 1) {
+                        current = new Range(Math.min(current.min, r2.min),
+                                Math.max(current.max, r2.max));
+                        processed.add(r2);
+                        changed = true;
                     }
-                    // partial overlap
-                    else if (r.min > r2.min && r.min <= r2.max && r.max >= r2.max) {
-                        toAdd = new Range(r2.min, r.max);
-                        merged.add(r2);
-                        break;
-                    }
-
                 }
-
-                if (toAdd != null) {
-                    result.add(toAdd);
-                } else {
-                    result.add(r);
-                }
-
+                newRanges.add(current);
             }
-        }
+            result = newRanges;
+        } while (changed);
+
         return result;
     }
 
@@ -150,60 +136,7 @@ public class D5 {
         long res = calculateTotalRangeSize(
                 condenseRanges2(parseInput(FileReader.readFileString("src/test/resources/2025/D5.txt")).ranges));
 
-        assertNotEquals(415321722881192L, res);
-        assertNotEquals(416375886268456L, res); // too high
-        assertNotEquals(363340107255412L, res); // too high
-        assertNotEquals(364904969506891L, res);
-        assertNotEquals(364634303056893L, res);
-        assertNotEquals(356533418226332L, res);
-
-
-        assertEquals(0, res);
+        assertEquals(350780324308385L, res);
 
     }
-
-
-    private List<Range> condenseRanges(List<Range> ranges) {
-        List<Range> result = new ArrayList<>();
-
-        boolean overlap = true;
-        while(overlap) {
-            result = new ArrayList<>();
-            overlap = false;
-            for (Range r : ranges) {
-                Range toAdd = null;
-                Range toRemove = null;
-                for (Range r2 : result) {
-                    // partial overlap
-                    if (r.min < r2.min && r.max >= r2.min && r.max <= r2.max) {
-                        toAdd = new Range(r.min, r2.max);
-                        toRemove = r2;
-                        break;
-                    }
-                    // total overlap
-                    if (r.min < r2.min && r.max > r2.max) {
-                        toAdd = new Range(r.min, r.max);
-                        toRemove = r2;
-                        break;
-                    }
-                    // partial overlap
-                    if (r.min > r2.min && r.min <= r2.max && r.max >= r2.max) {
-                        toAdd = new Range(r2.min, r.max);
-                        toRemove = r2;
-                    }
-                }
-                if (toRemove != null) {
-                    result.remove(toRemove);
-                    result.add(toAdd);
-                    overlap = true;
-                } else {
-                    result.add(r);
-                }
-            }
-            ranges = new ArrayList<>(result);
-        }
-
-        return result;
-    }
-
 }
