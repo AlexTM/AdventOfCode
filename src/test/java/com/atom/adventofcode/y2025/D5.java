@@ -28,6 +28,13 @@ public class D5 {
 
     record Range(long min, long max){}
     record Data(List<Range> ranges, List<Long> ids){}
+    class RangeMutable {
+        public long min, max;
+        public RangeMutable(long min, long max) {
+            this.min = min;
+            this.max = max;
+        }
+    }
 
     private Data parseInput(String input) {
         var ranges = new ArrayList<Range>();
@@ -84,10 +91,11 @@ public class D5 {
 
             for (Range r : ranges) {
                 Range toAdd = null;
-                Range toRemove = null;
 
                 if (merged.contains(r))
                     continue;
+
+                merged.add(r);
 
                 for (Range r2 : ranges) {
 
@@ -96,30 +104,28 @@ public class D5 {
 
                     if (r.min < r2.min && r.max >= r2.min && r.max <= r2.max) {
                         toAdd = new Range(r.min, r2.max);
-                        toRemove = r2;
+                        merged.add(r2);
                         break;
                     }
                     // total overlap
-                    if (r.min < r2.min && r.max > r2.max) {
+                    else if (r.min <= r2.min && r.max >= r2.max) {
                         toAdd = new Range(r.min, r.max);
-                        toRemove = r2;
+                        merged.add(r2);
                         break;
                     }
                     // partial overlap
-                    if (r.min > r2.min && r.min <= r2.max && r.max >= r2.max) {
+                    else if (r.min > r2.min && r.min <= r2.max && r.max >= r2.max) {
                         toAdd = new Range(r2.min, r.max);
-                        toRemove = r2;
+                        merged.add(r2);
                         break;
                     }
 
                 }
-                if (toRemove != null) {
+
+                if (toAdd != null) {
                     result.add(toAdd);
-                    merged.add(r);
-                    merged.add(toRemove);
                 } else {
                     result.add(r);
-                    merged.add(r);
                 }
 
             }
@@ -149,6 +155,8 @@ public class D5 {
         assertNotEquals(363340107255412L, res); // too high
         assertNotEquals(364904969506891L, res);
         assertNotEquals(364634303056893L, res);
+        assertNotEquals(356533418226332L, res);
+
 
         assertEquals(0, res);
 
